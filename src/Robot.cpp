@@ -20,7 +20,33 @@ public:
 		m_chooser.AddObject(kAutoNameCustom, kAutoNameCustom);
 		frc::SmartDashboard::PutData("Auto Modes", &m_chooser);
 	}
-
+	/*
+	 * Drive function. This controls the drive train
+	 */
+	void drive(double x, double y, double z, double gyro = 0) {
+			switch (driveLevel) {
+			case (slow):
+				x = (x / 1) * strafeSlow;
+				y = (y / 1) * driveSlow;
+				z = (z / 1) * turnSlow;
+				break;
+			case (normal):
+				x = (x / 1) * strafeNormal;
+				y = (y / 1) * driveNormal;
+				z = (z / 1) * turnNormal;
+				break;
+			case (full):
+				x = (x / 1) * strafeFull;
+				y = (y / 1) * driveFull;
+				z = (z / 1) * turnFull;
+				break;
+			default:
+				x = 0;
+				y = 0;
+				z = 0;
+			}
+			robotDrive.MecanumDrive_Cartesian(x, y, z, gyro);
+	}
 	/*
 	 * This autonomous (along with the chooser code above) shows how to
 	 * select between different autonomous modes using the dashboard. The
@@ -55,6 +81,7 @@ public:
 		}
 	}
 
+
 	void TeleopInit() {}
 
 	void TeleopPeriodic() {}
@@ -67,6 +94,12 @@ private:
 	const std::string kAutoNameDefault = "Default";
 	const std::string kAutoNameCustom = "My Auto";
 	std::string m_autoSelected;
+
+	/*
+	 * Main program variables. Levels and stuff
+	 */
+	double driveSlow = 0.3, driveNormal = 0.6, driveFull = 1;
+	double driveLevel = driveNormal;
 };
 
 START_ROBOT_CLASS(Robot)
