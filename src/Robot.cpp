@@ -13,29 +13,68 @@
 #include <SmartDashboard/SmartDashboard.h>
 #include <TimedRobot.h>
 
+#include <Joystick.h>
+#include <RobotDrive.h>
+#include <Timer.h>
+#include <CameraServer.h>
+
+#include <Encoder.h>
+#include <I2c.h>
+#include <Victor.h>
+
+#include <Timer.h>
+#include <Servo.h>
+#include <ctime>
+#include <AnalogGyro.h>
+
+
 class Robot : public frc::TimedRobot {
 public:
 	void RobotInit() {
 		m_chooser.AddDefault(kAutoNameDefault, kAutoNameDefault);
 		m_chooser.AddObject(kAutoNameCustom, kAutoNameCustom);
 		frc::SmartDashboard::PutData("Auto Modes", &m_chooser);
+		/*
+		 * Drive Train setup
+		 */
+		frontLeft  = new Victor(1); // the number you pass the victor class is the pwm channel
+		frontRight = new Victor(2);
+		rearLeft   = new Victor(3);
+		rearRight  = new Victor(4);
+
+		myDrive = new RobotDrive(frontLeft, rearLeft, frontRight, rearRight );
+		/*
+		 * Controller setup
+		 */
+		driveStick = new Joystick(1);
+
+		/*
+		 * Sensor setup
+		 */
+		gyro = new AnalogGyro(0);
+		gyro->InitGyro();
+		gyro->Calibrate();
+
+
+
+
 	}
 	/*
 	 * Drive function. This controls the drive train
 	 */
 	void drive(double x, double y, double z, double gyro = 0) {
-			switch (driveLevel) {
-			case (slow):
+			/*switch (driveLevel) {
+			case (driveSlow):
 				x = (x / 1) * strafeSlow;
 				y = (y / 1) * driveSlow;
 				z = (z / 1) * turnSlow;
 				break;
-			case (normal):
+			case (driveNormal):
 				x = (x / 1) * strafeNormal;
 				y = (y / 1) * driveNormal;
 				z = (z / 1) * turnNormal;
 				break;
-			case (full):
+			case (driveFull):
 				x = (x / 1) * strafeFull;
 				y = (y / 1) * driveFull;
 				z = (z / 1) * turnFull;
@@ -44,8 +83,10 @@ public:
 				x = 0;
 				y = 0;
 				z = 0;
-			}
-			robotDrive.MecanumDrive_Cartesian(x, y, z, gyro);
+			}*/
+
+			myDrive->ArcadeDrive(driveStick);
+			//robotDrive.MecanumDrive_Cartesian(x, y, z, gyro);
 	}
 	/*
 	 * This autonomous (along with the chooser code above) shows how to
@@ -84,7 +125,13 @@ public:
 
 	void TeleopInit() {}
 
-	void TeleopPeriodic() {}
+
+	void TeleopPeriodic() {
+
+		drive(0,0,0,0);
+		SmartDashboard::PutString("DB/String 0", "My 21 Char TestString");
+		SmartDashboard::PutNumber("GryoAngle", gyro->GetAngle());
+	}
 
 	void TestPeriodic() {}
 
@@ -100,6 +147,27 @@ private:
 	 */
 	double driveSlow = 0.3, driveNormal = 0.6, driveFull = 1;
 	double driveLevel = driveNormal;
+
+	/*
+	 * Drive train class setup
+	 */
+
+
+	class RobotDrive *myDrive;
+	class Victor *frontLeft, *frontRight, *rearLeft, *rearRight;
+
+	/*
+	 * Controller setup
+	 */
+	class Joystick *driveStick; // main drive train Joystick
+
+	/*
+	 * Sensor Setup
+	 */
+	class AnalogGyro *gyro;
+	const float kP = 0.03;
+
+
 };
 
 START_ROBOT_CLASS(Robot)
