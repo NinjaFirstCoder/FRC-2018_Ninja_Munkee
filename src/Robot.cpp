@@ -8,6 +8,7 @@
 #include <iostream>
 #include <string>
 
+
 #include <LiveWindow/LiveWindow.h>
 #include <SmartDashboard/SendableChooser.h>
 #include <SmartDashboard/SmartDashboard.h>
@@ -15,6 +16,7 @@
 
 #include <Joystick.h>
 #include <RobotDrive.h>
+#include <Drive/DifferentialDrive.h>
 #include <Timer.h>
 #include <CameraServer.h>
 
@@ -27,6 +29,7 @@
 #include <ctime>
 #include <AnalogGyro.h>
 
+#include <AHRS.h>
 
 class Robot : public frc::TimedRobot {
 public:
@@ -42,6 +45,7 @@ public:
 		rearLeft   = new Victor(3);
 		rearRight  = new Victor(4);
 
+		//switch to differential drive soon
 		myDrive = new RobotDrive(frontLeft, rearLeft, frontRight, rearRight );
 		/*
 		 * Controller setup
@@ -129,8 +133,8 @@ public:
 	void TeleopPeriodic() {
 
 		drive(0,0,0,0);
-		SmartDashboard::PutString("DB/String 0", "My 21 Char TestString");
-		SmartDashboard::PutNumber("GryoAngle", gyro->GetAngle());
+		//SmartDashboard::PutString("DB/String 0", "My 21 Char TestString");
+		//SmartDashboard::PutNumber("GryoAngle", gyro->GetAngle());
 	}
 
 	void TestPeriodic() {}
@@ -151,15 +155,15 @@ private:
 	/*
 	 * Drive train class setup
 	 */
-
-
 	class RobotDrive *myDrive;
 	class Victor *frontLeft, *frontRight, *rearLeft, *rearRight;
+
 
 	/*
 	 * Controller setup
 	 */
 	class Joystick *driveStick; // main drive train Joystick
+
 
 	/*
 	 * Sensor Setup
