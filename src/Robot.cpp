@@ -33,34 +33,50 @@
 
 class Robot : public frc::TimedRobot {
 public:
+	/* setup the drive train
+	 *
+	 */
+	 frc::Victor m_frontLeft{1};
+	 frc::Victor m_midLeft{2};
+	 frc::Victor m_rearLeft{3};
+	 frc::SpeedControllerGroup m_left{m_frontLeft, m_midLeft, m_rearLeft};
+
+	 frc::Victor m_frontRight{4};
+	 frc::Victor m_midRight{5};
+	 frc::Victor m_rearRight{6};
+	 frc::SpeedControllerGroup m_right{m_frontRight, m_midRight, m_rearRight};
+
+	 frc::DifferentialDrive m_drive{m_left, m_right};
+
+	 /*
+	  * Setup the controller
+	  */
+	 frc::Joystick m_joystick{0};
+
 	void RobotInit() {
 		m_chooser.AddDefault(kAutoNameDefault, kAutoNameDefault);
 		m_chooser.AddObject(kAutoNameCustom, kAutoNameCustom);
 		frc::SmartDashboard::PutData("Auto Modes", &m_chooser);
-		/*
-		 * Drive Train setup
-		 */
-		frontLeft  = new Victor(1); // the number you pass the victor class is the pwm channel
-		frontRight = new Victor(2);
-		rearLeft   = new Victor(3);
-		rearRight  = new Victor(4);
 
-		//switch to differential drive soon
-		myDrive = new RobotDrive(frontLeft, rearLeft, frontRight, rearRight );
-		/*
-		 * Controller setup
-		 */
-		driveStick = new Joystick(1);
-
-		/*
-		 * Sensor setup
-		 */
-		gyro = new AnalogGyro(0);
-		gyro->InitGyro();
-		gyro->Calibrate();
-
-
-
+		try {
+		/***********************************************************************
+		 * navX-MXP:
+		 * - Communication via RoboRIO MXP (SPI, I2C, TTL UART) and USB.
+		 * - See http://navx-mxp.kauailabs.com/guidance/selecting-an-interface.
+		 *
+		 * navX-Micro:
+		 * - Communication via I2C (RoboRIO MXP or Onboard) and USB.
+		 * - See http://navx-micro.kauailabs.com/guidance/selecting-an-interface.
+		 *
+		 * Multiple navX-model devices on a single robot are supported.
+		 ************************************************************************/
+			 navxgyro = new AHRS(SPI::Port::kMXP);
+		 } catch (std::exception& ex ) {
+			 std::string err_string = "Error instantiating navX MXP:  ";
+		     err_string += ex.what();
+		     DriverStation::ReportError(err_string.c_str());
+		 }
+		 navxgyro->ZeroYaw();
 
 	}
 	/*
@@ -89,8 +105,12 @@ public:
 				z = 0;
 			}*/
 
-			myDrive->ArcadeDrive(driveStick);
-			//robotDrive.MecanumDrive_Cartesian(x, y, z, gyro);
+			m_drive.ArcadeDrive(m_joystick.GetY(),m_joystick.GetX());
+
+	}
+
+	void pollControllers(){
+
 	}
 	/*
 	 * This autonomous (along with the chooser code above) shows how to
@@ -134,7 +154,7 @@ public:
 
 		drive(0,0,0,0);
 		//SmartDashboard::PutString("DB/String 0", "My 21 Char TestString");
-		//SmartDashboard::PutNumber("GryoAngle", gyro->GetAngle());
+		SmartDashboard::PutNumber("GryoAngle", navxgyro->GetAngle());
 	}
 
 	void TestPeriodic() {}
@@ -153,23 +173,25 @@ private:
 	double driveLevel = driveNormal;
 
 	/*
-	 * Drive train class setup
-	 */
-	class RobotDrive *myDrive;
-	class Victor *frontLeft, *frontRight, *rearLeft, *rearRight;
-
-
-	/*
-	 * Controller setup
-	 */
-	class Joystick *driveStick; // main drive train Joystick
-
-
-	/*
 	 * Sensor Setup
 	 */
-	class AnalogGyro *gyro;
-	const float kP = 0.03;
+	class AHRS *navxgyro;
+
+	/* The following PID Controller coefficients will need to be tuned */
+	/* to match the dynamics of your drive system.  Note that the      */
+	/* SmartDashboard in Test mode has support for helping you tune    */
+	/* controllers by displaying a form where you can enter new P, I,  */
+	/* and D constants and test the mechanism.                         */
+
+	double kP = 0.03f;
+	double kI = 0.00f;
+	double kD = 0.00f;
+	double kF = 0.00f;
+
+	/* This tuning parameter indicates how close to "on target" the    */
+	/* PID Controller will attempt to get.                             */
+
+	double kToleranceDegrees = 2.0f;
 
 
 };
