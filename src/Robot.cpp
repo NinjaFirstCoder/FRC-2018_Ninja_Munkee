@@ -75,6 +75,7 @@ public:
 			 std::string err_string = "Error instantiating navX MXP:  ";
 		     err_string += ex.what();
 		     DriverStation::ReportError(err_string.c_str());
+		     GyroFound = false;
 		 }
 		 navxgyro->ZeroYaw();
 
@@ -82,35 +83,27 @@ public:
 	/*
 	 * Drive function. This controls the drive train
 	 */
-	void drive(double x, double y, double z, double gyro = 0) {
-			/*switch (driveLevel) {
-			case (driveSlow):
-				x = (x / 1) * strafeSlow;
-				y = (y / 1) * driveSlow;
-				z = (z / 1) * turnSlow;
-				break;
-			case (driveNormal):
-				x = (x / 1) * strafeNormal;
-				y = (y / 1) * driveNormal;
-				z = (z / 1) * turnNormal;
-				break;
-			case (driveFull):
-				x = (x / 1) * strafeFull;
-				y = (y / 1) * driveFull;
-				z = (z / 1) * turnFull;
-				break;
-			default:
-				x = 0;
-				y = 0;
-				z = 0;
-			}*/
-
+	void drive(double x, double y, double gyro = 0) {
+			x = x * driveLevel;
+			y = y * driveLevel;
 			m_drive.ArcadeDrive(m_joystick.GetY(),m_joystick.GetX());
 
 	}
 
 	void pollControllers(){
+		joystickX = m_joystick.GetX();
+		joystickY = m_joystick.GetY();
 
+		/* Add joystick switches here
+		 *
+		 */
+		if(JoystickButton(m_joystick, 1)){
+			driveLevel = driveNormal;
+		} else if(JoystickButton(m_joystick, 2)){
+			driveLevel = driveFull;
+		} else if(JoystickButton(m_joystick, 3)) {
+			driveLevel = driveSlow;
+		}
 	}
 	/*
 	 * This autonomous (along with the chooser code above) shows how to
@@ -151,8 +144,9 @@ public:
 
 
 	void TeleopPeriodic() {
+		pollControllers(); //
 
-		drive(0,0,0,0);
+		drive(joystickX,joystickY,0);
 		//SmartDashboard::PutString("DB/String 0", "My 21 Char TestString");
 		SmartDashboard::PutNumber("GryoAngle", navxgyro->GetAngle());
 	}
@@ -171,6 +165,10 @@ private:
 	 */
 	double driveSlow = 0.3, driveNormal = 0.6, driveFull = 1;
 	double driveLevel = driveNormal;
+	double joystickX = 0;
+	double joystickY = 0;
+
+
 
 	/*
 	 * Sensor Setup
@@ -192,6 +190,12 @@ private:
 	/* PID Controller will attempt to get.                             */
 
 	double kToleranceDegrees = 2.0f;
+
+	/* Function Variables
+	 *
+	 */
+	bool GyroFound = true;
+
 
 
 };
