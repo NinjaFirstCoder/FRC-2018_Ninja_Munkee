@@ -51,7 +51,9 @@ public:
 	 /*
 	  * Setup the controller
 	  */
-	 frc::Joystick m_joystick{0};
+	 //frc::Joystick m_joystick{0};
+
+
 
 	void RobotInit() {
 		m_chooser.AddDefault(kAutoNameDefault, kAutoNameDefault);
@@ -79,6 +81,11 @@ public:
 		 }
 		 navxgyro->ZeroYaw();
 
+		 /*
+		  * Setup controllers
+		  */
+		 MainJoystick = new Joystick(0);
+
 	}
 	/*
 	 * Drive function. This controls the drive train
@@ -86,24 +93,34 @@ public:
 	void drive(double x, double y, double gyro = 0) {
 			x = x * driveLevel;
 			y = y * driveLevel;
-			m_drive.ArcadeDrive(m_joystick.GetY(),m_joystick.GetX());
-
+			m_drive.ArcadeDrive(x,y);
 	}
 
+	/*
+	 * Function grabs values from joysticks and gamepads
+	 */
 	void pollControllers(){
-		joystickX = m_joystick.GetX();
-		joystickY = m_joystick.GetY();
+		joystickX = MainJoystick->GetY();
+		joystickY = MainJoystick->GetX();
 
 		/* Add joystick switches here
 		 *
 		 */
-		if(JoystickButton(m_joystick, 1)){
+		if(MainJoystick->GetRawButton(1)){
 			driveLevel = driveNormal;
-		} else if(JoystickButton(m_joystick, 2)){
+		} else if(MainJoystick->GetRawButton(2)){
 			driveLevel = driveFull;
-		} else if(JoystickButton(m_joystick, 3)) {
+		} else if(MainJoystick->GetRawButton(3)) {
 			driveLevel = driveSlow;
 		}
+	}
+
+	/*
+	 * Functions grabs values from gyros and other sensors
+	 */
+	void pollSensors(){
+
+
 	}
 	/*
 	 * This autonomous (along with the chooser code above) shows how to
@@ -145,6 +162,7 @@ public:
 
 	void TeleopPeriodic() {
 		pollControllers(); //
+		pollSensors();
 
 		drive(joystickX,joystickY,0);
 		//SmartDashboard::PutString("DB/String 0", "My 21 Char TestString");
@@ -167,6 +185,7 @@ private:
 	double driveLevel = driveNormal;
 	double joystickX = 0;
 	double joystickY = 0;
+	Joystick *MainJoystick;
 
 
 
