@@ -23,6 +23,7 @@
 #include <Encoder.h>
 #include <I2c.h>
 #include <Victor.h>
+#include <Talon.h>
 
 #include <Timer.h>
 #include <Servo.h>
@@ -86,6 +87,8 @@ public:
 		  */
 		 MainJoystick = new Joystick(0);
 
+		 intake = new Talon(9);
+
 	}
 	/*
 	 * Drive function. This controls the drive train
@@ -102,6 +105,7 @@ public:
 	void pollControllers(){
 		joystickX = MainJoystick->GetY();
 		joystickY = MainJoystick->GetX();
+		intakeSpeed = (MainJoystick->GetZ()-1)/2;
 
 		/* Add joystick switches here
 		 *
@@ -113,6 +117,18 @@ public:
 		} else if(MainJoystick->GetRawButton(3)) {
 			driveLevel = driveSlow;
 		}
+
+		if(MainJoystick->GetRawButton(11)) {
+			intakeForward = 1;
+			intakeBackward = 0;
+		} else if(MainJoystick->GetRawButton(10)){
+			intakeForward = 0;
+			intakeBackward = 1;
+		} else {
+			intakeForward = 0;
+			intakeBackward = 0;
+		}
+
 	}
 
 	/*
@@ -121,6 +137,16 @@ public:
 	void pollSensors(){
 
 
+	}
+
+	void runIntake() {
+		if(intakeForward) {
+			intake->Set(intakeSpeed);
+		} else if(intakeBackward) {
+			intake->Set(-intakeSpeed);
+		}else {
+			intake->Set(0);
+		}
 	}
 	/*
 	 * This autonomous (along with the chooser code above) shows how to
@@ -175,6 +201,7 @@ public:
 		pollControllers(); //
 		pollSensors();
 
+		runIntake();
 		drive(joystickX,joystickY,0);
 		//SmartDashboard::PutString("DB/String 0", "My 21 Char TestString");
 		if(GyroFound) {
@@ -229,6 +256,13 @@ private:
 	bool GyroFound = true;
 	bool test = true;
 
+	/*
+	 * Motor setup
+	 */
+	Talon *intake;
+	bool intakeForward = false;
+	bool intakeBackward = false;
+	double intakeSpeed = 0;
 
 
 };
