@@ -72,7 +72,7 @@ public:
 		 *
 		 * Multiple navX-model devices on a single robot are supported.
 		 ************************************************************************/
-			 navxgyro = new AHRS(SPI::Port::kMXP);
+			 navxgyro = new AHRS(SerialPort::Port::kUSB);
 		 } catch (std::exception& ex ) {
 			 std::string err_string = "Error instantiating navX MXP:  ";
 		     err_string += ex.what();
@@ -136,7 +136,7 @@ public:
 	 * well.
 	 */
 	void AutonomousInit() override {
-		m_autoSelected = m_chooser.GetSelected();
+		/*m_autoSelected = m_chooser.GetSelected();
 		// m_autoSelected = SmartDashboard::GetString("Auto Selector",
 		//		 kAutoNameDefault);
 		std::cout << "Auto selected: " << m_autoSelected << std::endl;
@@ -145,15 +145,26 @@ public:
 			// Custom Auto goes here
 		} else {
 			// Default Auto goes here
-		}
+		}*/
 	}
 
 	void AutonomousPeriodic() {
+		if(test) {
+			navxgyro->ZeroYaw();
+			test = false;
+		}
+		float gyroangle = navxgyro->GetAngle();
+
+		m_drive.CurvatureDrive(0.5, -gyroangle * kP,false);
+		//drive(0.5,0,-navxgyro->GetAngle()*kP);
+
+		/*
 		if (m_autoSelected == kAutoNameCustom) {
 			// Custom Auto goes here
 		} else {
 			// Default Auto goes here
 		}
+		*/
 	}
 
 
@@ -166,7 +177,9 @@ public:
 
 		drive(joystickX,joystickY,0);
 		//SmartDashboard::PutString("DB/String 0", "My 21 Char TestString");
-		SmartDashboard::PutNumber("GryoAngle", navxgyro->GetAngle());
+		if(GyroFound) {
+			SmartDashboard::PutNumber("GryoAngle", navxgyro->GetAngle());
+		}
 	}
 
 	void TestPeriodic() {}
@@ -214,6 +227,7 @@ private:
 	 *
 	 */
 	bool GyroFound = true;
+	bool test = true;
 
 
 
