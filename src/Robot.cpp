@@ -20,6 +20,7 @@
 #include <Timer.h>
 #include <CameraServer.h>
 
+#include "ctre/Phoenix.h"
 #include <Encoder.h>
 #include <I2c.h>
 #include <Victor.h>
@@ -89,15 +90,22 @@ public:
 
 		 intake = new Talon(9);
 
+		 // grabber setup
+		 talonGrabber = new TalonSRX(1);
+		 talonGrabber->ConfigSelectedFeedbackSensor(FeedbackDevice::QuadEncoder, 0,0);
+		 talonGrabber->SetSensorPhase(false);
+
+
 	}
 	/*
 	 * Drive function. This controls the drive train
 	 */
-	void drive(double x, double y, double gyro = 0) {
+	void drive(double x, double y) {
 			x = x * driveLevel;
 			y = y * driveLevel;
 			m_drive.ArcadeDrive(x,y);
 	}
+
 
 	/*
 	 * Function grabs values from joysticks and gamepads
@@ -110,6 +118,8 @@ public:
 		/* Add joystick switches here
 		 *
 		 */
+
+		// buttons for the drive train levels
 		if(MainJoystick->GetRawButton(1)){
 			driveLevel = driveNormal;
 		} else if(MainJoystick->GetRawButton(2)){
@@ -118,6 +128,7 @@ public:
 			driveLevel = driveSlow;
 		}
 
+		// buttons for the intake levels
 		if(MainJoystick->GetRawButton(11)) {
 			intakeForward = 1;
 			intakeBackward = 0;
@@ -128,6 +139,20 @@ public:
 			intakeForward = 0;
 			intakeBackward = 0;
 		}
+
+		// buttons for the grabber levels
+		if(MainJoystick->GetRawButton(8)) {
+			grabberForward = 1;
+			grabberBackward = 0;
+		} else if(MainJoystick->GetRawButton(9)){
+			grabberForward = 0;
+			grabberBackward = 1;
+		} else {
+			grabberForward = 0;
+			grabberBackward = 0;
+		}
+
+
 
 	}
 
@@ -147,6 +172,18 @@ public:
 		}else {
 			intake->Set(0);
 		}
+	}
+
+
+	void runGrabber() {
+		if(grabberForward) {
+			talonGrabber->Set(ControlMode::PercentOutput, 0.1);
+		} else if(grabberBackward) {
+			talonGrabber->Set(ControlMode::PercentOutput, -0.1);
+		} else {
+			talonGrabber->Set(ControlMode::PercentOutput, 0);
+		}
+
 	}
 	/*
 	 * This autonomous (along with the chooser code above) shows how to
@@ -175,22 +212,21 @@ public:
 	}
 
 	void AutonomousPeriodic() {
-		if(test) {
-			navxgyro->ZeroYaw();
-			test = false;
-		}
-		float gyroangle = navxgyro->GetAngle();
-
-		m_drive.CurvatureDrive(0.5, -gyroangle * kP,false);
-		//drive(0.5,0,-navxgyro->GetAngle()*kP);
-
 		/*
-		if (m_autoSelected == kAutoNameCustom) {
-			// Custom Auto goes here
-		} else {
-			// Default Auto goes here
+		 * Auto mode works similar to a state machine.
+		 */
+		switch(autoState) {
+			case(1):
+				navxgyro->ZeroYaw(); // zero out gyro when auto starts
+				autoState = 2;
+				break;
+			case(2):
+				gyroAngle = navxgyro->GetAngle();
+				m_drive.CurvatureDrive(0.5, -gyroAngle * kP,false); // get the angle of the gyro and drive straight
+				break;
+			default:
+				break;
 		}
-		*/
 	}
 
 
@@ -202,11 +238,14 @@ public:
 		pollSensors();
 
 		runIntake();
-		drive(joystickX,joystickY,0);
+		runGrabber();
+		drive(joystickX,joystickY);
 		//SmartDashboard::PutString("DB/String 0", "My 21 Char TestString");
 		if(GyroFound) {
 			SmartDashboard::PutNumber("GryoAngle", navxgyro->GetAngle());
 		}
+		SmartDashboard::PutNumber("Talon Sensor Velocity", talonGrabber->GetSelectedSensorVelocity(0));
+		SmartDashboard::PutNumber("Talon Sensor Position", talonGrabber->GetSelectedSensorPosition(0));
 	}
 
 	void TestPeriodic() {}
@@ -223,6 +262,11 @@ private:
 	 */
 	double driveSlow = 0.3, driveNormal = 0.6, driveFull = 1;
 	double driveLevel = driveNormal;
+
+
+	/*
+	 * Controller setup. Joy-sticks, buttons etc.
+	 */
 	double joystickX = 0;
 	double joystickY = 0;
 	Joystick *MainJoystick;
@@ -233,6 +277,7 @@ private:
 	 * Sensor Setup
 	 */
 	class AHRS *navxgyro;
+	float gyroAngle;
 
 	/* The following PID Controller coefficients will need to be tuned */
 	/* to match the dynamics of your drive system.  Note that the      */
@@ -254,15 +299,19 @@ private:
 	 *
 	 */
 	bool GyroFound = true;
-	bool test = true;
+	int autoState = 1;
 
 	/*
 	 * Motor setup
 	 */
 	Talon *intake;
+	TalonSRX *talonGrabber;
 	bool intakeForward = false;
 	bool intakeBackward = false;
 	double intakeSpeed = 0;
+
+	bool grabberForward = false;
+	bool grabberBackward = false;
 
 
 };
