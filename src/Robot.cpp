@@ -8,6 +8,8 @@
 #include <iostream>
 #include <string>
 
+#include "WPILib.h"
+#include "Constants.h"
 
 #include <LiveWindow/LiveWindow.h>
 #include <SmartDashboard/SendableChooser.h>
@@ -87,13 +89,22 @@ public:
 		  * Setup controllers
 		  */
 		 MainJoystick = new Joystick(0);
+		 ArmJoystick = new Joystick(1);
 
+		 ArmTalon = new TalonSRX(1);
+		 ArmTalon->ConfigSelectedFeedbackSensor(FeedbackDevice::QuadEncoder, 0,0);
+		 ArmTalon->SetSensorPhase(true);
+
+		 ArmTalon->Config_kF(kPIDLoopIdx, kF, kTimeoutMs);
+		 ArmTalon->Config_kP(kPIDLoopIdx, kP, kTimeoutMs);
+		 ArmTalon->Config_kI(kPIDLoopIdx, kI, kTimeoutMs);
+		 ArmTalon->Config_kD(kPIDLoopIdx, kD, kTimeoutMs);
 		 intake = new Talon(9);
 
 		 // grabber setup
-		 talonGrabber = new TalonSRX(1);
-		 talonGrabber->ConfigSelectedFeedbackSensor(FeedbackDevice::QuadEncoder, 0,0);
-		 talonGrabber->SetSensorPhase(false);
+		 //talonGrabber = new TalonSRX(2);
+		 //talonGrabber->ConfigSelectedFeedbackSensor(FeedbackDevice::QuadEncoder, 0,0);
+		 //talonGrabber->SetSensorPhase(false);
 
 
 	}
@@ -152,6 +163,40 @@ public:
 			grabberBackward = 0;
 		}
 
+		if(MainJoystick->GetRawButton(4)) {
+			grabberPneumaticsForward = true;
+			grabberPneumaticsBackward = false;
+
+		} else if(MainJoystick->GetRawButton(5)){
+			grabberPneumaticsForward = false;
+			grabberPneumaticsBackward = true;
+
+		}else {
+			grabberPneumaticsForward = false;
+			grabberPneumaticsBackward = false;
+		}
+
+		// arm controller
+		if(ArmJoystick->GetRawButton(2)){
+			ArmButtons.low = true;
+			ArmButtons.mid = false;
+			ArmButtons.high = false;
+		} else if(ArmJoystick->GetRawButton(3)){
+			ArmButtons.low = false;
+			ArmButtons.mid = true;
+			ArmButtons.high = false;
+		} else if(ArmJoystick->GetRawButton(1)){
+			ArmButtons.low = false;
+			ArmButtons.mid = false;
+			ArmButtons.high = true;
+		} else{
+			ArmButtons.low = false;
+			ArmButtons.mid = false;
+			ArmButtons.high = false;
+		}
+
+
+
 
 
 	}
@@ -174,15 +219,39 @@ public:
 		}
 	}
 
-
+/*
 	void runGrabber() {
 		if(grabberForward) {
-			talonGrabber->Set(ControlMode::PercentOutput, 0.1);
+			talonGrabber->Set(ControlMode::PercentOutput, 0.5);
 		} else if(grabberBackward) {
-			talonGrabber->Set(ControlMode::PercentOutput, -0.1);
+			talonGrabber->Set(ControlMode::PercentOutput, -0.5);
 		} else {
 			talonGrabber->Set(ControlMode::PercentOutput, 0);
 		}
+
+	}
+*/
+	void runGrabberPneumatics() {
+		if(grabberPneumaticsForward) {
+			grabberSolenoid.Set(frc::DoubleSolenoid::Value::kForward);
+		} else if(grabberPneumaticsBackward) {
+			grabberSolenoid.Set(frc::DoubleSolenoid::Value::kReverse);
+		} else {
+			grabberSolenoid.Set(frc::DoubleSolenoid::Value::kOff);
+		}
+	}
+
+	void runArm() {
+		if(ArmButtons.low) {
+			ArmTalon->Set(ControlMode::Position, 1000);
+		} else if(ArmButtons.mid) {
+			ArmTalon->Set(ControlMode::Position, -1000);
+		} else {
+			ArmTalon->Set(ControlMode::PercentOutput, ArmJoystick->GetY());
+		}
+
+
+//		ArmTalon->Set(ControlMode::Position, 1000);
 
 	}
 	/*
@@ -238,14 +307,16 @@ public:
 		pollSensors();
 
 		runIntake();
-		runGrabber();
+		//runGrabber();
+		runArm();
+		runGrabberPneumatics();
 		drive(joystickX,joystickY);
 		//SmartDashboard::PutString("DB/String 0", "My 21 Char TestString");
 		if(GyroFound) {
 			SmartDashboard::PutNumber("GryoAngle", navxgyro->GetAngle());
 		}
-		SmartDashboard::PutNumber("Talon Sensor Velocity", talonGrabber->GetSelectedSensorVelocity(0));
-		SmartDashboard::PutNumber("Talon Sensor Position", talonGrabber->GetSelectedSensorPosition(0));
+		SmartDashboard::PutNumber("Talon Sensor Velocity", ArmTalon->GetSelectedSensorVelocity(0));
+		SmartDashboard::PutNumber("Talon Sensor Position", ArmTalon->GetSelectedSensorPosition(0));
 	}
 
 	void TestPeriodic() {}
@@ -270,7 +341,7 @@ private:
 	double joystickX = 0;
 	double joystickY = 0;
 	Joystick *MainJoystick;
-
+	Joystick *ArmJoystick;
 
 
 	/*
@@ -285,9 +356,9 @@ private:
 	/* controllers by displaying a form where you can enter new P, I,  */
 	/* and D constants and test the mechanism.                         */
 
-	double kP = 0.03f;
+	double kP = 0.13f;
 	double kI = 0.00f;
-	double kD = 0.00f;
+	double kD = 1.00f;
 	double kF = 0.00f;
 
 	/* This tuning parameter indicates how close to "on target" the    */
@@ -305,13 +376,26 @@ private:
 	 * Motor setup
 	 */
 	Talon *intake;
-	TalonSRX *talonGrabber;
+	TalonSRX *ArmTalon;
+
+	//TalonSRX *talonGrabber;
 	bool intakeForward = false;
 	bool intakeBackward = false;
 	double intakeSpeed = 0;
 
 	bool grabberForward = false;
 	bool grabberBackward = false;
+
+	bool grabberPneumaticsForward = false;
+	bool grabberPneumaticsBackward = false;
+
+	frc::DoubleSolenoid grabberSolenoid {0,1};
+
+	struct structArmButtons {
+		bool low = false;
+		bool mid = false;
+		bool high = false;
+	} ArmButtons;
 
 
 };
