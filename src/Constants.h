@@ -1,6 +1,15 @@
 #ifndef SRC_CONSTANTS_H_
 #define SRC_CONSTANTS_H_
 
+
+#define DriveM_FrontLeft 1
+#define DriveM_MiddleLeft 2
+#define DriveM_RearLeft 3
+
+#define DriveM_FrontRight 4
+#define DriveM_MiddleRight 5
+#define DriveM_RearRight 6
+
 enum Constants {
 	/**
 	 * Which PID slot to pull gains from.  Starting 2018, you can choose

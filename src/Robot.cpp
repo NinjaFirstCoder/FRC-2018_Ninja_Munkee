@@ -99,6 +99,8 @@ public:
 		 ArmTalon->Config_kP(kPIDLoopIdx, kP, kTimeoutMs);
 		 ArmTalon->Config_kI(kPIDLoopIdx, kI, kTimeoutMs);
 		 ArmTalon->Config_kD(kPIDLoopIdx, kD, kTimeoutMs);
+		 ArmTalon->ConfigPeakOutputForward(arm_power, kTimeoutMs);
+		 ArmTalon->ConfigPeakOutputReverse(-arm_power, kTimeoutMs);
 		 intake = new Talon(9);
 
 		 // grabber setup
@@ -243,13 +245,39 @@ public:
 
 	void runArm() {
 		if(ArmButtons.low) {
-			ArmTalon->Set(ControlMode::Position, 1000);
+			arm_currentPos = 0;
 		} else if(ArmButtons.mid) {
-			ArmTalon->Set(ControlMode::Position, -1000);
+			arm_currentPos = 1000;
+		} else if(ArmButtons.high){
+			arm_currentPos = 4096;
 		} else {
-			ArmTalon->Set(ControlMode::PercentOutput, ArmJoystick->GetY());
+			arm_currentPos += ArmJoystick->GetY() * 100;
+			//ArmTalon->Set(ControlMode::PercentOutput, ArmJoystick->GetY());
 		}
 
+		ArmTalon->Set(ControlMode::Position, arm_currentPos);
+
+/*		if(ArmJoystick->GetRawButton(8)) {
+			dashData1 = SmartDashboard::GetString("DB/String 0", "myDefaultData");
+			dashData2 = SmartDashboard::GetString("DB/String 1", "myDefaultData");
+			dashData3 = SmartDashboard::GetString("DB/String 2", "myDefaultData");
+			dashData4 = SmartDashboard::GetString("DB/String 3", "myDefaultData");
+			dashData5 = SmartDashboard::GetString("DB/String 4", "myDefaultData");
+
+			ArmTalon->Config_kF(kPIDLoopIdx, atof(dashData1.c_str()), kTimeoutMs);
+			ArmTalon->Config_kP(kPIDLoopIdx, atof(dashData2.c_str()), kTimeoutMs);
+			ArmTalon->Config_kI(kPIDLoopIdx, atof(dashData3.c_str()), kTimeoutMs);
+			ArmTalon->Config_kD(kPIDLoopIdx, atof(dashData4.c_str()), kTimeoutMs);
+			ArmTalon->ConfigPeakOutputForward((double) atof(dashData5.c_str()), kTimeoutMs);
+			ArmTalon->ConfigPeakOutputReverse(-(double) atof(dashData5.c_str()), kTimeoutMs);
+
+			SmartDashboard::PutNumber("1", atof(dashData1.c_str()) );
+			SmartDashboard::PutNumber("2", atof(dashData2.c_str()));
+			SmartDashboard::PutNumber("3", atof(dashData3.c_str()));
+			SmartDashboard::PutNumber("4", atof(dashData4.c_str()));
+
+
+		}*/
 
 //		ArmTalon->Set(ControlMode::Position, 1000);
 
@@ -356,10 +384,12 @@ private:
 	/* controllers by displaying a form where you can enter new P, I,  */
 	/* and D constants and test the mechanism.                         */
 
-	double kP = 0.13f;
+	double kP = 1;
 	double kI = 0.00f;
-	double kD = 1.00f;
+	double kD = 0.00f;
 	double kF = 0.00f;
+	double arm_power = 0.5f;
+	double arm_currentPos = 0;
 
 	/* This tuning parameter indicates how close to "on target" the    */
 	/* PID Controller will attempt to get.                             */
@@ -397,7 +427,11 @@ private:
 		bool high = false;
 	} ArmButtons;
 
-
+	std::string dashData1;
+	std::string dashData2;
+	std::string dashData3;
+	std::string dashData4;
+	std::string dashData5;
 };
 
 START_ROBOT_CLASS(Robot)
