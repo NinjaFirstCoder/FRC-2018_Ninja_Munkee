@@ -35,30 +35,183 @@
 
 #include <AHRS.h>
 
+// autonomous config files
+#include <iostream>
+#include <stdlib.h>
+#include <fstream>
+#include <string>
+#include <string.h>
+#include <algorithm>
+#include <cstdlib>
+using namespace std;
+#define OPERATION_ELEMENTS 6
+
 class Robot : public frc::TimedRobot {
 public:
 	/* setup the drive train
 	 *
 	 */
-	 frc::Victor m_frontLeft{1};
-	 frc::Victor m_midLeft{2};
-	 frc::Victor m_rearLeft{3};
+	 frc::Victor m_frontLeft{DriveM_FrontLeft};
+	 frc::Victor m_midLeft{DriveM_MiddleLeft};
+	 frc::Victor m_rearLeft{DriveM_RearLeft};
 	 frc::SpeedControllerGroup m_left{m_frontLeft, m_midLeft, m_rearLeft};
 
-	 frc::Victor m_frontRight{4};
-	 frc::Victor m_midRight{5};
-	 frc::Victor m_rearRight{6};
+	 frc::Victor m_frontRight{DriveM_FrontRight};
+	 frc::Victor m_midRight{DriveM_MiddleRight};
+	 frc::Victor m_rearRight{DriveM_RearRight};
 	 frc::SpeedControllerGroup m_right{m_frontRight, m_midRight, m_rearRight};
 
 	 frc::DifferentialDrive m_drive{m_left, m_right};
 
-	 /*
-	  * Setup the controller
+
+
+	 /***************************************************
+	  * AUTONOMOUS CONFIG FILE LOADING CODE
 	  */
-	 //frc::Joystick m_joystick{0};
+	 struct node {
+	 	double data[OPERATION_ELEMENTS];
+	 	node *next;
+	 };
+	 class list {
+	 	 	 private:
+	 			int x;
+	 		public:
+	 			node *head, *tail;
+	 			list() {  // setup class with null pointers
+	 				head=NULL;
+	 				tail=NULL;
+	 				x=0;
+	 			}
+	 			void createnode(double value[]) {
+	 				node *temp=new node;
+	 				for(x = 0; x<OPERATION_ELEMENTS; x++) { // transfer data not a pointer
+	 					temp->data[x] = value[x];
+	 				}
+	 				temp->next=NULL;
+	 				if(head==NULL)
+	 				{
+	 					head=temp;
+	 					tail=temp;
+	 					temp=NULL;
+	 				}
+	 				else
+	 				{
+	 					tail->next=temp;
+	 					tail=temp;
+	 				}
+	 			}
+	 			void display() {
+	 				node *temp=new node;
+	 				temp=head;
+	 				int z;
+	 				while(temp!=NULL)
+	 				{
+	 					for(z=0; z<OPERATION_ELEMENTS; z++) {
+	 						cout << temp->data[z] << "\n";
+	 					}
+	 					temp=temp->next;
+	 				}
+	 			}
+	 };
+	 //list autoMode1, autoMode2, autoMode3, autoMode4, autoMode5, autoMode6;
+
+	 class AutoConfigLoader {
+	 public:
+		 list autoMode1, autoMode2, autoMode3, autoMode4, autoMode5, autoMode6;
+		 bool FileNotFound = false;
+		 void loadConfig() {
+			 	 ifstream myfile("/media/sda1/Config.txt");
+
+			 	 string line;
+			 	 string newString;
+
+			 	 int x;
+			 	 size_t charNumb;
+			 	 size_t charNumb2;
+			 	 size_t stringlen;
 
 
+			 	 char CurrentModeName[20];
 
+
+			 	 bool foundEndOfBlock = false;
+			 	 double randomArray[OPERATION_ELEMENTS];
+
+			 	 //myfile.open ("C:/Users/mainuser/Documents/Programming/Projects/ConfigFileGrabber/src/config.txt");
+			 	 if (myfile.is_open()) {
+			 			while (getline(myfile,line)) {
+			 				if(line.length() != 0) {
+			 					if(line.at(0) == '-') { // auto block found
+			 						line.erase(line.begin()); 									// remove first '-'
+			 						charNumb = line.find('-');                                  // find pos of last '-'
+			 						stringlen = line.copy(CurrentModeName , charNumb , 0);   // copy up to the last '-'
+			 						CurrentModeName[stringlen] = '\0';                       // put a null at the end of the string
+			 						//cout << "NEW NAME:" << CurrentModeName << '\n';                  // print the value
+			 						// CHECK INTO REMOVING SPACES HERE
+
+			 						foundEndOfBlock = true;
+			 						while(foundEndOfBlock) {
+
+			 							getline(myfile,line);                   // grab the next line
+			 							if(line.find("Operation") != std::string::npos) { // found the operation line line.compare(0,9,"Operation") == 0
+			 								x = 0;
+			 								while(x != OPERATION_ELEMENTS) {
+			 									getline(myfile,line);
+			 									charNumb2 = line.find(':');
+			 									line.erase(0, charNumb2);
+			 									for (string::iterator it = line.begin(); it != line.end(); ++it) { // remove all non digits
+			 									        if (isdigit(*it)) newString.push_back(*it);
+			 									}
+
+			 									randomArray[x] = atoi(newString.c_str());
+			 									newString.clear();
+			 									x++;
+			 								}
+			 								if(!strcmp("AutoMode_1",CurrentModeName)) {
+			 									autoMode1.createnode(randomArray);
+			 								}
+			 								else if(!strcmp("AutoMode_2",CurrentModeName)) {
+			 									autoMode2.createnode(randomArray);
+			 								}
+			 								else if(!strcmp("AutoMode_3",CurrentModeName)) {
+			 									autoMode3.createnode(randomArray);
+			 								}
+			 								else if(!strcmp("AutoMode_4",CurrentModeName)) {
+			 									autoMode4.createnode(randomArray);
+			 								}
+			 								else if(!strcmp("AutoMode_5",CurrentModeName)) {
+			 									autoMode5.createnode(randomArray);
+			 								}
+			 								else if(!strcmp("AutoMode_6",CurrentModeName)) {
+			 									autoMode6.createnode(randomArray);
+			 								}
+
+			 							} else if(line.find("-END-") != std::string::npos) {
+			 								foundEndOfBlock = false;
+			 							}
+
+			 						}
+
+			 					}
+			 				}
+			 			}
+			 			myfile.close();
+
+				 		frc::SmartDashboard::PutString("AutoLoaded", "FOUND");
+			 	 }
+			 	 else {
+			 		 // PRINT ERROR MESSAGE OR SEARCH FOR FILE HERE
+			 		frc::SmartDashboard::PutString("AutoLoaded", "NOT FOUND");
+			 		FileNotFound= true;
+			 	 }
+		 }
+
+	 };
+
+	 /********************************************************
+	  * RobotInit is the first function that is run when the robot starts. Put
+	  * all of the motor controller/joystick/etc setup inside.
+	  */
 	void RobotInit() {
 		m_chooser.AddDefault(kAutoNameDefault, kAutoNameDefault);
 		m_chooser.AddObject(kAutoNameCustom, kAutoNameCustom);
@@ -85,33 +238,40 @@ public:
 		 }
 		 navxgyro->ZeroYaw();
 
-		 /*
-		  * Setup controllers
-		  */
-		 MainJoystick = new Joystick(0);
-		 ArmJoystick = new Joystick(1);
+		 // Joystick setup
+		 MainJoystick = new Joystick(MAIN_JOYSTICK);
+		 ArmJoystick = new Joystick(SECONDARY_JOYSTICK);
 
-		 ArmTalon = new TalonSRX(1);
+		 // Arm setup
+		 ArmTalon = new TalonSRX(ARM_CONTROLLER_PORT);
 		 ArmTalon->ConfigSelectedFeedbackSensor(FeedbackDevice::QuadEncoder, 0,0);
 		 ArmTalon->SetSensorPhase(true);
 
-		 ArmTalon->Config_kF(kPIDLoopIdx, kF, kTimeoutMs);
-		 ArmTalon->Config_kP(kPIDLoopIdx, kP, kTimeoutMs);
-		 ArmTalon->Config_kI(kPIDLoopIdx, kI, kTimeoutMs);
-		 ArmTalon->Config_kD(kPIDLoopIdx, kD, kTimeoutMs);
-		 ArmTalon->ConfigPeakOutputForward(arm_power, kTimeoutMs);
-		 ArmTalon->ConfigPeakOutputReverse(-arm_power, kTimeoutMs);
-		 intake = new Talon(9);
+		 ArmTalon->Config_kF(kPIDLoopIdx, CONST_kF, kTimeoutMs);
+		 ArmTalon->Config_kP(kPIDLoopIdx, CONST_kP, kTimeoutMs);
+		 ArmTalon->Config_kI(kPIDLoopIdx, CONST_kI, kTimeoutMs);
+		 ArmTalon->Config_kD(kPIDLoopIdx, CONST_kF, kTimeoutMs);
+		 ArmTalon->ConfigPeakOutputForward((double) ARM_POWER, kTimeoutMs);
+		 ArmTalon->ConfigPeakOutputReverse((double)-ARM_POWER, kTimeoutMs);
 
-		 // grabber setup
-		 //talonGrabber = new TalonSRX(2);
-		 //talonGrabber->ConfigSelectedFeedbackSensor(FeedbackDevice::QuadEncoder, 0,0);
-		 //talonGrabber->SetSensorPhase(false);
+		 // Intake setup
+		 IntakeTalon = new Talon(9);
 
+		 // Grabber setup
+		 GrabberTalon = new TalonSRX(2);
+		 GrabberTalon->ConfigSelectedFeedbackSensor(FeedbackDevice::QuadEncoder, 0,0);
+		 GrabberTalon->SetSensorPhase(false);
+
+		 // auto config loader
+		 AutoConfig.loadConfig();
+		// chooser.AddDefault("Automatic", new AutoManual());
+		 //chooser.AddObject("Manual 1", new AutoSelection());
+
+//		 frc::SmartDashboard::PutData("Auto Modes", &chooser);
 
 	}
-	/*
-	 * Drive function. This controls the drive train
+	/********************************************************
+	 * Drive function. This runs the drive train
 	 */
 	void drive(double x, double y) {
 			x = x * driveLevel;
@@ -120,7 +280,7 @@ public:
 	}
 
 
-	/*
+	/*******************************************************
 	 * Function grabs values from joysticks and gamepads
 	 */
 	void pollControllers(){
@@ -203,7 +363,7 @@ public:
 
 	}
 
-	/*
+	/*****************************************************
 	 * Functions grabs values from gyros and other sensors
 	 */
 	void pollSensors(){
@@ -211,28 +371,36 @@ public:
 
 	}
 
+	/*****************************************************
+	 * Function runs intake motors
+	 */
 	void runIntake() {
 		if(intakeForward) {
-			intake->Set(intakeSpeed);
+			IntakeTalon->Set(intakeSpeed);
 		} else if(intakeBackward) {
-			intake->Set(-intakeSpeed);
+			IntakeTalon->Set(-intakeSpeed);
 		}else {
-			intake->Set(0);
+			IntakeTalon->Set(0);
 		}
 	}
 
-/*
+	/****************************************************
+	 * Function runs the grabber. NOTE: the grabber is the thing on the end of the arm
+	 */
 	void runGrabber() {
 		if(grabberForward) {
-			talonGrabber->Set(ControlMode::PercentOutput, 0.5);
+			GrabberTalon->Set(ControlMode::PercentOutput, 0.5);
 		} else if(grabberBackward) {
-			talonGrabber->Set(ControlMode::PercentOutput, -0.5);
+			GrabberTalon->Set(ControlMode::PercentOutput, -0.5);
 		} else {
-			talonGrabber->Set(ControlMode::PercentOutput, 0);
+			GrabberTalon->Set(ControlMode::PercentOutput, 0);
 		}
 
 	}
-*/
+
+	/****************************************************
+	 * Function runs the grabber pneumatics
+	 */
 	void runGrabberPneumatics() {
 		if(grabberPneumaticsForward) {
 			grabberSolenoid.Set(frc::DoubleSolenoid::Value::kForward);
@@ -243,6 +411,9 @@ public:
 		}
 	}
 
+	/*****************************************************
+	 * Function runs the arm motor
+	 */
 	void runArm() {
 		if(ArmButtons.low) {
 			arm_currentPos = 0;
@@ -296,9 +467,13 @@ public:
 	 * well.
 	 */
 	void AutonomousInit() override {
-		/*m_autoSelected = m_chooser.GetSelected();
-		// m_autoSelected = SmartDashboard::GetString("Auto Selector",
-		//		 kAutoNameDefault);
+		//autonomousCommand.reset(chooser.GetSelected());
+		//if(autonomousCommand.get() != nullptr) {
+		//	autonomousCommand->Start();
+		//}
+	/*	m_autoSelected = m_chooser.GetSelected();
+		 m_autoSelected = SmartDashboard::GetString("Auto Selector",
+				 kAutoNameDefault);
 		std::cout << "Auto selected: " << m_autoSelected << std::endl;
 
 		if (m_autoSelected == kAutoNameCustom) {
@@ -309,9 +484,50 @@ public:
 	}
 
 	void AutonomousPeriodic() {
+		int AutoMode = SmartDashboard::GetNumber("Autonomous Mode", 404); // may need to be changed from 0
+		SmartDashboard::PutNumber("FOUND", AutoMode);
+
+		if(AutoConfig.FileNotFound) { // if the auto config wasn't loaded
+			drive(0,0); // update drive so it doesn't error
+			return;
+		}
+		switch(AutoMode){
+			case(0): // Automatic selection
+				CurrentAutoMode = &AutoConfig.autoMode1; // put the stuff from that list into the current list
+				break;
+			case(1):
+				CurrentAutoMode = &AutoConfig.autoMode2;
+				break;
+			case(2):
+					CurrentAutoMode = &AutoConfig.autoMode3;
+					break;
+			case(3):
+					CurrentAutoMode = &AutoConfig.autoMode4;
+					break;
+			case(4):
+					CurrentAutoMode = &AutoConfig.autoMode5;
+					break;
+			default:
+				break;
+
+		}
+		node *temp = new node;
+		temp = CurrentAutoMode->head;
+		SmartDashboard::PutNumber("Autodata0", temp->data[0]);
+		SmartDashboard::PutNumber("Autodata1", temp->data[1]);
+		SmartDashboard::PutNumber("Autodata2", temp->data[2]);
+		SmartDashboard::PutNumber("Autodata3", temp->data[3]);
+		SmartDashboard::PutNumber("Autodata4", temp->data[4]);
+		SmartDashboard::PutNumber("Autodata5", temp->data[5]);
+
+
+		drive(0,0);
+		//frc::Scheduler::GetInstance()->Run();
 		/*
 		 * Auto mode works similar to a state machine.
 		 */
+		/*
+		double kP = 1;
 		switch(autoState) {
 			case(1):
 				navxgyro->ZeroYaw(); // zero out gyro when auto starts
@@ -323,9 +539,15 @@ public:
 				break;
 			default:
 				break;
-		}
+		}*/
 	}
 
+	void AutoSelection() {
+		SmartDashboard::PutString("FIRST", "RAN");
+	}
+	void AutoManual() {
+		SmartDashboard::PutString("SECOND", "RAN");
+	}
 
 	void TeleopInit() {}
 
@@ -384,17 +606,12 @@ private:
 	/* controllers by displaying a form where you can enter new P, I,  */
 	/* and D constants and test the mechanism.                         */
 
-	double kP = 1;
-	double kI = 0.00f;
-	double kD = 0.00f;
-	double kF = 0.00f;
-	double arm_power = 0.5f;
 	double arm_currentPos = 0;
 
 	/* This tuning parameter indicates how close to "on target" the    */
 	/* PID Controller will attempt to get.                             */
 
-	double kToleranceDegrees = 2.0f;
+//	double kToleranceDegrees = 2.0f;
 
 	/* Function Variables
 	 *
@@ -405,10 +622,11 @@ private:
 	/*
 	 * Motor setup
 	 */
-	Talon *intake;
+	Talon *IntakeTalon;
 	TalonSRX *ArmTalon;
+	TalonSRX *GrabberTalon;
 
-	//TalonSRX *talonGrabber;
+
 	bool intakeForward = false;
 	bool intakeBackward = false;
 	double intakeSpeed = 0;
@@ -432,6 +650,12 @@ private:
 	std::string dashData3;
 	std::string dashData4;
 	std::string dashData5;
+
+	AutoConfigLoader AutoConfig;
+	list *CurrentAutoMode;
+	//std::unique_ptr<frc::Command> autonomousCommand;
+	//frc::SendableChooser<frc::Command*> chooser;
+
 };
 
 START_ROBOT_CLASS(Robot)
