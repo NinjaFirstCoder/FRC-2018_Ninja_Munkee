@@ -33,6 +33,12 @@
 #define ARM_POWER 0.5         // this is the power the arm runs at.
 #define ARM_CONTROLLER_PORT 1 // this is the CAN talon device ID
 
+#define ARM_POS_1 1000
+#define ARM_POS_2 2000
+#define ARM_POS_3 4096
+
+#define ARM_AUTO_ERROR 100
+
 /*********************************
  * Constants for the Grabber
  */

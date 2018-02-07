@@ -44,7 +44,7 @@
 #include <algorithm>
 #include <cstdlib>
 using namespace std;
-#define OPERATION_ELEMENTS 6
+#define OPERATION_ELEMENTS 13
 
 class Robot : public frc::TimedRobot {
 public:
@@ -120,6 +120,7 @@ public:
 		 list autoMode1, autoMode2, autoMode3, autoMode4, autoMode5, autoMode6;
 		 bool FileNotFound = false;
 		 void loadConfig() {
+			 	 int y = 0;
 			 	 ifstream myfile("/media/sda1/Config.txt");
 
 			 	 string line;
@@ -169,6 +170,7 @@ public:
 			 								}
 			 								if(!strcmp("AutoMode_1",CurrentModeName)) {
 			 									autoMode1.createnode(randomArray);
+			 									y++;
 			 								}
 			 								else if(!strcmp("AutoMode_2",CurrentModeName)) {
 			 									autoMode2.createnode(randomArray);
@@ -196,6 +198,8 @@ public:
 			 				}
 			 			}
 			 			myfile.close();
+
+			 			frc::SmartDashboard::PutNumber("Mode 1 states loaded", y);
 
 				 		frc::SmartDashboard::PutString("AutoLoaded", "FOUND");
 			 	 }
@@ -418,9 +422,9 @@ public:
 		if(ArmButtons.low) {
 			arm_currentPos = 0;
 		} else if(ArmButtons.mid) {
-			arm_currentPos = 1000;
+			arm_currentPos = ARM_POS_1;
 		} else if(ArmButtons.high){
-			arm_currentPos = 4096;
+			arm_currentPos = ARM_POS_2;
 		} else {
 			arm_currentPos += ArmJoystick->GetY() * 100;
 			//ArmTalon->Set(ControlMode::PercentOutput, ArmJoystick->GetY());
@@ -481,36 +485,112 @@ public:
 		} else {
 			// Default Auto goes here
 		}*/
+			autonomousVars.CompletingOperation = true;
+			autonomousVars.DriveOperationDone = false;
+			autonomousVars.ArmOperationDone = false;
+			autonomousVars.GrabberOperationDone = false;
+			autonomousVars.IntakeOperationDone = false;
+			autonomousVars.TimeOperationDone = false;
+			autonomousVars.foundList = false;
+
 	}
 
 	void AutonomousPeriodic() {
-		int AutoMode = SmartDashboard::GetNumber("Autonomous Mode", 404); // may need to be changed from 0
-		SmartDashboard::PutNumber("FOUND", AutoMode);
+		if(!autonomousVars.foundList) {
+			//SmartDashboard::PutString("CURRENTAUTOSTATE", "started");
+			int AutoMode = SmartDashboard::GetNumber("Autonomous Mode", 404); // may need to be changed from 0
+			SmartDashboard::PutNumber("FOUND", AutoMode);
 
-		if(AutoConfig.FileNotFound) { // if the auto config wasn't loaded
-			drive(0,0); // update drive so it doesn't error
-			return;
-		}
-		switch(AutoMode){
-			case(0): // Automatic selection
-				CurrentAutoMode = &AutoConfig.autoMode1; // put the stuff from that list into the current list
-				break;
-			case(1):
-				CurrentAutoMode = &AutoConfig.autoMode2;
-				break;
-			case(2):
-					CurrentAutoMode = &AutoConfig.autoMode3;
+			if(AutoConfig.FileNotFound) { // if the auto config wasn't loaded
+				drive(0,0); // update drive so it doesn't error
+				return;
+			}
+			switch(AutoMode){
+				case(0): // Automatic selection
+						CurrentAutoMode = &AutoConfig.autoMode1; // put the stuff from that list into the current list
+						autonomousVars.foundList = true;
+						break;
+				case(1):
+						CurrentAutoMode = &AutoConfig.autoMode2;
+						autonomousVars.foundList = true;
+						break;
+				case(2):
+						CurrentAutoMode = &AutoConfig.autoMode3;
+						autonomousVars.foundList = true;
+						break;
+				case(3):
+						CurrentAutoMode = &AutoConfig.autoMode4;
+						autonomousVars.foundList = true;
+						break;
+				case(4):
+						CurrentAutoMode = &AutoConfig.autoMode5;
+						autonomousVars.foundList = true;
+						break;
+				default:
 					break;
-			case(3):
-					CurrentAutoMode = &AutoConfig.autoMode4;
-					break;
-			case(4):
-					CurrentAutoMode = &AutoConfig.autoMode5;
-					break;
-			default:
-				break;
 
+			}
+			autonomousVars.autoTemp = CurrentAutoMode->head;
+			// zero out sensors
+			ArmTalon->SetSelectedSensorPosition(0, kPIDLoopIdx, kTimeoutMs);
+		} else {
+			if(!autonomousVars.CompletingOperation) { // if not currently in a operation
+				// grab next operation
+				if(autonomousVars.autoTemp != NULL) {
+					// grab next operation
+					autonomousVars.autoTemp = autonomousVars.autoTemp->next; // grab next operation
+					if(autonomousVars.autoTemp!=NULL) {
+						autonomousVars.CompletingOperation = true;
+						SmartDashboard::PutString("CURRENTAUTOSTATE", "grabbing next value");
+					} else {
+						autonomousVars.CompletingOperation = false;
+						SmartDashboard::PutString("CURRENTAUTOSTATE", "FOUND NULL");
+					}
+				}
+				else {
+					SmartDashboard::PutString("CURRENTAUTOSTATE", "FOUND NULL");
+					autonomousVars.CompletingOperation = false;
+				}
+			} else {
+				// run current operation
+
+				/*
+				 * Run arm operations
+				 */
+				if(ArmTalon->GetSelectedSensorPosition(0) < (autonomousVars.autoTemp->data[0] - ARM_AUTO_ERROR) || ArmTalon->GetSelectedSensorPosition(0) > (autonomousVars.autoTemp->data[0] + ARM_AUTO_ERROR) ){
+					ArmTalon->ConfigPeakOutputForward((double) autonomousVars.autoTemp->data[1], kTimeoutMs);
+					ArmTalon->ConfigPeakOutputReverse((double)-autonomousVars.autoTemp->data[1], kTimeoutMs);
+					ArmTalon->Set(ControlMode::Position, autonomousVars.autoTemp->data[0]);
+				} else {
+					autonomousVars.ArmOperationDone = true;
+				}
+				/*
+				 * run time operations
+				 */
+				if(autonomousVars.autoTemp->data[12] != autonomousVars.timeCount) {
+					autonomousVars.timeCount++;
+					SmartDashboard::PutNumber("Time Ticks", autonomousVars.timeCount);
+					SmartDashboard::PutNumber("Target Time", autonomousVars.autoTemp->data[12]);
+				} else {
+					autonomousVars.TimeOperationDone = true;
+				}
+
+
+				if(autonomousVars.ArmOperationDone && autonomousVars.TimeOperationDone) {
+					SmartDashboard::PutString("CURRENTAUTOSTATE", "Finished arm");
+					autonomousVars.CompletingOperation = false;
+					autonomousVars.ArmOperationDone = false;
+					autonomousVars.TimeOperationDone = false;
+
+					// reset time
+					autonomousVars.timeCount = 0;
+				}
+
+			}
 		}
+		drive(0,0);
+		SmartDashboard::PutNumber("Talon Sensor Position", ArmTalon->GetSelectedSensorPosition(0));
+		/*
 		node *temp = new node;
 		temp = CurrentAutoMode->head;
 		SmartDashboard::PutNumber("Autodata0", temp->data[0]);
@@ -521,7 +601,7 @@ public:
 		SmartDashboard::PutNumber("Autodata5", temp->data[5]);
 
 
-		drive(0,0);
+		drive(0,0);*/
 		//frc::Scheduler::GetInstance()->Run();
 		/*
 		 * Auto mode works similar to a state machine.
@@ -549,7 +629,12 @@ public:
 		SmartDashboard::PutString("SECOND", "RAN");
 	}
 
-	void TeleopInit() {}
+	void TeleopInit() {
+		// RESET TALON SPEED HERE
+		ArmTalon->ConfigPeakOutputForward((double) ARM_POWER, kTimeoutMs);
+		ArmTalon->ConfigPeakOutputReverse((double)-ARM_POWER, kTimeoutMs);
+
+	}
 
 
 	void TeleopPeriodic() {
@@ -644,6 +729,18 @@ private:
 		bool mid = false;
 		bool high = false;
 	} ArmButtons;
+
+	struct autonomousThings {
+		bool CompletingOperation = true;
+		bool DriveOperationDone = false;
+		bool ArmOperationDone = false;
+		bool GrabberOperationDone = false;
+		bool IntakeOperationDone = false;
+		bool TimeOperationDone = false;
+		bool foundList = false;
+		double timeCount = 0;
+		node *autoTemp = new node;
+	} autonomousVars;
 
 	std::string dashData1;
 	std::string dashData2;
