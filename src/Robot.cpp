@@ -117,11 +117,12 @@ public:
 
 	 class AutoConfigLoader {
 	 public:
-		 list autoMode1, autoMode2, autoMode3, autoMode4, autoMode5, autoMode6;
+		 list autoMode1, autoMode2, autoMode3, autoMode4, autoMode5, autoMode6, autoMode7, autoMode8, autoMode9;
 		 bool FileNotFound = false;
 		 void loadConfig() {
 			 	 int y = 0;
-			 	 ifstream myfile("/media/sda1/Config.txt");
+			 	 //ifstream myfile("/media/sda1/Config.txt");
+			 	ifstream myfile("/home/lvuser/Config.txt");
 
 			 	 string line;
 			 	 string newString;
@@ -160,17 +161,22 @@ public:
 			 									getline(myfile,line);
 			 									charNumb2 = line.find(':');
 			 									line.erase(0, charNumb2);
-			 									for (string::iterator it = line.begin(); it != line.end(); ++it) { // remove all non digits
+			 									/*for (string::iterator it = line.begin(); it != line.end(); ++it) { // remove all non digits
 			 									        if (isdigit(*it)) newString.push_back(*it);
+			 									}*/
+			 									for(int z = 0; z < (signed) line.length(); z++) {
+			 										if(line[z] == '0' || line[z] == '1' || line[z] == '2' || line[z] == '3' || line[z] == '4' || line[z] == '5' || line[z] == '6' || line[z] == '7' || line[z] == '8' || line[z] == '9' || line[z] == '.' || line[z] == '-' ) {
+			 											newString.push_back(line[z]);
+			 										}
 			 									}
 
-			 									randomArray[x] = atoi(newString.c_str());
+
+			 									randomArray[x] = atof(newString.c_str());
 			 									newString.clear();
 			 									x++;
 			 								}
 			 								if(!strcmp("AutoMode_1",CurrentModeName)) {
 			 									autoMode1.createnode(randomArray);
-			 									y++;
 			 								}
 			 								else if(!strcmp("AutoMode_2",CurrentModeName)) {
 			 									autoMode2.createnode(randomArray);
@@ -187,6 +193,16 @@ public:
 			 								else if(!strcmp("AutoMode_6",CurrentModeName)) {
 			 									autoMode6.createnode(randomArray);
 			 								}
+			 								else if(!strcmp("AutoMode_7",CurrentModeName)) {
+			 									autoMode7.createnode(randomArray);
+			 								}
+			 								else if(!strcmp("AutoMode_8",CurrentModeName)) {
+			 									autoMode7.createnode(randomArray);
+			 								}
+			 								else if(!strcmp("AutoMode_9",CurrentModeName)) {
+			 									autoMode7.createnode(randomArray);
+			 									y++;
+			 								}
 
 			 							} else if(line.find("-END-") != std::string::npos) {
 			 								foundEndOfBlock = false;
@@ -199,7 +215,7 @@ public:
 			 			}
 			 			myfile.close();
 
-			 			frc::SmartDashboard::PutNumber("Mode 1 states loaded", y);
+			 			frc::SmartDashboard::PutNumber("Mode 9 states loaded", y);
 
 				 		frc::SmartDashboard::PutString("AutoLoaded", "FOUND");
 			 	 }
@@ -485,6 +501,9 @@ public:
 		} else {
 			// Default Auto goes here
 		}*/
+			/*
+			 * This resets all the variables for autonomous so that it can be run more than once
+			 */
 			autonomousVars.CompletingOperation = true;
 			autonomousVars.DriveOperationDone = false;
 			autonomousVars.ArmOperationDone = false;
@@ -492,9 +511,31 @@ public:
 			autonomousVars.IntakeOperationDone = false;
 			autonomousVars.TimeOperationDone = false;
 			autonomousVars.foundList = false;
+			autonomousVars.timeCount = 0;
+			autonomousVars.grabberTimeCount = 0;
+			autonomousVars.intakeTimeCount = 0;
 
 	}
 
+	/*********************************************************************************
+	 * This is the main autonomous function. It selects the proper auto mode to run
+	 * from the config file stored on the robotRIO. The method for mode selection
+	 * is determined on the custom tab of the driver station. The modes are as follows:
+	 * 		00 - Prelim_Automatic_Right
+	 * 		01 - Prelim_Automatic_Left
+	 * 		02 - Finals_Automatic_Right
+	 * 		03 - Finals_Automatic_Left
+	 * 		04 - DriveForward
+	 * 		05 - Left_Switch_Scale
+	 * 		06 - Left_Switch
+	 * 		07 - Left_Scale
+	 * 		08 - Left_Scale_FINAL
+	 * 		09 - Right_Switch_Scale
+	 * 		10 - Right_Switch
+	 * 		11 - Right_Scale
+	 * 		12 - Right_Scale_FINAL
+	 *
+	 */
 	void AutonomousPeriodic() {
 		if(!autonomousVars.foundList) {
 			//SmartDashboard::PutString("CURRENTAUTOSTATE", "started");
@@ -505,25 +546,63 @@ public:
 				drive(0,0); // update drive so it doesn't error
 				return;
 			}
+			SmartDashboard::PutString("AUTOMODELOAD", "GOT TO SWITCH");
 			switch(AutoMode){
-				case(0): // Automatic selection
+				case(0): // Prelim Automatic Right
+						// PUT SELECTOR HERE
 						CurrentAutoMode = &AutoConfig.autoMode1; // put the stuff from that list into the current list
 						autonomousVars.foundList = true;
 						break;
-				case(1):
+				case(1): // Prelim Automatic Left
+						// PUT SELECTOR HERE
+						CurrentAutoMode = &AutoConfig.autoMode1;
+						autonomousVars.foundList = true;
+						break;
+				case(2): // Finals Automatic Right
+						// PUT SELECTOR HERE
+						CurrentAutoMode = &AutoConfig.autoMode1;
+						autonomousVars.foundList = true;
+						break;
+				case(3): // Finals Automatic Left
+						// PUT SELECTOR HERE
+						CurrentAutoMode = &AutoConfig.autoMode1; // put the stuff from that list into the current list
+						autonomousVars.foundList = true;
+						break;
+				case(4): // Drive Forward
+						CurrentAutoMode = &AutoConfig.autoMode1;
+						autonomousVars.foundList = true;
+						break;
+				case(5): // Left Switch Scale
 						CurrentAutoMode = &AutoConfig.autoMode2;
 						autonomousVars.foundList = true;
 						break;
-				case(2):
+				case(6): // Left Switch
 						CurrentAutoMode = &AutoConfig.autoMode3;
 						autonomousVars.foundList = true;
 						break;
-				case(3):
+				case(7): // Left Scale
 						CurrentAutoMode = &AutoConfig.autoMode4;
 						autonomousVars.foundList = true;
 						break;
-				case(4):
-						CurrentAutoMode = &AutoConfig.autoMode5;
+				case(8): // Left Scale Final
+						CurrentAutoMode = &AutoConfig.autoMode5; // put the stuff from that list into the current list
+						autonomousVars.foundList = true;
+						break;
+				case(9): // Right Switch Scale
+						CurrentAutoMode = &AutoConfig.autoMode6;
+						autonomousVars.foundList = true;
+						break;
+				case(10): // Right Switch
+						CurrentAutoMode = &AutoConfig.autoMode7;
+						autonomousVars.foundList = true;
+						break;
+				case(11): // Right Scale
+						CurrentAutoMode = &AutoConfig.autoMode8;
+						autonomousVars.foundList = true;
+						break;
+				case(12): // Right Scale Final
+						CurrentAutoMode = &AutoConfig.autoMode9;
+						SmartDashboard::PutString("AUTOMODELOAD", "FOUND MODE 9");
 						autonomousVars.foundList = true;
 						break;
 				default:
@@ -560,6 +639,7 @@ public:
 				if(ArmTalon->GetSelectedSensorPosition(0) < (autonomousVars.autoTemp->data[0] - ARM_AUTO_ERROR) || ArmTalon->GetSelectedSensorPosition(0) > (autonomousVars.autoTemp->data[0] + ARM_AUTO_ERROR) ){
 					ArmTalon->ConfigPeakOutputForward((double) autonomousVars.autoTemp->data[1], kTimeoutMs);
 					ArmTalon->ConfigPeakOutputReverse((double)-autonomousVars.autoTemp->data[1], kTimeoutMs);
+					SmartDashboard::PutNumber("MOTOR POWER", autonomousVars.autoTemp->data[1]);
 					ArmTalon->Set(ControlMode::Position, autonomousVars.autoTemp->data[0]);
 				} else {
 					autonomousVars.ArmOperationDone = true;
@@ -574,16 +654,50 @@ public:
 				} else {
 					autonomousVars.TimeOperationDone = true;
 				}
+				/*
+				 * run grabber operations
+				 */
+				if(autonomousVars.autoTemp->data[6]) {
+					grabberSolenoid.Set(frc::DoubleSolenoid::Value::kForward);
+				} else {
+					grabberSolenoid.Set(frc::DoubleSolenoid::Value::kReverse);
+				}
+				if(autonomousVars.autoTemp->data[8] != autonomousVars.grabberTimeCount) {
+					autonomousVars.grabberTimeCount++;
+					GrabberTalon->Set(ControlMode::PercentOutput, autonomousVars.autoTemp->data[7]);
+				} else {
+					autonomousVars.GrabberOperationDone = true;
+				}
+				/*
+				 * run intake operations
+				 */
+				if(autonomousVars.autoTemp->data[10]) {
+					intakeSolenoid.Set(frc::DoubleSolenoid::Value::kForward);
+				} else {
+					intakeSolenoid.Set(frc::DoubleSolenoid::Value::kReverse);
+				}
+				if(autonomousVars.autoTemp->data[11] != autonomousVars.intakeTimeCount) {
+					autonomousVars.intakeTimeCount ++;
+					// add intake movement here
+
+				} else {
+					autonomousVars.IntakeOperationDone = true;
+				}
 
 
-				if(autonomousVars.ArmOperationDone && autonomousVars.TimeOperationDone) {
+				if(autonomousVars.ArmOperationDone && autonomousVars.TimeOperationDone && autonomousVars.IntakeOperationDone && autonomousVars.GrabberOperationDone) {
 					SmartDashboard::PutString("CURRENTAUTOSTATE", "Finished arm");
+					/*********************************************
+					 * reset operations and variables so they don't carry over to the next state
+					 */
 					autonomousVars.CompletingOperation = false;
 					autonomousVars.ArmOperationDone = false;
 					autonomousVars.TimeOperationDone = false;
+					autonomousVars.GrabberOperationDone = false;
+					autonomousVars.IntakeOperationDone = false;
 
-					// reset time
 					autonomousVars.timeCount = 0;
+					autonomousVars.grabberTimeCount = 0;
 				}
 
 			}
@@ -642,7 +756,7 @@ public:
 		pollSensors();
 
 		runIntake();
-		//runGrabber();
+		runGrabber();
 		runArm();
 		runGrabberPneumatics();
 		drive(joystickX,joystickY);
@@ -723,6 +837,7 @@ private:
 	bool grabberPneumaticsBackward = false;
 
 	frc::DoubleSolenoid grabberSolenoid {0,1};
+	frc::DoubleSolenoid intakeSolenoid {2,3};
 
 	struct structArmButtons {
 		bool low = false;
@@ -739,6 +854,8 @@ private:
 		bool TimeOperationDone = false;
 		bool foundList = false;
 		double timeCount = 0;
+		double grabberTimeCount =0;
+		double intakeTimeCount =0;
 		node *autoTemp = new node;
 	} autonomousVars;
 
