@@ -53,13 +53,14 @@ public:
 	 */
 	 frc::Victor m_frontLeft{DriveM_FrontLeft};
 	 frc::Victor m_midLeft{DriveM_MiddleLeft};
-	 frc::Victor m_rearLeft{DriveM_RearLeft};
+	 WPI_TalonSRX m_rearLeft{DriveM_RearLeft};
 	 frc::SpeedControllerGroup m_left{m_frontLeft, m_midLeft, m_rearLeft};
 
 	 frc::Victor m_frontRight{DriveM_FrontRight};
 	 frc::Victor m_midRight{DriveM_MiddleRight};
-	 frc::Victor m_rearRight{DriveM_RearRight};
+	 WPI_TalonSRX m_rearRight{DriveM_RearRight};
 	 frc::SpeedControllerGroup m_right{m_frontRight, m_midRight, m_rearRight};
+
 
 	 frc::DifferentialDrive m_drive{m_left, m_right};
 
@@ -121,8 +122,8 @@ public:
 		 bool FileNotFound = false;
 		 void loadConfig() {
 			 	 int y = 0;
-			 	 //ifstream myfile("/media/sda1/Config.txt");
-			 	ifstream myfile("/home/lvuser/Config.txt");
+			 	 ifstream myfile("/media/sda1/Config.txt");
+			 	 //ifstream myfile("/home/lvuser/Config.txt");
 
 			 	 string line;
 			 	 string newString;
@@ -197,10 +198,10 @@ public:
 			 									autoMode7.createnode(randomArray);
 			 								}
 			 								else if(!strcmp("AutoMode_8",CurrentModeName)) {
-			 									autoMode7.createnode(randomArray);
+			 									autoMode8.createnode(randomArray);
 			 								}
 			 								else if(!strcmp("AutoMode_9",CurrentModeName)) {
-			 									autoMode7.createnode(randomArray);
+			 									autoMode9.createnode(randomArray);
 			 									y++;
 			 								}
 
@@ -261,8 +262,22 @@ public:
 		 // Joystick setup
 		 MainJoystick = new Joystick(MAIN_JOYSTICK);
 		 ArmJoystick = new Joystick(SECONDARY_JOYSTICK);
+		 GamepadButtons = new Joystick(GAMEPAD_PORT);
 
-		 // Arm setup
+		 /****************************************
+		  * Drive train motor encoder setup
+		  */
+		 m_rearLeft.ConfigSelectedFeedbackSensor(FeedbackDevice::QuadEncoder, 0, 0);
+		 m_rearLeft.SetSensorPhase(true);
+		 m_left.SetInverted(true);
+
+		 m_rearRight.ConfigSelectedFeedbackSensor(FeedbackDevice::QuadEncoder, 0, 0);
+		 m_rearRight.SetSensorPhase(true);
+
+
+		 /***************************************
+		  * Arm motor and encoder setup
+		  */
 		 ArmTalon = new TalonSRX(ARM_CONTROLLER_PORT);
 		 ArmTalon->ConfigSelectedFeedbackSensor(FeedbackDevice::QuadEncoder, 0,0);
 		 ArmTalon->SetSensorPhase(true);
@@ -271,16 +286,18 @@ public:
 		 ArmTalon->Config_kP(kPIDLoopIdx, CONST_kP, kTimeoutMs);
 		 ArmTalon->Config_kI(kPIDLoopIdx, CONST_kI, kTimeoutMs);
 		 ArmTalon->Config_kD(kPIDLoopIdx, CONST_kF, kTimeoutMs);
-		 ArmTalon->ConfigPeakOutputForward((double) ARM_POWER, kTimeoutMs);
-		 ArmTalon->ConfigPeakOutputReverse((double)-ARM_POWER, kTimeoutMs);
+		 //ArmTalon->ConfigPeakOutputForward((double) ARM_POWER, kTimeoutMs);
+		 //ArmTalon->ConfigPeakOutputReverse((double)-ARM_POWER, kTimeoutMs);
 
-		 // Intake setup
-		 IntakeTalon = new Talon(9);
+		 /***************************************
+		  * Intake motor and encoder setup
+		  */
+		 IntakeTalonLeft = new Talon(LEFT_INTAKE_PORT);
+		 IntakeTalonRight = new Talon(RIGHT_INTAKE_PORT);
 
 		 // Grabber setup
-		 GrabberTalon = new TalonSRX(2);
-		 GrabberTalon->ConfigSelectedFeedbackSensor(FeedbackDevice::QuadEncoder, 0,0);
-		 GrabberTalon->SetSensorPhase(false);
+		 GrabberTalon = new TalonSRX(GRABBER_CONTROLLER_PORT);
+
 
 		 // auto config loader
 		 AutoConfig.loadConfig();
@@ -304,8 +321,8 @@ public:
 	 * Function grabs values from joysticks and gamepads
 	 */
 	void pollControllers(){
-		joystickX = MainJoystick->GetY();
-		joystickY = MainJoystick->GetX();
+		joystickX = -MainJoystick->GetX();
+		joystickY = MainJoystick->GetY();
 		intakeSpeed = (MainJoystick->GetZ()-1)/2;
 
 		/* Add joystick switches here
@@ -321,28 +338,44 @@ public:
 			driveLevel = driveSlow;
 		}
 
-		// buttons for the intake levels
-		if(MainJoystick->GetRawButton(11)) {
+		/**********************************************************
+		 * buttons for the intake levels
+		 */
+		if(MainJoystick->GetRawButton(2)) { // run the intake forward
 			intakeForward = 1;
 			intakeBackward = 0;
-		} else if(MainJoystick->GetRawButton(10)){
+		} else if(MainJoystick->GetRawButton(3)){ // run the intake backwards
 			intakeForward = 0;
 			intakeBackward = 1;
 		} else {
 			intakeForward = 0;
 			intakeBackward = 0;
 		}
-
-		// buttons for the grabber levels
-		if(MainJoystick->GetRawButton(8)) {
+		if(MainJoystick->GetRawButton(1)) {
+			intakeOpen = true;
+			intakeClose = false;
+		}else if(MainJoystick->GetRawButton(10)){
+			intakeOpen = false;
+			intakeClose = true;
+		}
+		/**********************************************************
+		 * buttons for the grabber levels
+		 */
+		if(GamepadButtons->GetRawButton(4)) {
 			grabberForward = 1;
 			grabberBackward = 0;
-		} else if(MainJoystick->GetRawButton(9)){
+		} else if(GamepadButtons->GetRawButton(8)){
 			grabberForward = 0;
 			grabberBackward = 1;
 		} else {
 			grabberForward = 0;
 			grabberBackward = 0;
+		}
+
+		if(GamepadButtons->GetRawButton(6)) {
+			grabberOpen = true;
+		} else {
+			grabberOpen = false;
 		}
 
 		if(MainJoystick->GetRawButton(4)) {
@@ -381,6 +414,8 @@ public:
 
 
 
+
+
 	}
 
 	/*****************************************************
@@ -396,12 +431,23 @@ public:
 	 */
 	void runIntake() {
 		if(intakeForward) {
-			IntakeTalon->Set(intakeSpeed);
+			IntakeTalonLeft->Set(-INTAKE_SPEED);
+			IntakeTalonRight->Set(INTAKE_SPEED);
 		} else if(intakeBackward) {
-			IntakeTalon->Set(-intakeSpeed);
+			IntakeTalonLeft->Set(INTAKE_SPEED);
+			IntakeTalonRight->Set(-INTAKE_SPEED);
 		}else {
-			IntakeTalon->Set(0);
+			IntakeTalonRight->Set(0);
+			IntakeTalonLeft->Set(0);
 		}
+
+		if(intakeOpen) {
+			intakeSolenoid.Set(frc::DoubleSolenoid::Value::kForward);
+		} else if(intakeClose) {
+			intakeSolenoid.Set(frc::DoubleSolenoid::Value::kReverse);
+
+		}
+
 	}
 
 	/****************************************************
@@ -409,18 +455,25 @@ public:
 	 */
 	void runGrabber() {
 		if(grabberForward) {
-			GrabberTalon->Set(ControlMode::PercentOutput, 0.5);
+			GrabberTalon->Set(ControlMode::PercentOutput, GRABBER_POWER);
+			grabberSolenoid.Set(frc::DoubleSolenoid::Value::kReverse);
 		} else if(grabberBackward) {
-			GrabberTalon->Set(ControlMode::PercentOutput, -0.5);
+			GrabberTalon->Set(ControlMode::PercentOutput, -GRABBER_POWER);
+			grabberSolenoid.Set(frc::DoubleSolenoid::Value::kReverse);
 		} else {
 			GrabberTalon->Set(ControlMode::PercentOutput, 0);
+		}
+
+		if(grabberOpen) {
+			grabberSolenoid.Set(frc::DoubleSolenoid::Value::kForward);
+			grabberOpen = false;
 		}
 
 	}
 
 	/****************************************************
 	 * Function runs the grabber pneumatics
-	 */
+	 * /
 	void runGrabberPneumatics() {
 		if(grabberPneumaticsForward) {
 			grabberSolenoid.Set(frc::DoubleSolenoid::Value::kForward);
@@ -435,6 +488,7 @@ public:
 	 * Function runs the arm motor
 	 */
 	void runArm() {
+
 		if(ArmButtons.low) {
 			arm_currentPos = 0;
 		} else if(ArmButtons.mid) {
@@ -442,11 +496,26 @@ public:
 		} else if(ArmButtons.high){
 			arm_currentPos = ARM_POS_2;
 		} else {
-			arm_currentPos += ArmJoystick->GetY() * 100;
+			arm_currentPos += ArmJoystick->GetY() * 4400;
 			//ArmTalon->Set(ControlMode::PercentOutput, ArmJoystick->GetY());
 		}
-
+		if(arm_currentPos < 1 ) {
+			arm_currentPos = 0;
+		} if(arm_currentPos > 450000) {
+			arm_currentPos = 450000;
+		}
+	/*	int tmp = ArmJoystick->GetY();
+		int turn;
+		if (tmp > 0.1) {
+			turn = ((tmp - 0.1) * (1 / (1 - 0.1)));
+		} else if (tmp < -0.1) {
+			turn = ((tmp + 0.1) * (-1 / (-1 + 0.1)));
+		} else {
+			turn = 0;
+		}*/
 		ArmTalon->Set(ControlMode::Position, arm_currentPos);
+		SmartDashboard::PutNumber("Arm Position", ArmTalon->GetSelectedSensorPosition(0));
+		SmartDashboard::PutNumber("Arm Target Position", arm_currentPos);
 
 /*		if(ArmJoystick->GetRawButton(8)) {
 			dashData1 = SmartDashboard::GetString("DB/String 0", "myDefaultData");
@@ -514,6 +583,13 @@ public:
 			autonomousVars.timeCount = 0;
 			autonomousVars.grabberTimeCount = 0;
 			autonomousVars.intakeTimeCount = 0;
+
+			//ArmTalon->SetSelectedSensorPosition(0, kPIDLoopIdx, kTimeoutMs);
+			m_rearLeft.SetSelectedSensorPosition(0, kPIDLoopIdx, kTimeoutMs);
+			m_rearRight.SetSelectedSensorPosition(0, kPIDLoopIdx, kTimeoutMs);
+			navxgyro->ZeroYaw();
+
+			m_left.SetInverted(false);
 
 	}
 
@@ -611,7 +687,10 @@ public:
 			}
 			autonomousVars.autoTemp = CurrentAutoMode->head;
 			// zero out sensors
-			ArmTalon->SetSelectedSensorPosition(0, kPIDLoopIdx, kTimeoutMs);
+			//ArmTalon->SetSelectedSensorPosition(0, kPIDLoopIdx, kTimeoutMs);
+			m_rearLeft.SetSelectedSensorPosition(0, kPIDLoopIdx, kTimeoutMs);
+			m_rearRight.SetSelectedSensorPosition(0, kPIDLoopIdx, kTimeoutMs);
+			navxgyro->ZeroYaw();
 		} else {
 			if(!autonomousVars.CompletingOperation) { // if not currently in a operation
 				// grab next operation
@@ -621,6 +700,7 @@ public:
 					if(autonomousVars.autoTemp!=NULL) {
 						autonomousVars.CompletingOperation = true;
 						SmartDashboard::PutString("CURRENTAUTOSTATE", "grabbing next value");
+						navxgyro->ZeroYaw();
 					} else {
 						autonomousVars.CompletingOperation = false;
 						SmartDashboard::PutString("CURRENTAUTOSTATE", "FOUND NULL");
@@ -629,13 +709,14 @@ public:
 				else {
 					SmartDashboard::PutString("CURRENTAUTOSTATE", "FOUND NULL");
 					autonomousVars.CompletingOperation = false;
+					drive(0,0);
 				}
 			} else {
 				// run current operation
 
 				/*
 				 * Run arm operations
-				 */
+				 * /
 				if(ArmTalon->GetSelectedSensorPosition(0) < (autonomousVars.autoTemp->data[0] - ARM_AUTO_ERROR) || ArmTalon->GetSelectedSensorPosition(0) > (autonomousVars.autoTemp->data[0] + ARM_AUTO_ERROR) ){
 					ArmTalon->ConfigPeakOutputForward((double) autonomousVars.autoTemp->data[1], kTimeoutMs);
 					ArmTalon->ConfigPeakOutputReverse((double)-autonomousVars.autoTemp->data[1], kTimeoutMs);
@@ -646,7 +727,7 @@ public:
 				}
 				/*
 				 * run time operations
-				 */
+				 * /
 				if(autonomousVars.autoTemp->data[12] != autonomousVars.timeCount) {
 					autonomousVars.timeCount++;
 					SmartDashboard::PutNumber("Time Ticks", autonomousVars.timeCount);
@@ -656,12 +737,12 @@ public:
 				}
 				/*
 				 * run grabber operations
-				 */
+				 * /
 				if(autonomousVars.autoTemp->data[6]) {
 					grabberSolenoid.Set(frc::DoubleSolenoid::Value::kForward);
 				} else {
 					grabberSolenoid.Set(frc::DoubleSolenoid::Value::kReverse);
-				}
+				} * /
 				if(autonomousVars.autoTemp->data[8] != autonomousVars.grabberTimeCount) {
 					autonomousVars.grabberTimeCount++;
 					GrabberTalon->Set(ControlMode::PercentOutput, autonomousVars.autoTemp->data[7]);
@@ -670,12 +751,12 @@ public:
 				}
 				/*
 				 * run intake operations
-				 */
+				 * /
 				if(autonomousVars.autoTemp->data[10]) {
 					intakeSolenoid.Set(frc::DoubleSolenoid::Value::kForward);
 				} else {
 					intakeSolenoid.Set(frc::DoubleSolenoid::Value::kReverse);
-				}
+				}* /
 				if(autonomousVars.autoTemp->data[11] != autonomousVars.intakeTimeCount) {
 					autonomousVars.intakeTimeCount ++;
 					// add intake movement here
@@ -683,9 +764,48 @@ public:
 				} else {
 					autonomousVars.IntakeOperationDone = true;
 				}
+				/*
+				 * run drive train operations
+				 */
+				if(!autonomousVars.DriveOperationDone) {
+					if(autonomousVars.autoTemp->data[2] < 1) {
+						if(((int) ((m_rearLeft.GetSelectedSensorPosition(0) + m_rearRight.GetSelectedSensorPosition(0))/2)) > (autonomousVars.autoTemp->data[2] + DRIVE_AUTO_ERROR)) { // backward
+							m_drive.CurvatureDrive(-autonomousVars.autoTemp->data[3], navxgyro->GetAngle() * 0.014,false);
 
+						} else {
+							SmartDashboard::PutNumber("DRIVE MOTOR POS", autonomousVars.autoTemp->data[2]);
+							autonomousVars.DriveOperationDone = true;
+						}
+					} else if(autonomousVars.autoTemp->data[2] > 1) {
+						if(((int) ((m_rearLeft.GetSelectedSensorPosition(0) + m_rearRight.GetSelectedSensorPosition(0))/2)) < (autonomousVars.autoTemp->data[2] - DRIVE_AUTO_ERROR)) { // forward
+							m_drive.CurvatureDrive(autonomousVars.autoTemp->data[3], navxgyro->GetAngle() * 0.007,false);
 
-				if(autonomousVars.ArmOperationDone && autonomousVars.TimeOperationDone && autonomousVars.IntakeOperationDone && autonomousVars.GrabberOperationDone) {
+						} else {
+							SmartDashboard::PutNumber("DRIVE MOTOR POS", autonomousVars.autoTemp->data[2]);
+							autonomousVars.DriveOperationDone = true;
+						}
+					}
+				}
+				SmartDashboard::PutNumber("Drive left Position", m_rearLeft.GetSelectedSensorPosition(0));
+				SmartDashboard::PutNumber("Drive Right Position", m_rearRight.GetSelectedSensorPosition(0));
+				/*
+				if(m_rearLeft.GetSelectedSensorPosition(0) < (autonomousVars.autoTemp->data[2] - DRIVE_AUTO_ERROR) || m_rearLeft.GetSelectedSensorPosition(0) > (autonomousVars.autoTemp->data[2] + DRIVE_AUTO_ERROR) ){
+					if(autonomousVars.autoTemp->data[2]  < 1) {
+						m_drive.CurvatureDrive(autonomousVars.autoTemp->data[3], navxgyro->GetAngle() * 0.014,false);
+						//(0,autonomousVars.autoTemp->data[3]); // backward
+					} else {
+						m_drive.CurvatureDrive(autonomousVars.autoTemp->data[3], navxgyro->GetAngle() * 0.007,false);
+					}
+
+					SmartDashboard::PutNumber("DRIVE MOTOR POWER", autonomousVars.autoTemp->data[3]);
+					SmartDashboard::PutNumber("Drive Position", m_rearLeft.GetSelectedSensorPosition(0));
+				} else {
+					SmartDashboard::PutNumber("DRIVE MOTOR POS", autonomousVars.autoTemp->data[2]);
+					autonomousVars.DriveOperationDone = true;
+				}
+*/
+
+				if(autonomousVars.DriveOperationDone /*autonomousVars.ArmOperationDone && autonomousVars.TimeOperationDone && autonomousVars.IntakeOperationDone && autonomousVars.GrabberOperationDone*/) {
 					SmartDashboard::PutString("CURRENTAUTOSTATE", "Finished arm");
 					/*********************************************
 					 * reset operations and variables so they don't carry over to the next state
@@ -695,15 +815,22 @@ public:
 					autonomousVars.TimeOperationDone = false;
 					autonomousVars.GrabberOperationDone = false;
 					autonomousVars.IntakeOperationDone = false;
+					autonomousVars.DriveOperationDone = false;
 
 					autonomousVars.timeCount = 0;
 					autonomousVars.grabberTimeCount = 0;
+
+					m_rearLeft.SetSelectedSensorPosition(0, kPIDLoopIdx, kTimeoutMs); // this makes the drive train position relative
+					m_rearRight.SetSelectedSensorPosition(0, kPIDLoopIdx, kTimeoutMs);
+					navxgyro->ZeroYaw();
 				}
 
 			}
 		}
-		drive(0,0);
-		SmartDashboard::PutNumber("Talon Sensor Position", ArmTalon->GetSelectedSensorPosition(0));
+		if(autonomousVars.DriveOperationDone) {
+			drive(0,0);
+		}
+		//SmartDashboard::PutNumber("Talon Sensor Position", ArmTalon->GetSelectedSensorPosition(0));
 		/*
 		node *temp = new node;
 		temp = CurrentAutoMode->head;
@@ -745,9 +872,14 @@ public:
 
 	void TeleopInit() {
 		// RESET TALON SPEED HERE
-		ArmTalon->ConfigPeakOutputForward((double) ARM_POWER, kTimeoutMs);
-		ArmTalon->ConfigPeakOutputReverse((double)-ARM_POWER, kTimeoutMs);
-
+		//ArmTalon->ConfigPeakOutputForward((double) ARM_POWER, kTimeoutMs);
+		//ArmTalon->ConfigPeakOutputReverse((double)-ARM_POWER, kTimeoutMs);
+		m_left.SetInverted(true);
+		ArmTalon->SetSelectedSensorPosition(0, kPIDLoopIdx, kTimeoutMs);
+		ArmTalon->Set(ControlMode::Position, 0);
+		arm_currentPos = 0;
+		intnumb++;
+		SmartDashboard::PutNumber("intnumb", intnumb);
 	}
 
 
@@ -756,16 +888,19 @@ public:
 		pollSensors();
 
 		runIntake();
-		runGrabber();
+	    runGrabber();
 		runArm();
-		runGrabberPneumatics();
-		drive(joystickX,joystickY);
+	//	runGrabberPneumatics();
+		drive(0,0);
+		//drive(joystickX,joystickY);
 		//SmartDashboard::PutString("DB/String 0", "My 21 Char TestString");
 		if(GyroFound) {
 			SmartDashboard::PutNumber("GryoAngle", navxgyro->GetAngle());
 		}
-		SmartDashboard::PutNumber("Talon Sensor Velocity", ArmTalon->GetSelectedSensorVelocity(0));
-		SmartDashboard::PutNumber("Talon Sensor Position", ArmTalon->GetSelectedSensorPosition(0));
+		SmartDashboard::PutNumber("Talon Sensor Velocity", m_rearLeft.GetSelectedSensorVelocity(0));
+		SmartDashboard::PutNumber("Talon Sensor Position", m_rearLeft.GetSelectedSensorPosition(0));
+		SmartDashboard::PutNumber("Talon Right Sensor Velocity", m_rearRight.GetSelectedSensorVelocity(0));
+		SmartDashboard::PutNumber("Talon Right Sensor Position", m_rearRight.GetSelectedSensorPosition(0));
 	}
 
 	void TestPeriodic() {}
@@ -776,6 +911,8 @@ private:
 	const std::string kAutoNameDefault = "Default";
 	const std::string kAutoNameCustom = "My Auto";
 	std::string m_autoSelected;
+
+	int intnumb = 0;
 
 	/*
 	 * Main program variables. Levels and stuff
@@ -791,6 +928,7 @@ private:
 	double joystickY = 0;
 	Joystick *MainJoystick;
 	Joystick *ArmJoystick;
+	Joystick *GamepadButtons;
 
 
 	/*
@@ -821,23 +959,28 @@ private:
 	/*
 	 * Motor setup
 	 */
-	Talon *IntakeTalon;
+	Talon *IntakeTalonLeft;
+	Talon *IntakeTalonRight;
 	TalonSRX *ArmTalon;
 	TalonSRX *GrabberTalon;
 
 
 	bool intakeForward = false;
 	bool intakeBackward = false;
+	bool intakeOpen = false;
+	bool intakeClose = false;
 	double intakeSpeed = 0;
 
 	bool grabberForward = false;
 	bool grabberBackward = false;
+	bool grabberOpen = false;
 
 	bool grabberPneumaticsForward = false;
 	bool grabberPneumaticsBackward = false;
 
-	frc::DoubleSolenoid grabberSolenoid {0,1};
-	frc::DoubleSolenoid intakeSolenoid {2,3};
+	frc::DoubleSolenoid grabberSolenoid {GRABBER_SOL_ONE,GRABBER_SOL_TWO};
+	frc::DoubleSolenoid intakeSolenoid {INTAKE_SOL_ONE,INTAKE_SOL_TWO};
+	//frc::DoubleSolenoid intakeSolenoid {2,3};
 
 	struct structArmButtons {
 		bool low = false;

@@ -6,18 +6,21 @@
  */
 #define MAIN_JOYSTICK 0
 #define SECONDARY_JOYSTICK 1
+#define GAMEPAD_PORT 2
 
 /**********************************
  * This is the drive train setup and each constant is the motor port number. Currently all sparks but
  * may be changed to a combination of both talons and sparks later.
  */
-#define DriveM_FrontLeft 1
+#define DriveM_FrontLeft 3
 #define DriveM_MiddleLeft 2
-#define DriveM_RearLeft 3
+#define DriveM_RearLeft 2 // this is the talon srx
 
-#define DriveM_FrontRight 4
-#define DriveM_MiddleRight 5
-#define DriveM_RearRight 6
+#define DriveM_FrontRight 0
+#define DriveM_MiddleRight 1
+#define DriveM_RearRight 1 // this is the talon srx
+
+#define DRIVE_AUTO_ERROR 100
 
 /**********************************
  * PID constants. These are for the arm PID and should be adjusted with care
@@ -30,8 +33,8 @@
 /*********************************
  * Constants for the arm
  */
-#define ARM_POWER 0.5         // this is the power the arm runs at.
-#define ARM_CONTROLLER_PORT 1 // this is the CAN talon device ID
+#define ARM_POWER 1         // this is the power the arm runs at.
+#define ARM_CONTROLLER_PORT 3 // this is the CAN talon device ID
 
 #define ARM_POS_1 1000
 #define ARM_POS_2 2000
@@ -42,8 +45,20 @@
 /*********************************
  * Constants for the Grabber
  */
-#define GRABBER_CONTROLLER_PORT 2 // this is the CAN talon device ID
+#define GRABBER_CONTROLLER_PORT 4 // this is the CAN talon device ID
+#define GRABBER_POWER 1
+#define GRABBER_SOL_ONE 6
+#define GRABBER_SOL_TWO 7
 
+/*********************************
+ * Constants for the Intake
+ */
+#define INTAKE_SPEED 1
+#define LEFT_INTAKE_PORT 9
+#define RIGHT_INTAKE_PORT 8
+
+#define INTAKE_SOL_ONE 4
+#define INTAKE_SOL_TWO 5
 
 
 enum Constants {
