@@ -11,6 +11,8 @@
 #include "WPILib.h"
 #include "Constants.h"
 
+#include "FieldColorLocations.h"
+
 #include <LiveWindow/LiveWindow.h>
 #include <SmartDashboard/SendableChooser.h>
 #include <SmartDashboard/SmartDashboard.h>
@@ -69,6 +71,9 @@ public:
 	 /***************************************************
 	  * AUTONOMOUS CONFIG FILE LOADING CODE
 	  */
+
+	 FieldColorLocations fieldColorLocations;
+
 	 struct node {
 	 	double data[OPERATION_ELEMENTS];
 	 	node *next;
@@ -269,10 +274,10 @@ public:
 		  */
 		 m_rearLeft.ConfigSelectedFeedbackSensor(FeedbackDevice::QuadEncoder, 0, 0);
 		 m_rearLeft.SetSensorPhase(true);
-		 m_left.SetInverted(true);
+		 m_left.SetInverted(false);
 
 		 m_rearRight.ConfigSelectedFeedbackSensor(FeedbackDevice::QuadEncoder, 0, 0);
-		 m_rearRight.SetSensorPhase(true);
+		 m_rearRight.SetSensorPhase(false);
 
 
 		 /***************************************
@@ -525,6 +530,51 @@ public:
 	 */
 	void runArm() {
 		int tmp;
+		int lowerLimit = -10000;
+		if(ArmButtons.low ) {
+				arm_currentPos = lowerLimit;
+				grabberSolenoid.Set(frc::DoubleSolenoid::Value::kForward);
+		} else {
+				tmp = -ArmJoystick->GetY();
+				if (tmp < -0.1) {
+						arm_currentPos += ((tmp + 0.1) * (-1 / (-1 + 0.1))) * 5800;
+				} else {
+						arm_currentPos += 0;
+				}
+				//arm_currentPos += -ArmJoystick->GetY() * 5800;
+				//ArmTalon->Set(ControlMode::PercentOutput, ArmJoystick->GetY());
+		}
+
+		if(!HallEffect->Get()) {
+			ArmTalon->SetSelectedSensorPosition(0, kPIDLoopIdx, kTimeoutMs);
+			arm_currentPos = 0;
+
+			//arm_currentPos =  ArmTalon->GetSelectedSensorPosition(0);
+		} else if(arm_currentPos < lowerLimit) {
+			arm_currentPos = lowerLimit;
+		}
+
+
+		if(ArmButtons.mid) {
+				arm_currentPos = (ARM_UPPER_LIMIT/2);
+		} else if(ArmButtons.high){
+				arm_currentPos = ARM_UPPER_LIMIT;
+		} else {
+				tmp = -ArmJoystick->GetY();
+				if (tmp > 0.1) {
+						arm_currentPos += ((tmp - 0.1) * (1 / (1 - 0.1))) * 5800 ;
+				} else {
+						arm_currentPos += 0;
+				}
+				//arm_currentPos += -ArmJoystick->GetY() * 5800;
+				//ArmTalon->Set(ControlMode::PercentOutput, ArmJoystick->GetY());
+		}
+
+		if(arm_currentPos > ARM_UPPER_LIMIT) {
+			arm_currentPos = ARM_UPPER_LIMIT;
+		}
+		/*
+		int tmp;
 		if(!zeroingOperation) {
 			if(!HallEffect->Get()) {
 				ArmTalon->SetSelectedSensorPosition(-100, kPIDLoopIdx, kTimeoutMs);
@@ -534,7 +584,7 @@ public:
 				ArmTalon->SetSelectedSensorPosition(+100, kPIDLoopIdx, kTimeoutMs);
 			} else if(armZeroUp && arm_currentPos == 0) {
 				ArmTalon->SetSelectedSensorPosition(-100, kPIDLoopIdx, kTimeoutMs);
-			}*/
+			}* /
 			if(ArmButtons.low ) {
 				arm_currentPos = 0;
 				grabberSolenoid.Set(frc::DoubleSolenoid::Value::kForward);
@@ -576,7 +626,7 @@ public:
 			arm_currentPos = 0;
 			zeroingOperation = false;
 			zeroEdgeDetect = false;
-		}
+		}*/
 	/*	int tmp = ArmJoystick->GetY();
 		int turn;
 		if (tmp > 0.1) {
@@ -665,6 +715,51 @@ public:
 
 			m_left.SetInverted(false);
 
+			ArmTalon->SetSelectedSensorPosition(0, kPIDLoopIdx, kTimeoutMs);
+			ArmTalon->Set(ControlMode::Position, 0);
+
+			/**
+			 * Here, get the data from the DriverStation regarding the switches
+			 * and scale on the field. Three characters will be sent over and
+			 * stored into gameData. The first denotes the switch closest to the
+			 * robot, the second denotes the scale, and the third denotes the switch
+			 * furthest from the robot. The three characters each will be 'L' or 'R'
+			 * and denote the side of the field that the alliance color is on, relative
+			 * to the robot's alliance.
+			 */
+			string gameData = DriverStation::GetInstance().GetGameSpecificMessage();
+			if(gameData.length() >= 3) {
+				switch(gameData[0]) {
+				case 'L':
+				case 'l':
+					fieldColorLocations.setNearestSwitchLeft();
+					break;
+				case 'R':
+				case 'r':
+					fieldColorLocations.setNearestSwitchRight();
+				}
+
+				switch(gameData[1]) {
+				case 'L':
+				case 'l':
+					fieldColorLocations.setScaleLeft();
+					break;
+				case 'R':
+				case 'r':
+					fieldColorLocations.setScaleRight();
+				}
+
+				switch(gameData[2]) {
+				case 'L':
+				case 'l':
+					fieldColorLocations.setFurthestSwitchLeft();
+					break;
+				case 'R':
+				case 'r':
+					fieldColorLocations.setFurthestSwitchRight();
+				}
+			}
+
 	}
 
 	/*********************************************************************************
@@ -687,6 +782,64 @@ public:
 	 *
 	 */
 	void AutonomousPeriodic() {
+		string nearestSwitch = fieldColorLocations.isNearestSwitchOnLeft() ? "LEFT" : "RIGHT";
+		string scale = fieldColorLocations.isScaleOnLeft() ? "LEFT" : "RIGHT";
+		string furthestSwitch = fieldColorLocations.isFurthestSwitchOnLeft() ? "LEFT" : "RIGHT";
+		SmartDashboard::PutString("COLORS", nearestSwitch + " " + scale + " " + furthestSwitch);
+
+		/*
+		if(!fieldColorLocations.isNearestSwitchOnLeft()) {
+			/ *
+			 * TODO:
+			 * 1. Drive next to switch.
+			 * 2. Turn toward switch.
+			 * 3. Deploy intake dump box.
+			 * 4. Turn toward scale.
+			 * 5. Drive over the line.
+			 * /
+		} else if(!fieldColorLocations.isScaleOnLeft()) {
+			/ *
+			 * TODO:
+			 * 1. Drive to scale.
+			 * 2. Deploy intake and dump box.
+			 * /
+		} else {
+			/*
+			 * TODO:
+			 * 1. Drive past switch.
+			 * 2. Turn to the left 90 degrees.
+			 * 3. Drive to switch on left side.
+			 * 4. Turn to the left 90 degrees.
+			 * 5. Deploy intake and dump box.
+			 * /
+		} */
+
+		/*
+		 * Recommendation: utilize JSON for the configuration file. JSON has several libraries available,
+		 * as it is a standard. An example might be as such.
+		 *
+		 * {
+		 *   "nearSwitch": [
+		 *     "FORWARD 100",
+		 *     "LEFT 90",
+		 *     "DEPLOY",
+		 *     "RIGHT 90",
+		 *     "DRIVE 50"
+		 *   ],
+		 *   "scale": [
+		 *     "FORWARD 200",
+		 *     "DEPLOY"
+		 *   ],
+		 *   "farSwitch": [
+		 *     "FORWARD 120",
+		 *     "LEFT 90",
+		 *     "DRIVE 200",
+		 *     "LEFT 90",
+		 *     "DEPLOY"
+		 *   ]
+		 * }
+		 */
+
 		if(!autonomousVars.startingConfigDone) {
 
 			drive(0,0);
@@ -795,7 +948,91 @@ public:
 
 				/*
 				 * Run arm operations
-				 * /
+				 */
+
+				if(!autonomousVars.ArmOperationDone) {
+					if(autonomousVars.autoTemp->data[0] == 0) {
+						// run tell you find the hall effect
+						ArmTalon->Set(ControlMode::Position, -ARM_UPPER_LIMIT/3);
+
+						if(!HallEffect->Get()) {
+							ArmTalon->SetSelectedSensorPosition(0, kPIDLoopIdx, kTimeoutMs);
+							ArmTalon->Set(ControlMode::Position, 0);
+							autonomousVars.ArmOperationDone = true;
+							// fix the position
+						}
+					} else if(ArmTalon->GetSelectedSensorPosition(0) < (autonomousVars.autoTemp->data[0] - ARM_AUTO_ERROR) || ArmTalon->GetSelectedSensorPosition(0) > (autonomousVars.autoTemp->data[0] + ARM_AUTO_ERROR) ){
+						ArmTalon->ConfigPeakOutputForward((double) autonomousVars.autoTemp->data[1], kTimeoutMs);
+						ArmTalon->ConfigPeakOutputReverse((double)-autonomousVars.autoTemp->data[1], kTimeoutMs);
+						SmartDashboard::PutNumber("MOTOR POWER", autonomousVars.autoTemp->data[1]);
+						if(autonomousVars.autoTemp->data[0] > ARM_UPPER_LIMIT) {
+							ArmTalon->Set(ControlMode::Position, ARM_UPPER_LIMIT);
+						} else {
+							ArmTalon->Set(ControlMode::Position, autonomousVars.autoTemp->data[0]);
+						}
+					} else {
+						autonomousVars.ArmOperationDone = true;
+						// fix the position
+					}
+				}
+
+				SmartDashboard::PutNumber("Arm Motor Target Position", autonomousVars.autoTemp->data[0]);
+				SmartDashboard::PutNumber("Arm Motor actual Position", ArmTalon->GetSelectedSensorPosition(0));
+
+
+				/*
+				int tmp;
+				int lowerLimit = -10000;
+				if(ArmButtons.low ) {
+						arm_currentPos = lowerLimit;
+						grabberSolenoid.Set(frc::DoubleSolenoid::Value::kForward);
+				} else {
+						tmp = -ArmJoystick->GetY();
+						if (tmp < -0.1) {
+								arm_currentPos += ((tmp + 0.1) * (-1 / (-1 + 0.1))) * 5800;
+						} else {
+								arm_currentPos += 0;
+						}
+						//arm_currentPos += -ArmJoystick->GetY() * 5800;
+						//ArmTalon->Set(ControlMode::PercentOutput, ArmJoystick->GetY());
+				}
+
+				if(!HallEffect->Get()) {
+					ArmTalon->SetSelectedSensorPosition(0, kPIDLoopIdx, kTimeoutMs);
+					arm_currentPos = 0;
+
+					//arm_currentPos =  ArmTalon->GetSelectedSensorPosition(0);
+				} else if(arm_currentPos < lowerLimit) {
+					arm_currentPos = lowerLimit;
+				}
+
+
+				if(ArmButtons.mid) {
+						arm_currentPos = (ARM_UPPER_LIMIT/2);
+				} else if(ArmButtons.high){
+						arm_currentPos = ARM_UPPER_LIMIT;
+				} else {
+						tmp = -ArmJoystick->GetY();
+						if (tmp > 0.1) {
+								arm_currentPos += ((tmp - 0.1) * (1 / (1 - 0.1))) * 5800 ;
+						} else {
+								arm_currentPos += 0;
+						}
+						//arm_currentPos += -ArmJoystick->GetY() * 5800;
+						//ArmTalon->Set(ControlMode::PercentOutput, ArmJoystick->GetY());
+				}
+
+				if(arm_currentPos > ARM_UPPER_LIMIT) {
+					arm_currentPos = ARM_UPPER_LIMIT;
+				}
+
+
+
+
+
+
+
+
 				if(ArmTalon->GetSelectedSensorPosition(0) < (autonomousVars.autoTemp->data[0] - ARM_AUTO_ERROR) || ArmTalon->GetSelectedSensorPosition(0) > (autonomousVars.autoTemp->data[0] + ARM_AUTO_ERROR) ){
 					ArmTalon->ConfigPeakOutputForward((double) autonomousVars.autoTemp->data[1], kTimeoutMs);
 					ArmTalon->ConfigPeakOutputReverse((double)-autonomousVars.autoTemp->data[1], kTimeoutMs);
@@ -804,9 +1041,13 @@ public:
 				} else {
 					autonomousVars.ArmOperationDone = true;
 				}
+				*/
+
+
+
 				/*
 				 * run time operations
-				 * /
+				 */
 				if(autonomousVars.autoTemp->data[12] != autonomousVars.timeCount) {
 					autonomousVars.timeCount++;
 					SmartDashboard::PutNumber("Time Ticks", autonomousVars.timeCount);
@@ -816,31 +1057,36 @@ public:
 				}
 				/*
 				 * run grabber operations
-				 * /
+				 */
 				if(autonomousVars.autoTemp->data[6]) {
 					grabberSolenoid.Set(frc::DoubleSolenoid::Value::kForward);
 				} else {
 					grabberSolenoid.Set(frc::DoubleSolenoid::Value::kReverse);
-				} * /
+				}
 				if(autonomousVars.autoTemp->data[8] != autonomousVars.grabberTimeCount) {
 					autonomousVars.grabberTimeCount++;
 					GrabberTalon->Set(ControlMode::PercentOutput, autonomousVars.autoTemp->data[7]);
 				} else {
+					GrabberTalon->Set(ControlMode::PercentOutput, 0);
 					autonomousVars.GrabberOperationDone = true;
 				}
 				/*
 				 * run intake operations
-				 * /
-				if(autonomousVars.autoTemp->data[10]) {
-					intakeSolenoid.Set(frc::DoubleSolenoid::Value::kForward);
-				} else {
+				 */
+				if(autonomousVars.autoTemp->data[9]) { // if its a one open the intake
 					intakeSolenoid.Set(frc::DoubleSolenoid::Value::kReverse);
-				}* /
+				} else {
+					intakeSolenoid.Set(frc::DoubleSolenoid::Value::kForward);
+				}
 				if(autonomousVars.autoTemp->data[11] != autonomousVars.intakeTimeCount) {
 					autonomousVars.intakeTimeCount ++;
+					IntakeTalonLeft->Set(autonomousVars.autoTemp->data[10]);
+					IntakeTalonRight->Set(-autonomousVars.autoTemp->data[10]);
 					// add intake movement here
 
 				} else {
+					IntakeTalonLeft->Set(0);
+					IntakeTalonRight->Set(0);
 					autonomousVars.IntakeOperationDone = true;
 				}
 				/*
@@ -849,7 +1095,7 @@ public:
 				if(!autonomousVars.DriveOperationDone) {
 					if(autonomousVars.autoTemp->data[2] < 1) {
 						if(((int) ((m_rearLeft.GetSelectedSensorPosition(0) + m_rearRight.GetSelectedSensorPosition(0))/2)) > (autonomousVars.autoTemp->data[2] + DRIVE_AUTO_ERROR)) { // backward
-							m_drive.CurvatureDrive(-autonomousVars.autoTemp->data[3], navxgyro->GetAngle() * 0.014,false);
+							m_drive.CurvatureDrive(-autonomousVars.autoTemp->data[3], -navxgyro->GetAngle() * 0.014,false);
 
 						} else {
 							SmartDashboard::PutNumber("DRIVE MOTOR POS", autonomousVars.autoTemp->data[2]);
@@ -857,7 +1103,7 @@ public:
 						}
 					} else if(autonomousVars.autoTemp->data[2] > 1) {
 						if(((int) ((m_rearLeft.GetSelectedSensorPosition(0) + m_rearRight.GetSelectedSensorPosition(0))/2)) < (autonomousVars.autoTemp->data[2] - DRIVE_AUTO_ERROR)) { // forward
-							m_drive.CurvatureDrive(autonomousVars.autoTemp->data[3], navxgyro->GetAngle() * 0.007,false);
+							m_drive.CurvatureDrive(autonomousVars.autoTemp->data[3],-navxgyro->GetAngle() * 0.007,false);
 
 						} else {
 							SmartDashboard::PutNumber("DRIVE MOTOR POS", autonomousVars.autoTemp->data[2]);
@@ -867,6 +1113,7 @@ public:
 				}
 				SmartDashboard::PutNumber("Drive left Position", m_rearLeft.GetSelectedSensorPosition(0));
 				SmartDashboard::PutNumber("Drive Right Position", m_rearRight.GetSelectedSensorPosition(0));
+
 				/*
 				if(m_rearLeft.GetSelectedSensorPosition(0) < (autonomousVars.autoTemp->data[2] - DRIVE_AUTO_ERROR) || m_rearLeft.GetSelectedSensorPosition(0) > (autonomousVars.autoTemp->data[2] + DRIVE_AUTO_ERROR) ){
 					if(autonomousVars.autoTemp->data[2]  < 1) {
@@ -883,8 +1130,8 @@ public:
 					autonomousVars.DriveOperationDone = true;
 				}
 */
-
-				if(autonomousVars.DriveOperationDone /*autonomousVars.ArmOperationDone && autonomousVars.TimeOperationDone && autonomousVars.IntakeOperationDone && autonomousVars.GrabberOperationDone*/) {
+				//drive(0,0);
+				if(autonomousVars.DriveOperationDone && autonomousVars.ArmOperationDone && autonomousVars.TimeOperationDone && autonomousVars.IntakeOperationDone && autonomousVars.GrabberOperationDone) {
 					SmartDashboard::PutString("CURRENTAUTOSTATE", "Finished arm");
 					/*********************************************
 					 * reset operations and variables so they don't carry over to the next state
@@ -898,6 +1145,7 @@ public:
 
 					autonomousVars.timeCount = 0;
 					autonomousVars.grabberTimeCount = 0;
+					autonomousVars.intakeTimeCount = 0;
 
 					m_rearLeft.SetSelectedSensorPosition(0, kPIDLoopIdx, kTimeoutMs); // this makes the drive train position relative
 					m_rearRight.SetSelectedSensorPosition(0, kPIDLoopIdx, kTimeoutMs);
@@ -962,6 +1210,9 @@ public:
 		SmartDashboard::PutNumber("intnumb", intnumb);
 		zeroingOperation = false;
 		zeroEdgeDetect = false;
+
+		m_rearRight.SetSelectedSensorPosition(0, kPIDLoopIdx, kTimeoutMs);
+		m_rearLeft.SetSelectedSensorPosition(0, kPIDLoopIdx, kTimeoutMs);
 	}
 
 
@@ -983,6 +1234,8 @@ public:
 		SmartDashboard::PutNumber("Talon Sensor Position", m_rearLeft.GetSelectedSensorPosition(0));
 		SmartDashboard::PutNumber("Talon Right Sensor Velocity", m_rearRight.GetSelectedSensorVelocity(0));
 		SmartDashboard::PutNumber("Talon Right Sensor Position", m_rearRight.GetSelectedSensorPosition(0));
+		SmartDashboard::PutNumber("Drive Target X", joystickX);
+
 
 		SmartDashboard::PutNumber("Hall Effect Value" , HallEffect->Get());
 	}
@@ -1049,7 +1302,6 @@ private:
 	Talon *IntakeTalonRight;
 	TalonSRX *ArmTalon;
 	TalonSRX *GrabberTalon;
-
 
 	bool intakeForward = false;
 	bool intakeBackward = false;
