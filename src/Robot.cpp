@@ -290,6 +290,7 @@ public:
 		 //ArmTalon->ConfigPeakOutputReverse((double)-ARM_POWER, kTimeoutMs);
 
 		 HallEffect = new DigitalInput(9);
+		 IntakeSwitch = new DigitalInput(8);
 
 		 /***************************************
 		  * Intake motor and encoder setup
@@ -423,10 +424,10 @@ public:
 			ArmButtons.high = false;
 		}
 
-		if(ArmJoystick->GetRawButton(8)) {
+		if(ArmJoystick->GetRawButton(9)) {
 			armZeroDown = false;
 			armZeroUp = true;
-		} else if(ArmJoystick->GetRawButton(9)) {
+		} else if(ArmJoystick->GetRawButton(8)) {
 			armZeroDown = true;
 			armZeroUp = false;
 		} else {
@@ -457,6 +458,7 @@ public:
 		if(intakeForward) {
 			IntakeTalonLeft->Set(-INTAKE_SPEED);
 			IntakeTalonRight->Set(INTAKE_SPEED);
+
 		} else if(intakeBackward) {
 			IntakeTalonLeft->Set(INTAKE_SPEED);
 			IntakeTalonRight->Set(-INTAKE_SPEED);
@@ -478,6 +480,9 @@ public:
 			intakeSolenoid.Set(frc::DoubleSolenoid::Value::kReverse);
 
 		}
+		if(IntakeSwitch->Get() && ArmTalon->GetSelectedSensorPosition(0) < 200) {
+						grabberSolenoid.Set(frc::DoubleSolenoid::Value::kReverse);
+					}
 
 	}
 
@@ -519,31 +524,58 @@ public:
 	 * Function runs the arm motor
 	 */
 	void runArm() {
-
-		if(!HallEffect->Get()) {
-			ArmTalon->SetSelectedSensorPosition(-100, kPIDLoopIdx, kTimeoutMs);
+		int tmp;
+		if(!zeroingOperation) {
+			if(!HallEffect->Get()) {
+				ArmTalon->SetSelectedSensorPosition(-100, kPIDLoopIdx, kTimeoutMs);
+			}
+	/*
+			if(armZeroDown && arm_currentPos == 0 ) {
+				ArmTalon->SetSelectedSensorPosition(+100, kPIDLoopIdx, kTimeoutMs);
+			} else if(armZeroUp && arm_currentPos == 0) {
+				ArmTalon->SetSelectedSensorPosition(-100, kPIDLoopIdx, kTimeoutMs);
+			}*/
+			if(ArmButtons.low ) {
+				arm_currentPos = 0;
+				grabberSolenoid.Set(frc::DoubleSolenoid::Value::kForward);
+			} else if(ArmButtons.mid) {
+				arm_currentPos = (550000/2);
+			} else if(ArmButtons.high){
+				arm_currentPos = 550000;
+			} else {
+				tmp = -ArmJoystick->GetY();
+				if (tmp > 0.1) {
+					arm_currentPos += ((tmp - 0.1) * (1 / (1 - 0.1))) * 5800 ;
+				} else if (tmp < -0.1) {
+					arm_currentPos += ((tmp + 0.1) * (-1 / (-1 + 0.1))) * 5800;
+				} else {
+					arm_currentPos += 0;
+				}
+				//arm_currentPos += -ArmJoystick->GetY() * 5800;
+				//ArmTalon->Set(ControlMode::PercentOutput, ArmJoystick->GetY());
+			}
+			if(arm_currentPos < 1 ) {
+				arm_currentPos = 0;
+			} if(arm_currentPos > 550000) {
+				arm_currentPos = 550000;
+			}
 		}
 
-		if(armZeroDown) {
-			ArmTalon->SetSelectedSensorPosition(-100, kPIDLoopIdx, kTimeoutMs);
+		if(armZeroDown ) {
+			arm_currentPos -= 500;
+			zeroEdgeDetect = true;
+			zeroingOperation = true;
 		} else if(armZeroUp) {
-			ArmTalon->SetSelectedSensorPosition(100, kPIDLoopIdx, kTimeoutMs);
+			arm_currentPos += 500;
+			zeroEdgeDetect = true;
+			zeroingOperation = true;
 		}
-		if(ArmButtons.low) {
+
+		if(!armZeroDown && !armZeroUp && zeroEdgeDetect) {
+			ArmTalon->SetSelectedSensorPosition(0, kPIDLoopIdx, kTimeoutMs);
 			arm_currentPos = 0;
-			grabberSolenoid.Set(frc::DoubleSolenoid::Value::kForward);
-		} else if(ArmButtons.mid) {
-			arm_currentPos = (450000/2);
-		} else if(ArmButtons.high){
-			arm_currentPos = 450000;
-		} else {
-			arm_currentPos += -ArmJoystick->GetY() * 5800;
-			//ArmTalon->Set(ControlMode::PercentOutput, ArmJoystick->GetY());
-		}
-		if(arm_currentPos < 1 ) {
-			arm_currentPos = 0;
-		} if(arm_currentPos > 450000) {
-			arm_currentPos = 450000;
+			zeroingOperation = false;
+			zeroEdgeDetect = false;
 		}
 	/*	int tmp = ArmJoystick->GetY();
 		int turn;
@@ -921,12 +953,15 @@ public:
 		// RESET TALON SPEED HERE
 		//ArmTalon->ConfigPeakOutputForward((double) ARM_POWER, kTimeoutMs);
 		//ArmTalon->ConfigPeakOutputReverse((double)-ARM_POWER, kTimeoutMs);
+
 		m_left.SetInverted(true);
 		ArmTalon->SetSelectedSensorPosition(0, kPIDLoopIdx, kTimeoutMs);
 		ArmTalon->Set(ControlMode::Position, 0);
 		arm_currentPos = 0;
 		intnumb++;
 		SmartDashboard::PutNumber("intnumb", intnumb);
+		zeroingOperation = false;
+		zeroEdgeDetect = false;
 	}
 
 
@@ -986,6 +1021,7 @@ private:
 	class AHRS *navxgyro;
 	float gyroAngle;
 	DigitalInput *HallEffect;
+	DigitalInput *IntakeSwitch;
 
 	/* The following PID Controller coefficients will need to be tuned */
 	/* to match the dynamics of your drive system.  Note that the      */
@@ -1020,6 +1056,9 @@ private:
 	bool intakeOpen = false;
 	bool intakeClose = false;
 	double intakeSpeed = 0;
+
+	bool zeroingOperation = false;
+	bool zeroEdgeDetect = false;
 
 	bool intakeRotateRight = false;
 	bool intakeRotateLeft = false;
