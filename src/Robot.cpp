@@ -289,6 +289,8 @@ public:
 		 //ArmTalon->ConfigPeakOutputForward((double) ARM_POWER, kTimeoutMs);
 		 //ArmTalon->ConfigPeakOutputReverse((double)-ARM_POWER, kTimeoutMs);
 
+		 HallEffect = new DigitalInput(9);
+
 		 /***************************************
 		  * Intake motor and encoder setup
 		  */
@@ -311,8 +313,8 @@ public:
 	 * Drive function. This runs the drive train
 	 */
 	void drive(double x, double y) {
-			x = x * driveLevel;
-			y = y * driveLevel;
+			//x = x * driveLevel;
+			//y = y * driveLevel;
 			m_drive.ArcadeDrive(x,y);
 	}
 
@@ -354,9 +356,20 @@ public:
 		if(MainJoystick->GetRawButton(1)) {
 			intakeOpen = true;
 			intakeClose = false;
-		}else if(MainJoystick->GetRawButton(10)){
+		}else if(MainJoystick->GetRawButton(4)){
 			intakeOpen = false;
 			intakeClose = true;
+		}
+
+		if(MainJoystick->GetRawButton(8)) {
+			intakeRotateRight = true;
+			intakeRotateLeft = false;
+		} else if(MainJoystick->GetRawButton(9)) {
+			intakeRotateRight = false;
+			intakeRotateLeft = true;
+		} else {
+			intakeRotateRight = false;
+			intakeRotateLeft = false;
 		}
 		/**********************************************************
 		 * buttons for the grabber levels
@@ -392,15 +405,15 @@ public:
 		}
 
 		// arm controller
-		if(ArmJoystick->GetRawButton(2)){
+		if(GamepadButtons->GetRawButton(3)){
 			ArmButtons.low = true;
 			ArmButtons.mid = false;
 			ArmButtons.high = false;
-		} else if(ArmJoystick->GetRawButton(3)){
+		} else if(GamepadButtons->GetRawButton(2)){
 			ArmButtons.low = false;
 			ArmButtons.mid = true;
 			ArmButtons.high = false;
-		} else if(ArmJoystick->GetRawButton(1)){
+		} else if(GamepadButtons->GetRawButton(1)){
 			ArmButtons.low = false;
 			ArmButtons.mid = false;
 			ArmButtons.high = true;
@@ -408,6 +421,17 @@ public:
 			ArmButtons.low = false;
 			ArmButtons.mid = false;
 			ArmButtons.high = false;
+		}
+
+		if(ArmJoystick->GetRawButton(8)) {
+			armZeroDown = false;
+			armZeroUp = true;
+		} else if(ArmJoystick->GetRawButton(9)) {
+			armZeroDown = true;
+			armZeroUp = false;
+		} else {
+			armZeroDown = false;
+			armZeroUp = false;
 		}
 
 
@@ -436,7 +460,14 @@ public:
 		} else if(intakeBackward) {
 			IntakeTalonLeft->Set(INTAKE_SPEED);
 			IntakeTalonRight->Set(-INTAKE_SPEED);
-		}else {
+		} else if (intakeRotateRight) {
+			IntakeTalonLeft->Set(-INTAKE_SPEED);
+			IntakeTalonRight->Set(-INTAKE_SPEED);
+		} else if (intakeRotateLeft) {
+			IntakeTalonLeft->Set(INTAKE_SPEED);
+			IntakeTalonRight->Set(INTAKE_SPEED);
+		} else {
+
 			IntakeTalonRight->Set(0);
 			IntakeTalonLeft->Set(0);
 		}
@@ -489,14 +520,24 @@ public:
 	 */
 	void runArm() {
 
+		if(!HallEffect->Get()) {
+			ArmTalon->SetSelectedSensorPosition(-100, kPIDLoopIdx, kTimeoutMs);
+		}
+
+		if(armZeroDown) {
+			ArmTalon->SetSelectedSensorPosition(-100, kPIDLoopIdx, kTimeoutMs);
+		} else if(armZeroUp) {
+			ArmTalon->SetSelectedSensorPosition(100, kPIDLoopIdx, kTimeoutMs);
+		}
 		if(ArmButtons.low) {
 			arm_currentPos = 0;
+			grabberSolenoid.Set(frc::DoubleSolenoid::Value::kForward);
 		} else if(ArmButtons.mid) {
-			arm_currentPos = ARM_POS_1;
+			arm_currentPos = (450000/2);
 		} else if(ArmButtons.high){
-			arm_currentPos = ARM_POS_2;
+			arm_currentPos = 450000;
 		} else {
-			arm_currentPos += ArmJoystick->GetY() * 4400;
+			arm_currentPos += -ArmJoystick->GetY() * 5800;
 			//ArmTalon->Set(ControlMode::PercentOutput, ArmJoystick->GetY());
 		}
 		if(arm_currentPos < 1 ) {
@@ -583,6 +624,7 @@ public:
 			autonomousVars.timeCount = 0;
 			autonomousVars.grabberTimeCount = 0;
 			autonomousVars.intakeTimeCount = 0;
+			autonomousVars.startingConfigDone = false;
 
 			//ArmTalon->SetSelectedSensorPosition(0, kPIDLoopIdx, kTimeoutMs);
 			m_rearLeft.SetSelectedSensorPosition(0, kPIDLoopIdx, kTimeoutMs);
@@ -613,7 +655,11 @@ public:
 	 *
 	 */
 	void AutonomousPeriodic() {
-		if(!autonomousVars.foundList) {
+		if(!autonomousVars.startingConfigDone) {
+
+			drive(0,0);
+			autonomousVars.startingConfigDone = true;
+		} else if(!autonomousVars.foundList) {
 			//SmartDashboard::PutString("CURRENTAUTOSTATE", "started");
 			int AutoMode = SmartDashboard::GetNumber("Autonomous Mode", 404); // may need to be changed from 0
 			SmartDashboard::PutNumber("FOUND", AutoMode);
@@ -691,6 +737,7 @@ public:
 			m_rearLeft.SetSelectedSensorPosition(0, kPIDLoopIdx, kTimeoutMs);
 			m_rearRight.SetSelectedSensorPosition(0, kPIDLoopIdx, kTimeoutMs);
 			navxgyro->ZeroYaw();
+			drive(0,0);
 		} else {
 			if(!autonomousVars.CompletingOperation) { // if not currently in a operation
 				// grab next operation
@@ -891,8 +938,8 @@ public:
 	    runGrabber();
 		runArm();
 	//	runGrabberPneumatics();
-		drive(0,0);
-		//drive(joystickX,joystickY);
+		//drive(0,0);
+		drive(joystickX,joystickY);
 		//SmartDashboard::PutString("DB/String 0", "My 21 Char TestString");
 		if(GyroFound) {
 			SmartDashboard::PutNumber("GryoAngle", navxgyro->GetAngle());
@@ -901,6 +948,8 @@ public:
 		SmartDashboard::PutNumber("Talon Sensor Position", m_rearLeft.GetSelectedSensorPosition(0));
 		SmartDashboard::PutNumber("Talon Right Sensor Velocity", m_rearRight.GetSelectedSensorVelocity(0));
 		SmartDashboard::PutNumber("Talon Right Sensor Position", m_rearRight.GetSelectedSensorPosition(0));
+
+		SmartDashboard::PutNumber("Hall Effect Value" , HallEffect->Get());
 	}
 
 	void TestPeriodic() {}
@@ -936,6 +985,7 @@ private:
 	 */
 	class AHRS *navxgyro;
 	float gyroAngle;
+	DigitalInput *HallEffect;
 
 	/* The following PID Controller coefficients will need to be tuned */
 	/* to match the dynamics of your drive system.  Note that the      */
@@ -971,6 +1021,9 @@ private:
 	bool intakeClose = false;
 	double intakeSpeed = 0;
 
+	bool intakeRotateRight = false;
+	bool intakeRotateLeft = false;
+
 	bool grabberForward = false;
 	bool grabberBackward = false;
 	bool grabberOpen = false;
@@ -978,6 +1031,8 @@ private:
 	bool grabberPneumaticsForward = false;
 	bool grabberPneumaticsBackward = false;
 
+	bool armZeroDown = false;
+	bool armZeroUp = false;
 	frc::DoubleSolenoid grabberSolenoid {GRABBER_SOL_ONE,GRABBER_SOL_TWO};
 	frc::DoubleSolenoid intakeSolenoid {INTAKE_SOL_ONE,INTAKE_SOL_TWO};
 	//frc::DoubleSolenoid intakeSolenoid {2,3};
@@ -1000,6 +1055,7 @@ private:
 		double grabberTimeCount =0;
 		double intakeTimeCount =0;
 		node *autoTemp = new node;
+		bool startingConfigDone = false;
 	} autonomousVars;
 
 	std::string dashData1;
