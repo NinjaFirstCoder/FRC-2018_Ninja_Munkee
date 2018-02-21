@@ -40,7 +40,7 @@
 #define ARM_POS_2 2000
 #define ARM_POS_3 4096
 
-#define ARM_AUTO_ERROR 100
+#define ARM_AUTO_ERROR 10000
 
 #define ARM_UPPER_LIMIT 550000
 

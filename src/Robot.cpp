@@ -183,9 +183,11 @@ public:
 			 								}
 			 								if(!strcmp("AutoMode_1",CurrentModeName)) {
 			 									autoMode1.createnode(randomArray);
+			 									y++;
 			 								}
 			 								else if(!strcmp("AutoMode_2",CurrentModeName)) {
 			 									autoMode2.createnode(randomArray);
+
 			 								}
 			 								else if(!strcmp("AutoMode_3",CurrentModeName)) {
 			 									autoMode3.createnode(randomArray);
@@ -207,7 +209,7 @@ public:
 			 								}
 			 								else if(!strcmp("AutoMode_9",CurrentModeName)) {
 			 									autoMode9.createnode(randomArray);
-			 									y++;
+
 			 								}
 
 			 							} else if(line.find("-END-") != std::string::npos) {
@@ -221,7 +223,7 @@ public:
 			 			}
 			 			myfile.close();
 
-			 			frc::SmartDashboard::PutNumber("Mode 9 states loaded", y);
+			 			frc::SmartDashboard::PutNumber("Mode 2 states loaded", y);
 
 				 		frc::SmartDashboard::PutString("AutoLoaded", "FOUND");
 			 	 }
@@ -415,18 +417,27 @@ public:
 			ArmButtons.low = true;
 			ArmButtons.mid = false;
 			ArmButtons.high = false;
+			ArmButtons.lowmid = false;
 		} else if(GamepadButtons->GetRawButton(2)){
 			ArmButtons.low = false;
 			ArmButtons.mid = true;
 			ArmButtons.high = false;
+			ArmButtons.lowmid = false;
 		} else if(GamepadButtons->GetRawButton(1)){
 			ArmButtons.low = false;
 			ArmButtons.mid = false;
 			ArmButtons.high = true;
+			ArmButtons.lowmid = false;
+		} else if(GamepadButtons->GetRawButton(7)) {
+			ArmButtons.low = false;
+			ArmButtons.mid = false;
+			ArmButtons.high = false;
+			ArmButtons.lowmid = true;
 		} else{
 			ArmButtons.low = false;
 			ArmButtons.mid = false;
 			ArmButtons.high = false;
+			ArmButtons.lowmid = false;
 		}
 
 		if(ArmJoystick->GetRawButton(9)) {
@@ -559,6 +570,8 @@ public:
 				arm_currentPos = (ARM_UPPER_LIMIT/2);
 		} else if(ArmButtons.high){
 				arm_currentPos = ARM_UPPER_LIMIT;
+		} else if(ArmButtons.lowmid) {
+				arm_currentPos = 40000;
 		} else {
 				tmp = -ArmJoystick->GetY();
 				if (tmp > 0.1) {
@@ -707,6 +720,7 @@ public:
 			autonomousVars.grabberTimeCount = 0;
 			autonomousVars.intakeTimeCount = 0;
 			autonomousVars.startingConfigDone = false;
+			autonomousVars.TurningOperationDone = false;
 
 			//ArmTalon->SetSelectedSensorPosition(0, kPIDLoopIdx, kTimeoutMs);
 			m_rearLeft.SetSelectedSensorPosition(0, kPIDLoopIdx, kTimeoutMs);
@@ -718,6 +732,7 @@ public:
 			ArmTalon->SetSelectedSensorPosition(0, kPIDLoopIdx, kTimeoutMs);
 			ArmTalon->Set(ControlMode::Position, 0);
 
+			SmartDashboard::PutNumber("arm waiting", 0);
 			/**
 			 * Here, get the data from the DriverStation regarding the switches
 			 * and scale on the field. Three characters will be sent over and
@@ -922,6 +937,7 @@ public:
 			m_rearLeft.SetSelectedSensorPosition(0, kPIDLoopIdx, kTimeoutMs);
 			m_rearRight.SetSelectedSensorPosition(0, kPIDLoopIdx, kTimeoutMs);
 			navxgyro->ZeroYaw();
+			SmartDashboard::PutNumber("YEET2", 0);
 			drive(0,0);
 		} else {
 			if(!autonomousVars.CompletingOperation) { // if not currently in a operation
@@ -951,28 +967,35 @@ public:
 				 */
 
 				if(!autonomousVars.ArmOperationDone) {
-					if(autonomousVars.autoTemp->data[0] == 0) {
-						// run tell you find the hall effect
-						ArmTalon->Set(ControlMode::Position, -ARM_UPPER_LIMIT/3);
+					if(autonomousVars.autoTemp->data[0] > 0) { // initial state of doing nothing.
+						if(autonomousVars.autoTemp->data[0] == 0) {
+							// run tell you find the hall effect
+							ArmTalon->Set(ControlMode::Position, -ARM_UPPER_LIMIT);
 
-						if(!HallEffect->Get()) {
-							ArmTalon->SetSelectedSensorPosition(0, kPIDLoopIdx, kTimeoutMs);
-							ArmTalon->Set(ControlMode::Position, 0);
-							autonomousVars.ArmOperationDone = true;
-							// fix the position
-						}
-					} else if(ArmTalon->GetSelectedSensorPosition(0) < (autonomousVars.autoTemp->data[0] - ARM_AUTO_ERROR) || ArmTalon->GetSelectedSensorPosition(0) > (autonomousVars.autoTemp->data[0] + ARM_AUTO_ERROR) ){
-						ArmTalon->ConfigPeakOutputForward((double) autonomousVars.autoTemp->data[1], kTimeoutMs);
-						ArmTalon->ConfigPeakOutputReverse((double)-autonomousVars.autoTemp->data[1], kTimeoutMs);
-						SmartDashboard::PutNumber("MOTOR POWER", autonomousVars.autoTemp->data[1]);
-						if(autonomousVars.autoTemp->data[0] > ARM_UPPER_LIMIT) {
-							ArmTalon->Set(ControlMode::Position, ARM_UPPER_LIMIT);
+							if(!HallEffect->Get()) {
+								ArmTalon->SetSelectedSensorPosition(0, kPIDLoopIdx, kTimeoutMs);
+								ArmTalon->Set(ControlMode::Position, 0);
+								autonomousVars.ArmOperationDone = true;
+								SmartDashboard::PutNumber("arm waiting", 1);
+								// fix the position
+							}
+						} else if(ArmTalon->GetSelectedSensorPosition(0) < (autonomousVars.autoTemp->data[0] - ARM_AUTO_ERROR) || ArmTalon->GetSelectedSensorPosition(0) > (autonomousVars.autoTemp->data[0] + ARM_AUTO_ERROR) ){
+							ArmTalon->ConfigPeakOutputForward((double) autonomousVars.autoTemp->data[1], kTimeoutMs);
+							ArmTalon->ConfigPeakOutputReverse((double)-autonomousVars.autoTemp->data[1], kTimeoutMs);
+							SmartDashboard::PutNumber("MOTOR POWER", autonomousVars.autoTemp->data[1]);
+							if(autonomousVars.autoTemp->data[0] > ARM_UPPER_LIMIT) {
+								ArmTalon->Set(ControlMode::Position, ARM_UPPER_LIMIT);
+							} else {
+								ArmTalon->Set(ControlMode::Position, autonomousVars.autoTemp->data[0]);
+							}
 						} else {
-							ArmTalon->Set(ControlMode::Position, autonomousVars.autoTemp->data[0]);
+							autonomousVars.ArmOperationDone = true;
+							SmartDashboard::PutNumber("arm waiting", 1);
+							// fix the position
 						}
 					} else {
 						autonomousVars.ArmOperationDone = true;
-						// fix the position
+						SmartDashboard::PutNumber("arm waiting", 1);
 					}
 				}
 
@@ -980,59 +1003,7 @@ public:
 				SmartDashboard::PutNumber("Arm Motor actual Position", ArmTalon->GetSelectedSensorPosition(0));
 
 
-				/*
-				int tmp;
-				int lowerLimit = -10000;
-				if(ArmButtons.low ) {
-						arm_currentPos = lowerLimit;
-						grabberSolenoid.Set(frc::DoubleSolenoid::Value::kForward);
-				} else {
-						tmp = -ArmJoystick->GetY();
-						if (tmp < -0.1) {
-								arm_currentPos += ((tmp + 0.1) * (-1 / (-1 + 0.1))) * 5800;
-						} else {
-								arm_currentPos += 0;
-						}
-						//arm_currentPos += -ArmJoystick->GetY() * 5800;
-						//ArmTalon->Set(ControlMode::PercentOutput, ArmJoystick->GetY());
-				}
-
-				if(!HallEffect->Get()) {
-					ArmTalon->SetSelectedSensorPosition(0, kPIDLoopIdx, kTimeoutMs);
-					arm_currentPos = 0;
-
-					//arm_currentPos =  ArmTalon->GetSelectedSensorPosition(0);
-				} else if(arm_currentPos < lowerLimit) {
-					arm_currentPos = lowerLimit;
-				}
-
-
-				if(ArmButtons.mid) {
-						arm_currentPos = (ARM_UPPER_LIMIT/2);
-				} else if(ArmButtons.high){
-						arm_currentPos = ARM_UPPER_LIMIT;
-				} else {
-						tmp = -ArmJoystick->GetY();
-						if (tmp > 0.1) {
-								arm_currentPos += ((tmp - 0.1) * (1 / (1 - 0.1))) * 5800 ;
-						} else {
-								arm_currentPos += 0;
-						}
-						//arm_currentPos += -ArmJoystick->GetY() * 5800;
-						//ArmTalon->Set(ControlMode::PercentOutput, ArmJoystick->GetY());
-				}
-
-				if(arm_currentPos > ARM_UPPER_LIMIT) {
-					arm_currentPos = ARM_UPPER_LIMIT;
-				}
-
-
-
-
-
-
-
-
+			/*
 				if(ArmTalon->GetSelectedSensorPosition(0) < (autonomousVars.autoTemp->data[0] - ARM_AUTO_ERROR) || ArmTalon->GetSelectedSensorPosition(0) > (autonomousVars.autoTemp->data[0] + ARM_AUTO_ERROR) ){
 					ArmTalon->ConfigPeakOutputForward((double) autonomousVars.autoTemp->data[1], kTimeoutMs);
 					ArmTalon->ConfigPeakOutputReverse((double)-autonomousVars.autoTemp->data[1], kTimeoutMs);
@@ -1092,7 +1063,8 @@ public:
 				/*
 				 * run drive train operations
 				 */
-				if(!autonomousVars.DriveOperationDone) {
+				autonomousVars.DriveOperationDone = true;
+				//if(!autonomousVars.DriveOperationDone) {
 					if(autonomousVars.autoTemp->data[2] < 1) {
 						if(((int) ((m_rearLeft.GetSelectedSensorPosition(0) + m_rearRight.GetSelectedSensorPosition(0))/2)) > (autonomousVars.autoTemp->data[2] + DRIVE_AUTO_ERROR)) { // backward
 							m_drive.CurvatureDrive(-autonomousVars.autoTemp->data[3], -navxgyro->GetAngle() * 0.014,false);
@@ -1100,6 +1072,9 @@ public:
 						} else {
 							SmartDashboard::PutNumber("DRIVE MOTOR POS", autonomousVars.autoTemp->data[2]);
 							autonomousVars.DriveOperationDone = true;
+							navxgyro->ZeroYaw();
+							SmartDashboard::PutNumber("yeet", 0);
+							SmartDashboard::PutNumber("yeet", 1);
 						}
 					} else if(autonomousVars.autoTemp->data[2] > 1) {
 						if(((int) ((m_rearLeft.GetSelectedSensorPosition(0) + m_rearRight.GetSelectedSensorPosition(0))/2)) < (autonomousVars.autoTemp->data[2] - DRIVE_AUTO_ERROR)) { // forward
@@ -1108,12 +1083,51 @@ public:
 						} else {
 							SmartDashboard::PutNumber("DRIVE MOTOR POS", autonomousVars.autoTemp->data[2]);
 							autonomousVars.DriveOperationDone = true;
+							navxgyro->ZeroYaw();
+							SmartDashboard::PutNumber("yeet", 0);
+							SmartDashboard::PutNumber("yeet", 1);
 						}
 					}
-				}
+					else {
+						autonomousVars.DriveOperationDone = true;
+					}
+				//}
 				SmartDashboard::PutNumber("Drive left Position", m_rearLeft.GetSelectedSensorPosition(0));
 				SmartDashboard::PutNumber("Drive Right Position", m_rearRight.GetSelectedSensorPosition(0));
+				autonomousVars.TurningOperationDone = true;
+				// turning operation
+				/*if(autonomousVars.DriveOperationDone) {
+					if(!autonomousVars.TurningOperationDone) {
+						SmartDashboard::PutNumber("YEET2", 3);
+	//					if(autonomousVars.autoTemp->data[4] < 0) {
+								if( navxgyro->GetAngle() > (autonomousVars.autoTemp->data[4] + 2) || navxgyro->GetAngle() < (autonomousVars.autoTemp->data[4] - 2) ) { // backward
+										if(navxgyro->GetAngle() < autonomousVars.autoTemp->data[4]) {
+											m_drive.ArcadeDrive(0,autonomousVars.autoTemp->data[5]);
+										} else if(navxgyro->GetAngle() > autonomousVars.autoTemp->data[4]) {
+											m_drive.ArcadeDrive(0,-autonomousVars.autoTemp->data[5]);
+										}
 
+									    SmartDashboard::PutNumber("YEET2", 1);
+								} else {
+										m_drive.ArcadeDrive(0,0);
+										navxgyro->ZeroYaw();
+										autonomousVars.TurningOperationDone = true;
+								}
+						//} else if(autonomousVars.autoTemp->data[4] >= 0) {
+								/*if(navxgyro->GetAngle() > (autonomousVars.autoTemp->data[4] + 5)) { // forward
+										m_drive.ArcadeDrive(-1,0);
+										SmartDashboard::PutNumber("YEET2", 1);
+								} else {
+										m_drive.ArcadeDrive(0,0);
+										autonomousVars.TurningOperationDone = true;
+								} /
+//						}
+
+					}
+				}*/
+				SmartDashboard::PutNumber("GYRO ANGLE", navxgyro->GetAngle());
+				SmartDashboard::PutNumber("GYRO TARGET ANGLE", autonomousVars.autoTemp->data[4] );
+				SmartDashboard::PutNumber("GYRO SPEED" , autonomousVars.autoTemp->data[5]);
 				/*
 				if(m_rearLeft.GetSelectedSensorPosition(0) < (autonomousVars.autoTemp->data[2] - DRIVE_AUTO_ERROR) || m_rearLeft.GetSelectedSensorPosition(0) > (autonomousVars.autoTemp->data[2] + DRIVE_AUTO_ERROR) ){
 					if(autonomousVars.autoTemp->data[2]  < 1) {
@@ -1131,7 +1145,14 @@ public:
 				}
 */
 				//drive(0,0);
-				if(autonomousVars.DriveOperationDone && autonomousVars.ArmOperationDone && autonomousVars.TimeOperationDone && autonomousVars.IntakeOperationDone && autonomousVars.GrabberOperationDone) {
+
+				SmartDashboard::PutNumber("01", autonomousVars.TurningOperationDone);
+				SmartDashboard::PutNumber("02", autonomousVars.DriveOperationDone);
+				SmartDashboard::PutNumber("03", autonomousVars.ArmOperationDone);
+				SmartDashboard::PutNumber("04", autonomousVars.TimeOperationDone);
+				SmartDashboard::PutNumber("05", autonomousVars.IntakeOperationDone );
+				SmartDashboard::PutNumber("06", autonomousVars.GrabberOperationDone);
+				if(autonomousVars.TurningOperationDone && autonomousVars.DriveOperationDone && autonomousVars.ArmOperationDone && autonomousVars.TimeOperationDone && autonomousVars.IntakeOperationDone && autonomousVars.GrabberOperationDone) {
 					SmartDashboard::PutString("CURRENTAUTOSTATE", "Finished arm");
 					/*********************************************
 					 * reset operations and variables so they don't carry over to the next state
@@ -1142,19 +1163,22 @@ public:
 					autonomousVars.GrabberOperationDone = false;
 					autonomousVars.IntakeOperationDone = false;
 					autonomousVars.DriveOperationDone = false;
+					autonomousVars.TurningOperationDone = false;
 
 					autonomousVars.timeCount = 0;
 					autonomousVars.grabberTimeCount = 0;
 					autonomousVars.intakeTimeCount = 0;
-
+					SmartDashboard::PutNumber("arm waiting", 0);
 					m_rearLeft.SetSelectedSensorPosition(0, kPIDLoopIdx, kTimeoutMs); // this makes the drive train position relative
 					m_rearRight.SetSelectedSensorPosition(0, kPIDLoopIdx, kTimeoutMs);
 					navxgyro->ZeroYaw();
+					SmartDashboard::PutNumber("yeet", 0);
+												SmartDashboard::PutNumber("yeet", 1);
 				}
 
 			}
 		}
-		if(autonomousVars.DriveOperationDone) {
+		if(autonomousVars.DriveOperationDone && autonomousVars.TurningOperationDone) {
 			drive(0,0);
 		}
 		//SmartDashboard::PutNumber("Talon Sensor Position", ArmTalon->GetSelectedSensorPosition(0));
@@ -1203,6 +1227,10 @@ public:
 		//ArmTalon->ConfigPeakOutputReverse((double)-ARM_POWER, kTimeoutMs);
 
 		m_left.SetInverted(true);
+		/*
+		 * TODO:
+		 * add a thing that doesn't change the zero if auto ran first
+		 */
 		ArmTalon->SetSelectedSensorPosition(0, kPIDLoopIdx, kTimeoutMs);
 		ArmTalon->Set(ControlMode::Position, 0);
 		arm_currentPos = 0;
@@ -1330,6 +1358,7 @@ private:
 
 	struct structArmButtons {
 		bool low = false;
+		bool lowmid = false;
 		bool mid = false;
 		bool high = false;
 	} ArmButtons;
@@ -1341,6 +1370,7 @@ private:
 		bool GrabberOperationDone = false;
 		bool IntakeOperationDone = false;
 		bool TimeOperationDone = false;
+		bool TurningOperationDone = false;
 		bool foundList = false;
 		double timeCount = 0;
 		double grabberTimeCount =0;
