@@ -123,7 +123,7 @@ public:
 
 	 class AutoConfigLoader {
 	 public:
-		 list autoMode1, autoMode2, autoMode3, autoMode4, autoMode5, autoMode6, autoMode7, autoMode8, autoMode9;
+		 list autoMode1, autoMode2, autoMode3, autoMode4, autoMode5, autoMode6, autoMode7, autoMode8, autoMode9, autoMode10, autoMode11, autoMode12, autoMode13, autoMode14, autoMode15, autoMode16, autoMode17;
 		 bool FileNotFound = false;
 		 void loadConfig() {
 			 	 int y = 0;
@@ -210,30 +210,46 @@ public:
 			 								else if(!strcmp("AutoMode_9",CurrentModeName)) {
 			 									autoMode9.createnode(randomArray);
 
-			 								}
+			 								}else if(!strcmp("AutoMode_10",CurrentModeName)) {
+			 									autoMode10.createnode(randomArray);
 
+			 								}else if(!strcmp("AutoMode_11",CurrentModeName)) {
+			 									autoMode11.createnode(randomArray);
+
+			 								}else if(!strcmp("AutoMode_12",CurrentModeName)) {
+			 									autoMode12.createnode(randomArray);
+
+			 								}else if(!strcmp("AutoMode_13",CurrentModeName)) {
+			 									autoMode13.createnode(randomArray);
+
+			 								}else if(!strcmp("AutoMode_14",CurrentModeName)) {
+			 									autoMode14.createnode(randomArray);
+
+			 								}else if(!strcmp("AutoMode_15",CurrentModeName)) {
+			 									autoMode15.createnode(randomArray);
+
+			 								}else if(!strcmp("AutoMode_16",CurrentModeName)) {
+			 									autoMode16.createnode(randomArray);
+
+			 								}else if(!strcmp("AutoMode_17",CurrentModeName)) {
+			 									autoMode17.createnode(randomArray);
+			 								}
 			 							} else if(line.find("-END-") != std::string::npos) {
 			 								foundEndOfBlock = false;
 			 							}
-
 			 						}
-
 			 					}
 			 				}
 			 			}
 			 			myfile.close();
-
-			 			frc::SmartDashboard::PutNumber("Mode 2 states loaded", y);
-
-				 		frc::SmartDashboard::PutString("AutoLoaded", "FOUND");
+			 			frc::SmartDashboard::PutNumber("Mode_2_states_loaded", y);
+				 		frc::SmartDashboard::PutString("Pulled_Auto_Modes_From_Config", "Yes");
 			 	 }
-			 	 else {
-			 		 // PRINT ERROR MESSAGE OR SEARCH FOR FILE HERE
-			 		frc::SmartDashboard::PutString("AutoLoaded", "NOT FOUND");
+			 	 else { // PRINT ERROR MESSAGE OR SEARCH FOR FILE HERE
+			 		frc::SmartDashboard::PutString("Pulled_Auto_Modes_From_Config", "FAILED");
 			 		FileNotFound= true;
 			 	 }
 		 }
-
 	 };
 
 	 /********************************************************
@@ -245,7 +261,6 @@ public:
 		m_chooser.AddObject(kAutoNameCustom, kAutoNameCustom);
 		frc::SmartDashboard::PutData("Auto Modes", &m_chooser);
 
-		try {
 		/***********************************************************************
 		 * navX-MXP:
 		 * - Communication via RoboRIO MXP (SPI, I2C, TTL UART) and USB.
@@ -257,6 +272,7 @@ public:
 		 *
 		 * Multiple navX-model devices on a single robot are supported.
 		 ************************************************************************/
+		 try {
 			 navxgyro = new AHRS(SerialPort::Port::kUSB);
 		 } catch (std::exception& ex ) {
 			 std::string err_string = "Error instantiating navX MXP:  ";
@@ -411,8 +427,9 @@ public:
 			grabberPneumaticsForward = false;
 			grabberPneumaticsBackward = false;
 		}
-
-		// arm controller
+		/**********************************************************
+		 * buttons for the arm levels
+		 */
 		if(GamepadButtons->GetRawButton(3)){
 			ArmButtons.low = true;
 			ArmButtons.mid = false;
@@ -450,13 +467,6 @@ public:
 			armZeroDown = false;
 			armZeroUp = false;
 		}
-
-
-
-
-
-
-
 	}
 
 	/*****************************************************
@@ -497,8 +507,8 @@ public:
 
 		}
 		if(IntakeSwitch->Get() && ArmTalon->GetSelectedSensorPosition(0) < 200) {
-						grabberSolenoid.Set(frc::DoubleSolenoid::Value::kReverse);
-					}
+			grabberSolenoid.Set(frc::DoubleSolenoid::Value::kReverse);
+		}
 
 	}
 
@@ -521,19 +531,6 @@ public:
 			grabberOpen = false;
 		}
 
-	}
-
-	/****************************************************
-	 * Function runs the grabber pneumatics
-	 * /
-	void runGrabberPneumatics() {
-		if(grabberPneumaticsForward) {
-			grabberSolenoid.Set(frc::DoubleSolenoid::Value::kForward);
-		} else if(grabberPneumaticsBackward) {
-			grabberSolenoid.Set(frc::DoubleSolenoid::Value::kReverse);
-		} else {
-			grabberSolenoid.Set(frc::DoubleSolenoid::Value::kOff);
-		}
 	}
 
 	/*****************************************************
@@ -592,7 +589,7 @@ public:
 			if(!HallEffect->Get()) {
 				ArmTalon->SetSelectedSensorPosition(-100, kPIDLoopIdx, kTimeoutMs);
 			}
-	/*
+	/ *
 			if(armZeroDown && arm_currentPos == 0 ) {
 				ArmTalon->SetSelectedSensorPosition(+100, kPIDLoopIdx, kTimeoutMs);
 			} else if(armZeroUp && arm_currentPos == 0) {
@@ -924,7 +921,38 @@ public:
 						break;
 				case(12): // Right Scale Final
 						CurrentAutoMode = &AutoConfig.autoMode9;
-						SmartDashboard::PutString("AUTOMODELOAD", "FOUND MODE 9");
+						autonomousVars.foundList = true;
+						break;
+				case(13): // Right Scale Final
+						CurrentAutoMode = &AutoConfig.autoMode10;
+						autonomousVars.foundList = true;
+						break;
+				case(14): // Right Scale Final
+						CurrentAutoMode = &AutoConfig.autoMode11;
+						autonomousVars.foundList = true;
+						break;
+				case(15): // Right Scale Final
+						CurrentAutoMode = &AutoConfig.autoMode12;
+						autonomousVars.foundList = true;
+						break;
+				case(16): // Right Scale Final
+						CurrentAutoMode = &AutoConfig.autoMode13;
+						autonomousVars.foundList = true;
+						break;
+				case(17): // Right Scale Final
+						CurrentAutoMode = &AutoConfig.autoMode14;
+						autonomousVars.foundList = true;
+						break;
+				case(18): // Right Scale Final
+						CurrentAutoMode = &AutoConfig.autoMode15;
+						autonomousVars.foundList = true;
+						break;
+				case(19): // Right Scale Final
+						CurrentAutoMode = &AutoConfig.autoMode16;
+						autonomousVars.foundList = true;
+						break;
+				case(20): // Right Scale Final
+						CurrentAutoMode = &AutoConfig.autoMode17;
 						autonomousVars.foundList = true;
 						break;
 				default:
@@ -960,9 +988,7 @@ public:
 					drive(0,0);
 				}
 			} else {
-				// run current operation
-
-				/*
+				/**********************************************************************************
 				 * Run arm operations
 				 */
 
@@ -998,25 +1024,13 @@ public:
 						SmartDashboard::PutNumber("arm waiting", 1);
 					}
 				}
-
 				SmartDashboard::PutNumber("Arm Motor Target Position", autonomousVars.autoTemp->data[0]);
 				SmartDashboard::PutNumber("Arm Motor actual Position", ArmTalon->GetSelectedSensorPosition(0));
 
 
-			/*
-				if(ArmTalon->GetSelectedSensorPosition(0) < (autonomousVars.autoTemp->data[0] - ARM_AUTO_ERROR) || ArmTalon->GetSelectedSensorPosition(0) > (autonomousVars.autoTemp->data[0] + ARM_AUTO_ERROR) ){
-					ArmTalon->ConfigPeakOutputForward((double) autonomousVars.autoTemp->data[1], kTimeoutMs);
-					ArmTalon->ConfigPeakOutputReverse((double)-autonomousVars.autoTemp->data[1], kTimeoutMs);
-					SmartDashboard::PutNumber("MOTOR POWER", autonomousVars.autoTemp->data[1]);
-					ArmTalon->Set(ControlMode::Position, autonomousVars.autoTemp->data[0]);
-				} else {
-					autonomousVars.ArmOperationDone = true;
-				}
-				*/
 
 
-
-				/*
+				/**********************************************************************************
 				 * run time operations
 				 */
 				if(autonomousVars.autoTemp->data[12] != autonomousVars.timeCount) {
@@ -1026,7 +1040,10 @@ public:
 				} else {
 					autonomousVars.TimeOperationDone = true;
 				}
-				/*
+
+
+
+				/**********************************************************************************
 				 * run grabber operations
 				 */
 				if(autonomousVars.autoTemp->data[6]) {
@@ -1041,7 +1058,9 @@ public:
 					GrabberTalon->Set(ControlMode::PercentOutput, 0);
 					autonomousVars.GrabberOperationDone = true;
 				}
-				/*
+
+
+				/**********************************************************************************
 				 * run intake operations
 				 */
 				if(autonomousVars.autoTemp->data[9]) { // if its a one open the intake
@@ -1060,7 +1079,9 @@ public:
 					IntakeTalonRight->Set(0);
 					autonomousVars.IntakeOperationDone = true;
 				}
-				/*
+
+
+				/**********************************************************************************
 				 * run drive train operations
 				 */
 				autonomousVars.DriveOperationDone = true;
@@ -1146,18 +1167,20 @@ public:
 */
 				//drive(0,0);
 
-				SmartDashboard::PutNumber("01", autonomousVars.TurningOperationDone);
-				SmartDashboard::PutNumber("02", autonomousVars.DriveOperationDone);
-				SmartDashboard::PutNumber("03", autonomousVars.ArmOperationDone);
-				SmartDashboard::PutNumber("04", autonomousVars.TimeOperationDone);
-				SmartDashboard::PutNumber("05", autonomousVars.IntakeOperationDone );
-				SmartDashboard::PutNumber("06", autonomousVars.GrabberOperationDone);
+				/**********************************************************************************
+				 * Put all the modes current completion state on the driver station and test to see
+				 * if we can move onto the next operation.
+				 */
+				SmartDashboard::PutNumber("TurningOperationDone", autonomousVars.TurningOperationDone);
+				SmartDashboard::PutNumber("DriveOperationDone", autonomousVars.DriveOperationDone);
+				SmartDashboard::PutNumber("ArmOperationDone", autonomousVars.ArmOperationDone);
+				SmartDashboard::PutNumber("TimeOperationDone", autonomousVars.TimeOperationDone);
+				SmartDashboard::PutNumber("IntakeOperationDone", autonomousVars.IntakeOperationDone );
+				SmartDashboard::PutNumber("GrabberOperationDone", autonomousVars.GrabberOperationDone);
 				if(autonomousVars.TurningOperationDone && autonomousVars.DriveOperationDone && autonomousVars.ArmOperationDone && autonomousVars.TimeOperationDone && autonomousVars.IntakeOperationDone && autonomousVars.GrabberOperationDone) {
 					SmartDashboard::PutString("CURRENTAUTOSTATE", "Finished arm");
-					/*********************************************
-					 * reset operations and variables so they don't carry over to the next state
-					 */
-					autonomousVars.CompletingOperation = false;
+
+					autonomousVars.CompletingOperation = false; //reset operations and variables so they don't carry over to the next state
 					autonomousVars.ArmOperationDone = false;
 					autonomousVars.TimeOperationDone = false;
 					autonomousVars.GrabberOperationDone = false;
@@ -1172,8 +1195,9 @@ public:
 					m_rearLeft.SetSelectedSensorPosition(0, kPIDLoopIdx, kTimeoutMs); // this makes the drive train position relative
 					m_rearRight.SetSelectedSensorPosition(0, kPIDLoopIdx, kTimeoutMs);
 					navxgyro->ZeroYaw();
+
 					SmartDashboard::PutNumber("yeet", 0);
-												SmartDashboard::PutNumber("yeet", 1);
+					SmartDashboard::PutNumber("yeet", 1);
 				}
 
 			}
@@ -1181,46 +1205,14 @@ public:
 		if(autonomousVars.DriveOperationDone && autonomousVars.TurningOperationDone) {
 			drive(0,0);
 		}
-		//SmartDashboard::PutNumber("Talon Sensor Position", ArmTalon->GetSelectedSensorPosition(0));
-		/*
-		node *temp = new node;
-		temp = CurrentAutoMode->head;
-		SmartDashboard::PutNumber("Autodata0", temp->data[0]);
-		SmartDashboard::PutNumber("Autodata1", temp->data[1]);
-		SmartDashboard::PutNumber("Autodata2", temp->data[2]);
-		SmartDashboard::PutNumber("Autodata3", temp->data[3]);
-		SmartDashboard::PutNumber("Autodata4", temp->data[4]);
-		SmartDashboard::PutNumber("Autodata5", temp->data[5]);
-
-
-		drive(0,0);*/
-		//frc::Scheduler::GetInstance()->Run();
-		/*
-		 * Auto mode works similar to a state machine.
-		 */
-		/*
-		double kP = 1;
-		switch(autoState) {
-			case(1):
-				navxgyro->ZeroYaw(); // zero out gyro when auto starts
-				autoState = 2;
-				break;
-			case(2):
-				gyroAngle = navxgyro->GetAngle();
-				m_drive.CurvatureDrive(0.5, -gyroAngle * kP,false); // get the angle of the gyro and drive straight
-				break;
-			default:
-				break;
-		}*/
 	}
 
-	void AutoSelection() {
-		SmartDashboard::PutString("FIRST", "RAN");
-	}
-	void AutoManual() {
-		SmartDashboard::PutString("SECOND", "RAN");
-	}
-
+	/***********************************************************************
+	 * This is the first thing that is ran when teleop starts. Make sure you
+	 * have all the things from auto set back to normal in this function.
+	 * Other wise you might get odd results
+	 *
+	 */
 	void TeleopInit() {
 		// RESET TALON SPEED HERE
 		//ArmTalon->ConfigPeakOutputForward((double) ARM_POWER, kTimeoutMs);
@@ -1243,18 +1235,19 @@ public:
 		m_rearLeft.SetSelectedSensorPosition(0, kPIDLoopIdx, kTimeoutMs);
 	}
 
-
+	/***********************************************************************
+	 * This function is ran every 20ms in Teleop mode. It should call all the
+	 * functions that run the different aspects of the robot.
+	 *
+	 */
 	void TeleopPeriodic() {
 		pollControllers(); //
 		pollSensors();
-
 		runIntake();
 	    runGrabber();
 		runArm();
-	//	runGrabberPneumatics();
-		//drive(0,0);
 		drive(joystickX,joystickY);
-		//SmartDashboard::PutString("DB/String 0", "My 21 Char TestString");
+
 		if(GyroFound) {
 			SmartDashboard::PutNumber("GryoAngle", navxgyro->GetAngle());
 		}
@@ -1268,8 +1261,21 @@ public:
 		SmartDashboard::PutNumber("Hall Effect Value" , HallEffect->Get());
 	}
 
-	void TestPeriodic() {}
+	/***********************************************************************
+	 * This function can be used for testing things outside of messing with
+	 * the teleop or auto modes.
+	 *
+	 */
+	void TestPeriodic() {
 
+
+	}
+
+	/***********************************************************************
+	 * This has all of the main program variables in it. Almost all of them
+	 * are just declared here, not initialized. For initialization go to the
+	 * RobotInit Function.
+	 */
 private:
 	frc::LiveWindow& m_lw = *LiveWindow::GetInstance();
 	frc::SendableChooser<std::string> m_chooser;
