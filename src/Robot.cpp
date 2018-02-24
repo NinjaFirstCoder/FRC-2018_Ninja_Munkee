@@ -35,6 +35,7 @@
 #include <ctime>
 #include <AnalogGyro.h>
 
+#include <PIDController.h>
 #include <AHRS.h>
 
 // autonomous config files
@@ -48,7 +49,10 @@
 using namespace std;
 #define OPERATION_ELEMENTS 13
 
-class Robot : public frc::TimedRobot {
+
+
+
+class Robot : public frc::TimedRobot, public PIDSource, public PIDOutput {
 public:
 	/* setup the drive train
 	 *
@@ -65,8 +69,6 @@ public:
 
 
 	 frc::DifferentialDrive m_drive{m_left, m_right};
-
-
 
 	 /***************************************************
 	  * AUTONOMOUS CONFIG FILE LOADING CODE
@@ -297,6 +299,10 @@ public:
 		 m_rearRight.ConfigSelectedFeedbackSensor(FeedbackDevice::QuadEncoder, 0, 0);
 		 m_rearRight.SetSensorPhase(false);
 
+		 DrivePIDController = new PIDController(DRIVE_PIDC_Kp, DRIVE_PIDC_Ki, DRIVE_PIDC_Kd, this, this, DRIVE_PIDC_PERIOD);
+
+		 TicksPerInch = (1/(DRIVE_WHEEL_DIA * 3.1415)) * 4096;
+
 
 		 /***************************************
 		  * Arm motor and encoder setup
@@ -331,6 +337,9 @@ public:
 		 //chooser.AddObject("Manual 1", new AutoSelection());
 
 //		 frc::SmartDashboard::PutData("Auto Modes", &chooser);
+
+
+
 
 	}
 	/********************************************************
@@ -730,6 +739,8 @@ public:
 			ArmTalon->Set(ControlMode::Position, 0);
 
 			SmartDashboard::PutNumber("arm waiting", 0);
+
+			SmartDashboard::PutBoolean("graph_reset", true);
 			/**
 			 * Here, get the data from the DriverStation regarding the switches
 			 * and scale on the field. Three characters will be sent over and
@@ -772,6 +783,10 @@ public:
 				}
 			}
 
+			// enable the drive PID controller
+			SmartDashboard::PutBoolean("graph_reset", true);
+			DrivePIDController->Enable();
+
 	}
 
 	/*********************************************************************************
@@ -794,6 +809,11 @@ public:
 	 *
 	 */
 	void AutonomousPeriodic() {
+
+
+
+
+
 		string nearestSwitch = fieldColorLocations.isNearestSwitchOnLeft() ? "LEFT" : "RIGHT";
 		string scale = fieldColorLocations.isScaleOnLeft() ? "LEFT" : "RIGHT";
 		string furthestSwitch = fieldColorLocations.isFurthestSwitchOnLeft() ? "LEFT" : "RIGHT";
@@ -967,6 +987,17 @@ public:
 			navxgyro->ZeroYaw();
 			SmartDashboard::PutNumber("YEET2", 0);
 			drive(0,0);
+
+
+			DrivePIDController->SetP((double) SmartDashboard::GetNumber("drive_P", 0));
+					DrivePIDController->SetI((double) SmartDashboard::GetNumber("drive_I", 0));
+					DrivePIDController->SetD((double) SmartDashboard::GetNumber("drive_D", 0));
+
+					SmartDashboard::PutNumber("actual_P", DrivePIDController->GetP());
+					SmartDashboard::PutNumber("actual_I", DrivePIDController->GetI());
+					SmartDashboard::PutNumber("actual_D", DrivePIDController->GetD());
+					DrivePIDController->Reset();
+					DrivePIDController->Enable();
 		} else {
 			if(!autonomousVars.CompletingOperation) { // if not currently in a operation
 				// grab next operation
@@ -990,7 +1021,7 @@ public:
 			} else {
 				/**********************************************************************************
 				 * Run arm operations
-				 */
+				 * /
 
 				if(!autonomousVars.ArmOperationDone) {
 					if(autonomousVars.autoTemp->data[0] > 0) { // initial state of doing nothing.
@@ -1026,7 +1057,8 @@ public:
 				}
 				SmartDashboard::PutNumber("Arm Motor Target Position", autonomousVars.autoTemp->data[0]);
 				SmartDashboard::PutNumber("Arm Motor actual Position", ArmTalon->GetSelectedSensorPosition(0));
-
+				*/
+				autonomousVars.ArmOperationDone = true;
 
 
 
@@ -1045,7 +1077,7 @@ public:
 
 				/**********************************************************************************
 				 * run grabber operations
-				 */
+				 * /
 				if(autonomousVars.autoTemp->data[6]) {
 					grabberSolenoid.Set(frc::DoubleSolenoid::Value::kForward);
 				} else {
@@ -1057,12 +1089,14 @@ public:
 				} else {
 					GrabberTalon->Set(ControlMode::PercentOutput, 0);
 					autonomousVars.GrabberOperationDone = true;
-				}
+				} */
+
+				autonomousVars.GrabberOperationDone = true;
 
 
 				/**********************************************************************************
 				 * run intake operations
-				 */
+				 * /
 				if(autonomousVars.autoTemp->data[9]) { // if its a one open the intake
 					intakeSolenoid.Set(frc::DoubleSolenoid::Value::kReverse);
 				} else {
@@ -1078,14 +1112,20 @@ public:
 					IntakeTalonLeft->Set(0);
 					IntakeTalonRight->Set(0);
 					autonomousVars.IntakeOperationDone = true;
-				}
+				} */
+				autonomousVars.IntakeOperationDone = true;
 
 
 				/**********************************************************************************
 				 * run drive train operations
 				 */
-				autonomousVars.DriveOperationDone = true;
-				//if(!autonomousVars.DriveOperationDone) {
+				if(!autonomousVars.DriveOperationDone) {
+					DrivePIDController->SetSetpoint((TicksPerInch * (autonomousVars.autoTemp->data[2])-2));
+					SmartDashboard::PutNumber("Drive Target Position", autonomousVars.autoTemp->data[2]);
+
+
+				}
+				/*//if(!autonomousVars.DriveOperationDone) {
 					if(autonomousVars.autoTemp->data[2] < 1) {
 						if(((int) ((m_rearLeft.GetSelectedSensorPosition(0) + m_rearRight.GetSelectedSensorPosition(0))/2)) > (autonomousVars.autoTemp->data[2] + DRIVE_AUTO_ERROR)) { // backward
 							m_drive.CurvatureDrive(-autonomousVars.autoTemp->data[3], -navxgyro->GetAngle() * 0.014,false);
@@ -1112,9 +1152,14 @@ public:
 					else {
 						autonomousVars.DriveOperationDone = true;
 					}
-				//}
+				//}*/
 				SmartDashboard::PutNumber("Drive left Position", m_rearLeft.GetSelectedSensorPosition(0));
 				SmartDashboard::PutNumber("Drive Right Position", m_rearRight.GetSelectedSensorPosition(0));
+				// put data on the graph
+				//SmartDashboard::PutNumber("graph_actual", (m_rearRight.GetSelectedSensorPosition(0)+m_rearLeft.GetSelectedSensorPosition(0))/2);
+				//SmartDashboard::PutNumber("graph_target", autonomousVars.autoTemp->data[2]);
+				//SmartDashboard::PutBoolean("graph_in", true);
+
 				autonomousVars.TurningOperationDone = true;
 				// turning operation
 				/*if(autonomousVars.DriveOperationDone) {
@@ -1205,6 +1250,22 @@ public:
 		if(autonomousVars.DriveOperationDone && autonomousVars.TurningOperationDone) {
 			drive(0,0);
 		}
+
+
+
+
+
+	}
+
+	double PIDGet(){
+		return ((m_rearLeft.GetSelectedSensorPosition(0) + m_rearRight.GetSelectedSensorPosition(0))/2);
+	}
+
+	void PIDWrite(double PIDPower){
+		drive(PIDPower * SmartDashboard::GetNumber("drive_Undef", 0), 0);
+		SmartDashboard::PutNumber("graph_actual", ((m_rearLeft.GetSelectedSensorPosition(0) + m_rearRight.GetSelectedSensorPosition(0))/2));
+		SmartDashboard::PutNumber("graph_target", autonomousVars.autoTemp->data[2]);
+		SmartDashboard::PutBoolean("graph_in", true);
 	}
 
 	/***********************************************************************
@@ -1233,6 +1294,8 @@ public:
 
 		m_rearRight.SetSelectedSensorPosition(0, kPIDLoopIdx, kTimeoutMs);
 		m_rearLeft.SetSelectedSensorPosition(0, kPIDLoopIdx, kTimeoutMs);
+
+		DrivePIDController->Disable(); // turn off the drive PID controller
 	}
 
 	/***********************************************************************
@@ -1243,9 +1306,9 @@ public:
 	void TeleopPeriodic() {
 		pollControllers(); //
 		pollSensors();
-		runIntake();
-	    runGrabber();
-		runArm();
+		//runIntake();
+	    //runGrabber();
+		//runArm();
 		drive(joystickX,joystickY);
 
 		if(GyroFound) {
@@ -1258,7 +1321,7 @@ public:
 		SmartDashboard::PutNumber("Drive Target X", joystickX);
 
 
-		SmartDashboard::PutNumber("Hall Effect Value" , HallEffect->Get());
+		//SmartDashboard::PutNumber("Hall Effect Value" , HallEffect->Get());
 	}
 
 	/***********************************************************************
@@ -1266,10 +1329,23 @@ public:
 	 * the teleop or auto modes.
 	 *
 	 */
-	void TestPeriodic() {
+
+	void TestInit() {
+		SmartDashboard::PutBoolean("graph_reset", true);
+
+		DrivePIDController->Enable();
 
 
 	}
+
+	void TestPeriodic() {
+
+		DrivePIDController->SetSetpoint(10000);
+		drive(0,0);
+
+	}
+
+
 
 	/***********************************************************************
 	 * This has all of the main program variables in it. Almost all of them
@@ -1290,6 +1366,13 @@ private:
 	 */
 	double driveSlow = 0.3, driveNormal = 0.6, driveFull = 1;
 	double driveLevel = driveNormal;
+	PIDController *DrivePIDController;
+
+	double PIDEncoderCount = 0;
+
+
+	double TicksPerInch =0;
+
 
 
 	/*
@@ -1309,6 +1392,7 @@ private:
 	float gyroAngle;
 	DigitalInput *HallEffect;
 	DigitalInput *IntakeSwitch;
+
 
 	/* The following PID Controller coefficients will need to be tuned */
 	/* to match the dynamics of your drive system.  Note that the      */
@@ -1397,5 +1481,7 @@ private:
 	//frc::SendableChooser<frc::Command*> chooser;
 
 };
+
+
 
 START_ROBOT_CLASS(Robot)

@@ -22,6 +22,15 @@
 
 #define DRIVE_AUTO_ERROR 100
 
+#define DRIVE_PIDC_Kp 0.0035
+#define DRIVE_PIDC_Ki 0
+#define DRIVE_PIDC_Kd 0.002
+#define DRIVE_PIDC_Kf 0
+
+#define DRIVE_PIDC_PERIOD 0.02  // default maybe change to 20ms
+
+#define DRIVE_WHEEL_DIA 6 // in inches
+
 /**********************************
  * PID constants. These are for the arm PID and should be adjusted with care
  */
