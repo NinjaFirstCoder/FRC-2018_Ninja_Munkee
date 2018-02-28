@@ -271,8 +271,8 @@ Operation_03
 Operation_01
 	arm_position: 0
 	arm_speed: 0
-	drive_position: 48
-	drive_speed: 1
+	drive_position: 96
+	drive_speed: 0.8
 	turn_angle: 0
 	turn_speed: 0
 	grabber_position: 0
@@ -285,10 +285,10 @@ Operation_01
 -END- 
 -AutoMode_8-
 Operation_01
-	arm_position: 40096
+	arm_position: 0
 	arm_speed: 0
-	drive_position: 4096
-	drive_speed: 0
+	drive_position: 96
+	drive_speed: 0.8
 	turn_angle: 0
 	turn_speed: 0
 	grabber_position: 0
@@ -299,24 +299,10 @@ Operation_01
 	intake_time: 0
 	time: 0
 Operation_02
-	arm_position: 40096
+	arm_position: 0
 	arm_speed: 0
-	drive_position: 4096
-	drive_speed: 0
-	turn_angle: 0
-	turn_speed: 0
-	grabber_position: 0
-	grabber_speed: 0 
-	grabber_time: 0
-	intake_position: 0
-	intake_speed: 0
-	intake_time: 0
-	time: 0
-Operation_03
-	arm_position: 40096
-	arm_speed: 0
-	drive_position: 4096
-	drive_speed: 0
+	drive_position: -24
+	drive_speed: 0.8
 	turn_angle: 0
 	turn_speed: 0
 	grabber_position: 0

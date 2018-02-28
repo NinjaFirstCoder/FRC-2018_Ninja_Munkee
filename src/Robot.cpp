@@ -38,6 +38,7 @@
 #include <PIDController.h>
 #include <AHRS.h>
 
+
 // autonomous config files
 #include <iostream>
 #include <stdlib.h>
@@ -48,8 +49,6 @@
 #include <cstdlib>
 using namespace std;
 #define OPERATION_ELEMENTS 13
-
-
 
 
 class Robot : public frc::TimedRobot, public PIDSource, public PIDOutput {
@@ -300,6 +299,8 @@ public:
 		 m_rearRight.SetSensorPhase(false);
 
 		 DrivePIDController = new PIDController(DRIVE_PIDC_Kp, DRIVE_PIDC_Ki, DRIVE_PIDC_Kd, this, this, DRIVE_PIDC_PERIOD);
+
+		 //GyroPIDOutput = new DriveGyroPIDOutput;
 
 		 TicksPerInch = (1/(DRIVE_WHEEL_DIA * 3.1415)) * 4096;
 
@@ -739,7 +740,6 @@ public:
 			ArmTalon->Set(ControlMode::Position, 0);
 
 			SmartDashboard::PutNumber("arm waiting", 0);
-
 			SmartDashboard::PutBoolean("graph_reset", true);
 			/**
 			 * Here, get the data from the DriverStation regarding the switches
@@ -785,7 +785,11 @@ public:
 
 			// enable the drive PID controller
 			SmartDashboard::PutBoolean("graph_reset", true);
-			DrivePIDController->Enable();
+			//DrivePIDController->Enable();
+
+			ranOnce = false;
+
+			// setup for the gyro PID controler
 
 	}
 
@@ -809,11 +813,6 @@ public:
 	 *
 	 */
 	void AutonomousPeriodic() {
-
-
-
-
-
 		string nearestSwitch = fieldColorLocations.isNearestSwitchOnLeft() ? "LEFT" : "RIGHT";
 		string scale = fieldColorLocations.isScaleOnLeft() ? "LEFT" : "RIGHT";
 		string furthestSwitch = fieldColorLocations.isFurthestSwitchOnLeft() ? "LEFT" : "RIGHT";
@@ -984,10 +983,10 @@ public:
 			//ArmTalon->SetSelectedSensorPosition(0, kPIDLoopIdx, kTimeoutMs);
 			m_rearLeft.SetSelectedSensorPosition(0, kPIDLoopIdx, kTimeoutMs);
 			m_rearRight.SetSelectedSensorPosition(0, kPIDLoopIdx, kTimeoutMs);
-			navxgyro->ZeroYaw();
-			SmartDashboard::PutNumber("YEET2", 0);
-			drive(0,0);
 
+			navxgyro->ZeroYaw();
+			drive(0,0);
+/*
 
 			DrivePIDController->SetP((double) SmartDashboard::GetNumber("drive_P", 0));
 					DrivePIDController->SetI((double) SmartDashboard::GetNumber("drive_I", 0));
@@ -995,9 +994,9 @@ public:
 
 					SmartDashboard::PutNumber("actual_P", DrivePIDController->GetP());
 					SmartDashboard::PutNumber("actual_I", DrivePIDController->GetI());
-					SmartDashboard::PutNumber("actual_D", DrivePIDController->GetD());
-					DrivePIDController->Reset();
-					DrivePIDController->Enable();
+					SmartDashboard::PutNumber("actual_D", DrivePIDController->GetD());*/
+			//DrivePIDController->Reset();
+			//DrivePIDController->Enable();
 		} else {
 			if(!autonomousVars.CompletingOperation) { // if not currently in a operation
 				// grab next operation
@@ -1120,10 +1119,43 @@ public:
 				 * run drive train operations
 				 */
 				if(!autonomousVars.DriveOperationDone) {
-					DrivePIDController->SetSetpoint((TicksPerInch * (autonomousVars.autoTemp->data[2])-2));
 					SmartDashboard::PutNumber("Drive Target Position", autonomousVars.autoTemp->data[2]);
+					SmartDashboard::PutNumber("Drive gyro angle", navxgyro->GetAngle());
+					if(!ranOnce) {
+						navxgyro->ZeroYaw();
+						startYaw = navxgyro->GetAngle();
+						if(startYaw < 0.5 && startYaw > -0.5) {
+							ranOnce = true;
+							DrivePIDController->Enable();
+							SmartDashboard::PutNumber("Start Yaw Drive", startYaw);
+						}
+					} else {
+						TurningAngle = -(navxgyro->GetAngle()) * SmartDashboard::GetNumber("drive_P", 0);
+						trueSetpoint  = (TicksPerInch * (autonomousVars.autoTemp->data[2]));
+						DrivePIDController->SetSetpoint(trueSetpoint);
 
 
+						SmartDashboard::PutNumber("graph_actual", 0);
+						SmartDashboard::PutNumber("graph_target", TurningAngle);
+						SmartDashboard::PutBoolean("graph_in", true);
+
+						if(autonomousVars.autoTemp->data[2] <= 1) { // if negative position
+							if(((m_rearLeft.GetSelectedSensorPosition(0) + m_rearRight.GetSelectedSensorPosition(0))/2) < (trueSetpoint + 100)) {
+								autonomousVars.DriveOperationDone = true;
+								DrivePIDController->Disable();
+								ranOnce = false;
+							}
+
+						}
+						if(autonomousVars.autoTemp->data[2] >= 1) { // if positive position
+							if(((m_rearLeft.GetSelectedSensorPosition(0) + m_rearRight.GetSelectedSensorPosition(0))/2) > (trueSetpoint + 100)) {
+								autonomousVars.DriveOperationDone = true;
+								DrivePIDController->Disable();
+								ranOnce = false;
+							}
+
+						}
+					}
 				}
 				/*//if(!autonomousVars.DriveOperationDone) {
 					if(autonomousVars.autoTemp->data[2] < 1) {
@@ -1155,10 +1187,7 @@ public:
 				//}*/
 				SmartDashboard::PutNumber("Drive left Position", m_rearLeft.GetSelectedSensorPosition(0));
 				SmartDashboard::PutNumber("Drive Right Position", m_rearRight.GetSelectedSensorPosition(0));
-				// put data on the graph
-				//SmartDashboard::PutNumber("graph_actual", (m_rearRight.GetSelectedSensorPosition(0)+m_rearLeft.GetSelectedSensorPosition(0))/2);
-				//SmartDashboard::PutNumber("graph_target", autonomousVars.autoTemp->data[2]);
-				//SmartDashboard::PutBoolean("graph_in", true);
+
 
 				autonomousVars.TurningOperationDone = true;
 				// turning operation
@@ -1191,9 +1220,6 @@ public:
 
 					}
 				}*/
-				SmartDashboard::PutNumber("GYRO ANGLE", navxgyro->GetAngle());
-				SmartDashboard::PutNumber("GYRO TARGET ANGLE", autonomousVars.autoTemp->data[4] );
-				SmartDashboard::PutNumber("GYRO SPEED" , autonomousVars.autoTemp->data[5]);
 				/*
 				if(m_rearLeft.GetSelectedSensorPosition(0) < (autonomousVars.autoTemp->data[2] - DRIVE_AUTO_ERROR) || m_rearLeft.GetSelectedSensorPosition(0) > (autonomousVars.autoTemp->data[2] + DRIVE_AUTO_ERROR) ){
 					if(autonomousVars.autoTemp->data[2]  < 1) {
@@ -1222,6 +1248,8 @@ public:
 				SmartDashboard::PutNumber("TimeOperationDone", autonomousVars.TimeOperationDone);
 				SmartDashboard::PutNumber("IntakeOperationDone", autonomousVars.IntakeOperationDone );
 				SmartDashboard::PutNumber("GrabberOperationDone", autonomousVars.GrabberOperationDone);
+
+
 				if(autonomousVars.TurningOperationDone && autonomousVars.DriveOperationDone && autonomousVars.ArmOperationDone && autonomousVars.TimeOperationDone && autonomousVars.IntakeOperationDone && autonomousVars.GrabberOperationDone) {
 					SmartDashboard::PutString("CURRENTAUTOSTATE", "Finished arm");
 
@@ -1232,41 +1260,54 @@ public:
 					autonomousVars.IntakeOperationDone = false;
 					autonomousVars.DriveOperationDone = false;
 					autonomousVars.TurningOperationDone = false;
-
 					autonomousVars.timeCount = 0;
 					autonomousVars.grabberTimeCount = 0;
 					autonomousVars.intakeTimeCount = 0;
-					SmartDashboard::PutNumber("arm waiting", 0);
+
+
+
 					m_rearLeft.SetSelectedSensorPosition(0, kPIDLoopIdx, kTimeoutMs); // this makes the drive train position relative
 					m_rearRight.SetSelectedSensorPosition(0, kPIDLoopIdx, kTimeoutMs);
 					navxgyro->ZeroYaw();
+					TurningAngle = 0;
 
-					SmartDashboard::PutNumber("yeet", 0);
-					SmartDashboard::PutNumber("yeet", 1);
+					ranOnce = false;
 				}
-
 			}
 		}
 		if(autonomousVars.DriveOperationDone && autonomousVars.TurningOperationDone) {
 			drive(0,0);
 		}
-
-
-
-
-
 	}
 
+	/*********************************************************************************
+	 * These functions overwrite the default PIDController input and output functions.
+	 *
+	 */
 	double PIDGet(){
 		return ((m_rearLeft.GetSelectedSensorPosition(0) + m_rearRight.GetSelectedSensorPosition(0))/2);
 	}
 
 	void PIDWrite(double PIDPower){
-		drive(PIDPower * SmartDashboard::GetNumber("drive_Undef", 0), 0);
-		SmartDashboard::PutNumber("graph_actual", ((m_rearLeft.GetSelectedSensorPosition(0) + m_rearRight.GetSelectedSensorPosition(0))/2));
-		SmartDashboard::PutNumber("graph_target", autonomousVars.autoTemp->data[2]);
-		SmartDashboard::PutBoolean("graph_in", true);
+		drive(PIDPower * autonomousVars.autoTemp->data[3], TurningAngle);
+		//SmartDashboard::PutNumber("graph_actual", ((m_rearLeft.GetSelectedSensorPosition(0) + m_rearRight.GetSelectedSensorPosition(0))/2));
+		//SmartDashboard::PutNumber("graph_target", autonomousVars.autoTemp->data[2]);
+		//SmartDashboard::PutBoolean("graph_in", true);
 	}
+	/*********************************************************************************
+	 * This is custom PIDController output code. It is used for driving the auto
+	 * straight.
+	 *
+	 */
+	/*class DriveGyroPIDOutput : public PIDOutput {
+		private:
+			double *PIDOutputVar;
+		public:
+			virtual void PIDWrite(float output) {
+				*PIDOutputVar = output; // put the value of the PIDOutput in the proper variable
+			}
+	};*/
+
 
 	/***********************************************************************
 	 * This is the first thing that is ran when teleop starts. Make sure you
@@ -1296,6 +1337,8 @@ public:
 		m_rearLeft.SetSelectedSensorPosition(0, kPIDLoopIdx, kTimeoutMs);
 
 		DrivePIDController->Disable(); // turn off the drive PID controller
+
+		navxgyro->ZeroYaw();
 	}
 
 	/***********************************************************************
@@ -1366,14 +1409,23 @@ private:
 	 */
 	double driveSlow = 0.3, driveNormal = 0.6, driveFull = 1;
 	double driveLevel = driveNormal;
+
+	/*
+	 * auto PID and stuff
+	 */
 	PIDController *DrivePIDController;
-
 	double PIDEncoderCount = 0;
+	double TicksPerInch = 0;
 
+	//DriveGyroPIDOutput *GyroPIDOutput;
+	double GyroPIDOutputPower = 0;
 
-	double TicksPerInch =0;
+	double TurningAngle = 0;
 
+	double ranOnce = false;
+	double startYaw = 0;
 
+	double trueSetpoint = 0;
 
 	/*
 	 * Controller setup. Joy-sticks, buttons etc.
