@@ -22,10 +22,19 @@
 
 #define DRIVE_AUTO_ERROR 100
 
-#define DRIVE_PIDC_Kp 0.0035
+#define DRIVE_PIDC_Kp 0.0035    // for driving
 #define DRIVE_PIDC_Ki 0
 #define DRIVE_PIDC_Kd 0.002
 #define DRIVE_PIDC_Kf 0
+
+#define DRIVE_STRAIGHT_P 0.095 // for driving straight
+
+
+#define DRIVE_PIDT_Kp 0.0035   // for turning
+#define DRIVE_PIDT_Ki 0
+#define DRIVE_PIDT_Kd 0.002
+#define DRIVE_PIDT_Kf 0
+
 
 #define DRIVE_PIDC_PERIOD 0.02  // default maybe change to 20ms
 
