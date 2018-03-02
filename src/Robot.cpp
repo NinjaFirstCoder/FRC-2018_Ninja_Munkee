@@ -301,7 +301,7 @@ public:
 		 * Multiple navX-model devices on a single robot are supported.
 		 ************************************************************************/
 		 try {
-			 navxgyro = new AHRS(SerialPort::Port::kUSB);
+			 navxgyro = new AHRS(SerialPort::Port::kUSB, AHRS::SerialDataType::kProcessedData,  200);
 		 } catch (std::exception& ex ) {
 			 std::string err_string = "Error instantiating navX MXP:  ";
 		     err_string += ex.what();
@@ -329,7 +329,7 @@ public:
 
 		 DriveTurningPIDOutputController = new TDPIDOutput;
 		 DriveTurningPIDController = new PIDController(DRIVE_PIDC_Kp, DRIVE_PIDC_Ki, DRIVE_PIDC_Kd, navxgyro, DriveTurningPIDOutputController);
-		 DriveTurningPIDController->SetInputRange(-180.0f,  180.0f);
+		 DriveTurningPIDController->SetInputRange(-1000000.0f,  1000000.0f);
 		 DriveTurningPIDController->SetOutputRange(-1.0, 1.0);
 		 //DriveTurningPIDController->SetAbsoluteTolerance(kToleranceDegrees);
 		 DriveTurningPIDController->SetContinuous(true);
@@ -765,7 +765,7 @@ public:
 			//ArmTalon->SetSelectedSensorPosition(0, kPIDLoopIdx, kTimeoutMs);
 			m_rearLeft.SetSelectedSensorPosition(0, kPIDLoopIdx, kTimeoutMs);
 			m_rearRight.SetSelectedSensorPosition(0, kPIDLoopIdx, kTimeoutMs);
-			navxgyro->ZeroYaw();
+			//navxgyro->ZeroYaw();
 
 			m_left.SetInverted(false);
 
@@ -1017,7 +1017,7 @@ public:
 			m_rearLeft.SetSelectedSensorPosition(0, kPIDLoopIdx, kTimeoutMs);
 			m_rearRight.SetSelectedSensorPosition(0, kPIDLoopIdx, kTimeoutMs);
 
-			navxgyro->ZeroYaw();
+			//navxgyro->ZeroYaw();
 			drive(0,0);
 
 
@@ -1039,7 +1039,7 @@ public:
 					if(autonomousVars.autoTemp!=NULL) {
 						autonomousVars.CompletingOperation = true;
 						SmartDashboard::PutString("CURRENTAUTOSTATE", "grabbing next value");
-						navxgyro->ZeroYaw();
+						//navxgyro->ZeroYaw();
 					} else {
 						autonomousVars.CompletingOperation = false;
 						SmartDashboard::PutString("CURRENTAUTOSTATE", "FOUND NULL");
@@ -1155,17 +1155,20 @@ public:
 					SmartDashboard::PutNumber("Drive Target Position", autonomousVars.autoTemp->data[2]);
 					SmartDashboard::PutNumber("Drive gyro angle", navxgyro->GetAngle());
 					if(!ranOnce) {
-						navxgyro->ZeroYaw();
-						startYaw = navxgyro->GetAngle();
-						if(startYaw < 0.5 && startYaw > -0.5) {
+						//navxgyro->ZeroYaw();
+							startYaw = navxgyro->GetAngle();
+						//if(startYaw < 0.5 && startYaw > -0.5) {
 							ranOnce = true;
+
+							m_rearLeft.SetSelectedSensorPosition(0, kPIDLoopIdx, kTimeoutMs);
+							m_rearRight.SetSelectedSensorPosition(0, kPIDLoopIdx, kTimeoutMs);
+							trueSetpoint  = (TicksPerInch * (autonomousVars.autoTemp->data[2]));
+							DrivePIDController->SetSetpoint(trueSetpoint);
 							DrivePIDController->Enable();
 							SmartDashboard::PutNumber("Start Yaw Drive", startYaw);
-						}
+						//}
 					} else {
-						TurningAngle = -(navxgyro->GetAngle()) * DRIVE_STRAIGHT_P;
-						trueSetpoint  = (TicksPerInch * (autonomousVars.autoTemp->data[2]));
-						DrivePIDController->SetSetpoint(trueSetpoint);
+						TurningAngle = -(navxgyro->GetAngle() - startYaw) * DRIVE_STRAIGHT_P;
 
 
 						SmartDashboard::PutNumber("graph_actual", 0);
@@ -1190,40 +1193,69 @@ public:
 						}
 					}
 				}
-				SmartDashboard::PutNumber("Drive left Position", m_rearLeft.GetSelectedSensorPosition(0));
-				SmartDashboard::PutNumber("Drive Right Position", m_rearRight.GetSelectedSensorPosition(0));
+				SmartDashboard::PutNumber("2 Drive left Position", m_rearLeft.GetSelectedSensorPosition(0));
+				SmartDashboard::PutNumber("2 Drive Right Position", m_rearRight.GetSelectedSensorPosition(0));
+				SmartDashboard::PutNumber("2 Drive truesetpoint", trueSetpoint);
 
 
 				//autonomousVars.TurningOperationDone = true;
 				// turning operation
 				if(autonomousVars.DriveOperationDone) {
+					if(autonomousVars.autoTemp->data[4] == 0){
+						autonomousVars.TurningOperationDone = true;
+					}
 					if(!autonomousVars.TurningOperationDone) {
 						if(!ranOnce) {
-								navxgyro->ZeroYaw();
+								//navxgyro->ZeroYaw();
 								startYaw = navxgyro->GetAngle();
-								if(startYaw < 0.5 && startYaw > -0.5) {
-									ranOnce = true;
-									//DriveTurningPIDController->Reset();
-									DriveTurningPIDController->Enable();
-									SmartDashboard::PutNumber("Start Yaw Drive", startYaw);
-								}
-						} else {
-							 SmartDashboard::PutNumber("Drive angle setpoint", autonomousVars.autoTemp->data[4]);
-							 SmartDashboard::PutNumber("Drive gyro angle", navxgyro->GetAngle());
-							 SmartDashboard::PutNumber("Drive PID power", DriveTurningPIDOutputController->GetOutput());
+								///if(startYaw < 0.5 && startYaw > -0.5) {
+									//ranOnce = true;
+							//DriveTurningPIDController->Reset();
 
-							 DriveTurningPIDController->SetSetpoint(autonomousVars.autoTemp->data[4]);
-							 m_drive.ArcadeDrive(0,  DriveTurningPIDOutputController->GetOutput());
+								SmartDashboard::PutNumber("Start Yaw Drive", startYaw);
+								if(autonomousVars.autoTemp->data[4] < 0) {
+									DriveTurningPIDController->SetSetpoint((autonomousVars.autoTemp->data[4] + startYaw + 5));
+								} else {
+									DriveTurningPIDController->SetSetpoint((autonomousVars.autoTemp->data[4] + startYaw - 7.5));
+								}
+
+
+								DriveTurningPIDController->Enable();
+								ranOnce = true;
+								//}
+						} else {
+
+								if(autonomousVars.autoTemp->data[4] < 0) { // if the setpoint is negative
+									if(DriveTurningPIDOutputController->m_out * autonomousVars.autoTemp->data[5] < 0) {
+										turningIsNegative = 1;
+									} else {
+										turningIsNegative = -1;
+									}
+								} else {
+									if(DriveTurningPIDOutputController->m_out * autonomousVars.autoTemp->data[5] < 0) {
+											turningIsNegative = -1;
+									} else {
+											turningIsNegative = 1;
+									}
+
+								}
+							 SmartDashboard::PutNumber("Drive angle setpoint", DriveTurningPIDController->GetSetpoint());
+							 SmartDashboard::PutNumber("Drive gyro angle", navxgyro->GetAngle());
+							 SmartDashboard::PutNumber("Drive PID power", turningIsNegative * (DriveTurningPIDOutputController->m_out * autonomousVars.autoTemp->data[5]));
+							 SmartDashboard::PutNumber("Drive PID set power", autonomousVars.autoTemp->data[4]);
+
+
+							 m_drive.ArcadeDrive(0,  turningIsNegative * DriveTurningPIDOutputController->m_out * autonomousVars.autoTemp->data[5]);
 
 							 if(autonomousVars.autoTemp->data[4] <= 1) { // if negative position
-							 		if(navxgyro->GetAngle() < (autonomousVars.autoTemp->data[4] + 1)) {
+							 		if(navxgyro->GetAngle() < DriveTurningPIDController->GetSetpoint() + 1) {
 							 				autonomousVars.TurningOperationDone = true;
 							 				DriveTurningPIDController->Disable();
 							 				ranOnce = false;
 							 		}
 							 }
 							 if(autonomousVars.autoTemp->data[4] >= 1) { // if positive position
-							 		if(navxgyro->GetAngle() > (autonomousVars.autoTemp->data[4] - 1)) {
+							 		if(navxgyro->GetAngle() >  DriveTurningPIDController->GetSetpoint() - 1) {
 							 				autonomousVars.TurningOperationDone = true;
 							 				DriveTurningPIDController->Disable();
 							 				ranOnce = false;
@@ -1241,12 +1273,12 @@ public:
 				 * Put all the modes current completion state on the driver station and test to see
 				 * if we can move onto the next operation.
 				 */
-				SmartDashboard::PutNumber("TurningOperationDone", autonomousVars.TurningOperationDone);
-				SmartDashboard::PutNumber("DriveOperationDone", autonomousVars.DriveOperationDone);
-				SmartDashboard::PutNumber("ArmOperationDone", autonomousVars.ArmOperationDone);
-				SmartDashboard::PutNumber("TimeOperationDone", autonomousVars.TimeOperationDone);
-				SmartDashboard::PutNumber("IntakeOperationDone", autonomousVars.IntakeOperationDone );
-				SmartDashboard::PutNumber("GrabberOperationDone", autonomousVars.GrabberOperationDone);
+				SmartDashboard::PutNumber("1 TurningOperationDone", autonomousVars.TurningOperationDone);
+				SmartDashboard::PutNumber("1 DriveOperationDone", autonomousVars.DriveOperationDone);
+				SmartDashboard::PutNumber("1 ArmOperationDone", autonomousVars.ArmOperationDone);
+				SmartDashboard::PutNumber("1 TimeOperationDone", autonomousVars.TimeOperationDone);
+				SmartDashboard::PutNumber("1 IntakeOperationDone", autonomousVars.IntakeOperationDone );
+				SmartDashboard::PutNumber("1 GrabberOperationDone", autonomousVars.GrabberOperationDone);
 
 
 				if(autonomousVars.TurningOperationDone && autonomousVars.DriveOperationDone && autonomousVars.ArmOperationDone && autonomousVars.TimeOperationDone && autonomousVars.IntakeOperationDone && autonomousVars.GrabberOperationDone) {
@@ -1267,7 +1299,7 @@ public:
 
 					m_rearLeft.SetSelectedSensorPosition(0, kPIDLoopIdx, kTimeoutMs); // this makes the drive train position relative
 					m_rearRight.SetSelectedSensorPosition(0, kPIDLoopIdx, kTimeoutMs);
-					navxgyro->ZeroYaw();
+					//navxgyro->ZeroYaw();
 					TurningAngle = 0;
 
 					ranOnce = false;
@@ -1428,6 +1460,8 @@ private:
 	double trueSetpoint = 0;
 
 	double PIDTurningOutputPower = 0;
+
+	int turningIsNegative = 1;
 
 
 	PIDController *DriveTurningPIDController;
