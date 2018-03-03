@@ -465,9 +465,43 @@ Operation_01
 Operation_01
 	arm_position: 0
 	arm_speed: 0
-	drive_position: 24
+	drive_position: 48
 	drive_speed: 0.8
-	turn_angle: -90
+	turn_angle: 0
+	turn_speed: 0
+	grabber_position: 0
+	grabber_speed: 0 
+	grabber_time: 0
+	intake_position: 0
+	intake_speed: 0
+	intake_time: 0
+	time: 0
+-END- 
+
+-AutoMode_13-
+Operation_01
+	arm_position: 0
+	arm_speed: 0
+	drive_position: 0
+	drive_speed: 0
+	turn_angle: 45
+	turn_speed: 0.8
+	grabber_position: 0
+	grabber_speed: 0 
+	grabber_time: 0
+	intake_position: 0
+	intake_speed: 0
+	intake_time: 0
+	time: 0
+-END- 
+
+-AutoMode_14-
+Operation_01
+	arm_position: 0
+	arm_speed: 0
+	drive_position: 0
+	drive_speed: 0
+	turn_angle: -45
 	turn_speed: 0.8
 	grabber_position: 0
 	grabber_speed: 0 

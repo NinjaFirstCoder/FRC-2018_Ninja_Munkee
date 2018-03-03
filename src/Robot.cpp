@@ -328,7 +328,7 @@ public:
 		 DrivePIDController = new PIDController(DRIVE_PIDC_Kp, DRIVE_PIDC_Ki, DRIVE_PIDC_Kd, this, this, DRIVE_PIDC_PERIOD);
 
 		 DriveTurningPIDOutputController = new TDPIDOutput;
-		 DriveTurningPIDController = new PIDController(DRIVE_PIDC_Kp, DRIVE_PIDC_Ki, DRIVE_PIDC_Kd, navxgyro, DriveTurningPIDOutputController);
+		 DriveTurningPIDController = new PIDController(DRIVE_PIDT_Kp, DRIVE_PIDT_Ki, DRIVE_PIDT_Kd, navxgyro, DriveTurningPIDOutputController);
 		 DriveTurningPIDController->SetInputRange(-1000000.0f,  1000000.0f);
 		 DriveTurningPIDController->SetOutputRange(-1.0, 1.0);
 		 //DriveTurningPIDController->SetAbsoluteTolerance(kToleranceDegrees);
@@ -1021,9 +1021,9 @@ public:
 			drive(0,0);
 
 
-			DriveTurningPIDController->SetP((double) SmartDashboard::GetNumber("drive_P", 0));
-			DriveTurningPIDController->SetI((double) SmartDashboard::GetNumber("drive_I", 0));
-			DriveTurningPIDController->SetD((double) SmartDashboard::GetNumber("drive_D", 0));
+			//DriveTurningPIDController->SetP((double) SmartDashboard::GetNumber("drive_P", 0));
+			//DriveTurningPIDController->SetI((double) SmartDashboard::GetNumber("drive_I", 0));
+			//DriveTurningPIDController->SetD((double) SmartDashboard::GetNumber("drive_D", 0));
 
 				/*	SmartDashboard::PutNumber("actual_P", DrivePIDController->GetP());
 					SmartDashboard::PutNumber("actual_I", DrivePIDController->GetI());
@@ -1177,6 +1177,9 @@ public:
 
 						if(autonomousVars.autoTemp->data[2] <= 1) { // if negative position
 							if(((m_rearLeft.GetSelectedSensorPosition(0) + m_rearRight.GetSelectedSensorPosition(0))/2) < (trueSetpoint + 100)) {
+								SmartDashboard::PutNumber("2 Drive End Position", (m_rearRight.GetSelectedSensorPosition(0) + m_rearLeft.GetSelectedSensorPosition(0))/2);
+								SmartDashboard::PutNumber("2 Drive in End Position", ((m_rearRight.GetSelectedSensorPosition(0) + m_rearLeft.GetSelectedSensorPosition(0))/2)/TicksPerInch);
+
 								autonomousVars.DriveOperationDone = true;
 								DrivePIDController->Disable();
 								ranOnce = false;
@@ -1184,7 +1187,9 @@ public:
 
 						}
 						if(autonomousVars.autoTemp->data[2] >= 1) { // if positive position
-							if(((m_rearLeft.GetSelectedSensorPosition(0) + m_rearRight.GetSelectedSensorPosition(0))/2) > (trueSetpoint + 100)) {
+							if(((m_rearLeft.GetSelectedSensorPosition(0) + m_rearRight.GetSelectedSensorPosition(0))/2) > (trueSetpoint - 100)) {
+								SmartDashboard::PutNumber("2 Drive End Position", (m_rearRight.GetSelectedSensorPosition(0) + m_rearLeft.GetSelectedSensorPosition(0))/2);
+								SmartDashboard::PutNumber("2 Drive in End Position", ((m_rearRight.GetSelectedSensorPosition(0) + m_rearLeft.GetSelectedSensorPosition(0))/2)/TicksPerInch);
 								autonomousVars.DriveOperationDone = true;
 								DrivePIDController->Disable();
 								ranOnce = false;
@@ -1195,7 +1200,10 @@ public:
 				}
 				SmartDashboard::PutNumber("2 Drive left Position", m_rearLeft.GetSelectedSensorPosition(0));
 				SmartDashboard::PutNumber("2 Drive Right Position", m_rearRight.GetSelectedSensorPosition(0));
+				SmartDashboard::PutNumber("2 Drive Avg Position", (m_rearRight.GetSelectedSensorPosition(0) + m_rearLeft.GetSelectedSensorPosition(0))/2);
+				SmartDashboard::PutNumber("2 Drive in Avg Position",  ((m_rearRight.GetSelectedSensorPosition(0) + m_rearLeft.GetSelectedSensorPosition(0))/2)/TicksPerInch);
 				SmartDashboard::PutNumber("2 Drive truesetpoint", trueSetpoint);
+				SmartDashboard::PutNumber("2 Drive in truesetpoint", trueSetpoint/TicksPerInch);
 
 
 				//autonomousVars.TurningOperationDone = true;
