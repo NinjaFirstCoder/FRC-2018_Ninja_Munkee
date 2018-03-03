@@ -38,7 +38,7 @@
 
 #define DRIVE_PIDC_PERIOD 0.02  // default maybe change to 20ms
 
-#define DRIVE_WHEEL_DIA 6.601 // in inches
+#define DRIVE_WHEEL_DIA 6.2861 // in inches
 
 /**********************************
  * PID constants. These are for the arm PID and should be adjusted with care

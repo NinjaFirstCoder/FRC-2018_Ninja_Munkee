@@ -1176,7 +1176,7 @@ public:
 						SmartDashboard::PutBoolean("graph_in", true);
 
 						if(autonomousVars.autoTemp->data[2] <= 1) { // if negative position
-							if(((m_rearLeft.GetSelectedSensorPosition(0) + m_rearRight.GetSelectedSensorPosition(0))/2) < (trueSetpoint + 100)) {
+							if(((m_rearLeft.GetSelectedSensorPosition(0) + m_rearRight.GetSelectedSensorPosition(0))/2) < (trueSetpoint + 200)) {
 								SmartDashboard::PutNumber("2 Drive End Position", (m_rearRight.GetSelectedSensorPosition(0) + m_rearLeft.GetSelectedSensorPosition(0))/2);
 								SmartDashboard::PutNumber("2 Drive in End Position", ((m_rearRight.GetSelectedSensorPosition(0) + m_rearLeft.GetSelectedSensorPosition(0))/2)/TicksPerInch);
 
@@ -1187,7 +1187,7 @@ public:
 
 						}
 						if(autonomousVars.autoTemp->data[2] >= 1) { // if positive position
-							if(((m_rearLeft.GetSelectedSensorPosition(0) + m_rearRight.GetSelectedSensorPosition(0))/2) > (trueSetpoint - 100)) {
+							if(((m_rearLeft.GetSelectedSensorPosition(0) + m_rearRight.GetSelectedSensorPosition(0))/2) > (trueSetpoint - 200)) {
 								SmartDashboard::PutNumber("2 Drive End Position", (m_rearRight.GetSelectedSensorPosition(0) + m_rearLeft.GetSelectedSensorPosition(0))/2);
 								SmartDashboard::PutNumber("2 Drive in End Position", ((m_rearRight.GetSelectedSensorPosition(0) + m_rearLeft.GetSelectedSensorPosition(0))/2)/TicksPerInch);
 								autonomousVars.DriveOperationDone = true;

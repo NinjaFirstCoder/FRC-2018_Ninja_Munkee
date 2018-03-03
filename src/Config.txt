@@ -497,11 +497,39 @@ Operation_01
 
 -AutoMode_14-
 Operation_01
+	arm_position: 0 // finals right left right from left
+	arm_speed: 0
+	drive_position: 259
+	drive_speed: 1
+	turn_angle: 0
+	turn_speed: 0
+	grabber_position: 0
+	grabber_speed: 0 
+	grabber_time: 0
+	intake_position: 0
+	intake_speed: 0
+	intake_time: 0
+	time: 0
+Operation_01
+	arm_position: 0
+	arm_speed: 0
+	drive_position: -30
+	drive_speed: 0.8
+	turn_angle: 0
+	turn_speed: 0
+	grabber_position: 0
+	grabber_speed: 0 
+	grabber_time: 0
+	intake_position: 0
+	intake_speed: 0
+	intake_time: 0
+	time: 0
+Operation_01
 	arm_position: 0
 	arm_speed: 0
 	drive_position: 0
 	drive_speed: 0
-	turn_angle: -45
+	turn_angle: 90
 	turn_speed: 0.8
 	grabber_position: 0
 	grabber_speed: 0 
@@ -510,4 +538,475 @@ Operation_01
 	intake_speed: 0
 	intake_time: 0
 	time: 0
+Operation_01
+	arm_position: 0
+	arm_speed: 0
+	drive_position: 173
+	drive_speed: 0.8
+	turn_angle: 0
+	turn_speed: 0
+	grabber_position: 0
+	grabber_speed: 0 
+	grabber_time: 0
+	intake_position: 0
+	intake_speed: 0
+	intake_time: 0
+	time: 0
+Operation_01
+	arm_position: 0
+	arm_speed: 0
+	drive_position: 0
+	drive_speed: 0
+	turn_angle: 90
+	turn_speed: 0.8
+	grabber_position: 0
+	grabber_speed: 0 
+	grabber_time: 0
+	intake_position: 0
+	intake_speed: 0
+	intake_time: 0
+	time: 0
+Operation_01
+	arm_position: 0
+	arm_speed: 0
+	drive_position: 20
+	drive_speed: 0.8
+	turn_angle: 0
+	turn_speed: 0
+	grabber_position: 0
+	grabber_speed: 0 
+	grabber_time: 0
+	intake_position: 0
+	intake_speed: 0
+	intake_time: 0
+	time: 0
 -END- 
+
+-AutoMode_15-
+Operation_01
+	arm_position: 0 // this is the code for doing left right left from left
+	arm_speed: 0
+	drive_position: 235
+	drive_speed: 1
+	turn_angle: 0
+	turn_speed: 0
+	grabber_position: 0
+	grabber_speed: 0 
+	grabber_time: 0
+	intake_position: 0
+	intake_speed: 0
+	intake_time: 0
+	time: 0
+Operation_01
+	arm_position: 0
+	arm_speed: 0
+	drive_position: 0
+	drive_speed: 0
+	turn_angle: 90
+	turn_speed: 0.8
+	grabber_position: 0
+	grabber_speed: 0 
+	grabber_time: 0
+	intake_position: 0
+	intake_speed: 0
+	intake_time: 0
+	time: 0
+Operation_01
+	arm_position: 0
+	arm_speed: 0
+	drive_position: 33
+	drive_speed: 0.8
+	turn_angle: 0
+	turn_speed: 0
+	grabber_position: 0
+	grabber_speed: 0 
+	grabber_time: 0
+	intake_position: 0
+	intake_speed: 0
+	intake_time: 0
+	time: 0
+Operation_01
+	arm_position: 0
+	arm_speed: 0
+	drive_position: 0
+	drive_speed: 0
+	turn_angle: 90
+	turn_speed: 0.8
+	grabber_position: 0
+	grabber_speed: 0 
+	grabber_time: 0
+	intake_position: 0
+	intake_speed: 0
+	intake_time: 0
+	time: 0
+Operation_01
+	arm_position: 0
+	arm_speed: 0
+	drive_position: 24
+	drive_speed: 0.8
+	turn_angle: 0
+	turn_speed: 0
+	grabber_position: 0
+	grabber_speed: 0 
+	grabber_time: 0
+	intake_position: 0
+	intake_speed: 0
+	intake_time: 0
+	time: 0
+Operation_01
+	arm_position: 0
+	arm_speed: 0
+	drive_position: -24
+	drive_speed: 0.8
+	turn_angle: 0
+	turn_speed: 0
+	grabber_position: 0
+	grabber_speed: 0 
+	grabber_time: 0
+	intake_position: 0
+	intake_speed: 0
+	intake_time: 0
+	time: 0
+Operation_01
+	arm_position: 0
+	arm_speed: 0
+	drive_position: 0
+	drive_speed: 0
+	turn_angle: -90
+	turn_speed: 0.8
+	grabber_position: 0
+	grabber_speed: 0 
+	grabber_time: 0
+	intake_position: 0
+	intake_speed: 0
+	intake_time: 0
+	time: 0
+Operation_01
+	arm_position: 0
+	arm_speed: 0
+	drive_position: 160
+	drive_speed: 1
+	turn_angle: 0
+	turn_speed: 0
+	grabber_position: 0
+	grabber_speed: 0 
+	grabber_time: 0
+	intake_position: 0
+	intake_speed: 0
+	intake_time: 0
+	time: 0
+Operation_01
+	arm_position: 0
+	arm_speed: 0
+	drive_position: 0
+	drive_speed: 0
+	turn_angle: -90
+	turn_speed: 0.8
+	grabber_position: 0
+	grabber_speed: 0 
+	grabber_time: 0
+	intake_position: 0
+	intake_speed: 0
+	intake_time: 0
+	time: 0
+Operation_01
+	arm_position: 0
+	arm_speed: 0
+	drive_position: 24
+	drive_speed: 1
+	turn_angle: 0
+	turn_speed: 0
+	grabber_position: 0
+	grabber_speed: 0 
+	grabber_time: 0
+	intake_position: 0
+	intake_speed: 0
+	intake_time: 0
+	time: 0
+-END- 
+
+-AutoMode_16-
+Operation_01
+	arm_position: 0 // code for left left left from left
+	arm_speed: 0
+	drive_position: 235
+	drive_speed: 1
+	turn_angle: 0
+	turn_speed: 0
+	grabber_position: 0
+	grabber_speed: 0 
+	grabber_time: 0
+	intake_position: 0
+	intake_speed: 0
+	intake_time: 0
+	time: 0
+Operation_01
+	arm_position: 0
+	arm_speed: 0
+	drive_position: 0
+	drive_speed: 0
+	turn_angle: 90
+	turn_speed: 0.8
+	grabber_position: 0
+	grabber_speed: 0 
+	grabber_time: 0
+	intake_position: 0
+	intake_speed: 0
+	intake_time: 0
+	time: 0
+Operation_01
+	arm_position: 0
+	arm_speed: 0
+	drive_position: 33
+	drive_speed: 0.8
+	turn_angle: 0
+	turn_speed: 0
+	grabber_position: 0
+	grabber_speed: 0 
+	grabber_time: 0
+	intake_position: 0
+	intake_speed: 0
+	intake_time: 0
+	time: 0
+Operation_01
+	arm_position: 0
+	arm_speed: 0
+	drive_position: 0
+	drive_speed: 0
+	turn_angle: 90
+	turn_speed: 0.8
+	grabber_position: 0
+	grabber_speed: 0 
+	grabber_time: 0
+	intake_position: 0
+	intake_speed: 0
+	intake_time: 0
+	time: 0
+Operation_01
+	arm_position: 0
+	arm_speed: 0
+	drive_position: 24
+	drive_speed: 0.8
+	turn_angle: 0
+	turn_speed: 0
+	grabber_position: 0
+	grabber_speed: 0 
+	grabber_time: 0
+	intake_position: 0
+	intake_speed: 0
+	intake_time: 0
+	time: 0
+Operation_01
+	arm_position: 0
+	arm_speed: 0
+	drive_position: -24
+	drive_speed: 0.8
+	turn_angle: 0
+	turn_speed: 0
+	grabber_position: 0
+	grabber_speed: 0 
+	grabber_time: 0
+	intake_position: 0
+	intake_speed: 0
+	intake_time: 0
+	time: 0
+Operation_01
+	arm_position: 0
+	arm_speed: 0
+	drive_position: 0
+	drive_speed: 0
+	turn_angle: 90
+	turn_speed: 0.8
+	grabber_position: 0
+	grabber_speed: 0 
+	grabber_time: 0
+	intake_position: 0
+	intake_speed: 0
+	intake_time: 0
+	time: 0
+Operation_01
+	arm_position: 0
+	arm_speed: 0
+	drive_position: 24
+	drive_speed: 1
+	turn_angle: 0
+	turn_speed: 0
+	grabber_position: 0
+	grabber_speed: 0 
+	grabber_time: 0
+	intake_position: 0
+	intake_speed: 0
+	intake_time: 0
+	time: 0
+Operation_01
+	arm_position: 0
+	arm_speed: 0
+	drive_position: 0
+	drive_speed: 0
+	turn_angle: 90
+	turn_speed: 0.8
+	grabber_position: 0
+	grabber_speed: 0 
+	grabber_time: 0
+	intake_position: 0
+	intake_speed: 0
+	intake_time: 0
+	time: 0
+Operation_01
+	arm_position: 0
+	arm_speed: 0
+	drive_position: 24
+	drive_speed: 0.8
+	turn_angle: 0
+	turn_speed: 0
+	grabber_position: 0
+	grabber_speed: 0 
+	grabber_time: 0
+	intake_position: 0
+	intake_speed: 0
+	intake_time: 0
+	time: 0
+-END- 
+
+-AutoMode_17-
+Operation_01
+	arm_position: 0 // code for right left right from left
+	arm_speed: 0
+	drive_position: 235
+	drive_speed: 1
+	turn_angle: 0
+	turn_speed: 0
+	grabber_position: 0
+	grabber_speed: 0 
+	grabber_time: 0
+	intake_position: 0
+	intake_speed: 0
+	intake_time: 0
+	time: 0
+Operation_01
+	arm_position: 0 
+	arm_speed: 0
+	drive_position: 0
+	drive_speed: 0
+	turn_angle: 90
+	turn_speed: 0.8
+	grabber_position: 0
+	grabber_speed: 0 
+	grabber_time: 0
+	intake_position: 0
+	intake_speed: 0
+	intake_time: 0
+	time: 0
+Operation_01
+	arm_position: 0 
+	arm_speed: 0
+	drive_position: 163
+	drive_speed: 1
+	turn_angle: 0
+	turn_speed: 0
+	grabber_position: 0
+	grabber_speed: 0 
+	grabber_time: 0
+	intake_position: 0
+	intake_speed: 0
+	intake_time: 0
+	time: 0
+Operation_01
+	arm_position: 0 
+	arm_speed: 0
+	drive_position: 0
+	drive_speed: 0
+	turn_angle: 90
+	turn_speed: 0.8
+	grabber_position: 0
+	grabber_speed: 0 
+	grabber_time: 0
+	intake_position: 0
+	intake_speed: 0
+	intake_time: 0
+	time: 0
+Operation_01
+	arm_position: 0 
+	arm_speed: 0
+	drive_position: 24
+	drive_speed: 0.8
+	turn_angle: 0
+	turn_speed: 0
+	grabber_position: 0
+	grabber_speed: 0 
+	grabber_time: 0
+	intake_position: 0
+	intake_speed: 0
+	intake_time: 0
+	time: 0
+Operation_01
+	arm_position: 0 
+	arm_speed: 0
+	drive_position: -24
+	drive_speed: 0.8
+	turn_angle: 0
+	turn_speed: 0
+	grabber_position: 0
+	grabber_speed: 0 
+	grabber_time: 0
+	intake_position: 0
+	intake_speed: 0
+	intake_time: 0
+	time: 0
+Operation_01
+	arm_position: 0 
+	arm_speed: 0
+	drive_position: 0
+	drive_speed: 0
+	turn_angle: 90
+	turn_speed: 0.8
+	grabber_position: 0
+	grabber_speed: 0 
+	grabber_time: 0
+	intake_position: 0
+	intake_speed: 0
+	intake_time: 0
+	time: 0
+Operation_01
+	arm_position: 0 
+	arm_speed: 0
+	drive_position: 163
+	drive_speed: 1
+	turn_angle: 0
+	turn_speed: 0
+	grabber_position: 0
+	grabber_speed: 0 
+	grabber_time: 0
+	intake_position: 0
+	intake_speed: 0
+	intake_time: 0
+	time: 0
+Operation_01
+	arm_position: 0 
+	arm_speed: 0
+	drive_position: 0
+	drive_speed: 0
+	turn_angle: 90
+	turn_speed: 0.8
+	grabber_position: 0
+	grabber_speed: 0 
+	grabber_time: 0
+	intake_position: 0
+	intake_speed: 0
+	intake_time: 0
+	time: 0
+Operation_01
+	arm_position: 0 
+	arm_speed: 0
+	drive_position: 24
+	drive_speed: 0.8
+	turn_angle: 0
+	turn_speed: 0
+	grabber_position: 0
+	grabber_speed: 0 
+	grabber_time: 0
+	intake_position: 0
+	intake_speed: 0
+	intake_time: 0
+	time: 0
+-END-
