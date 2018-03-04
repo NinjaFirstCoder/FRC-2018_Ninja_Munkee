@@ -372,6 +372,15 @@ public:
 
 //		 frc::SmartDashboard::PutData("Auto Modes", &chooser);
 
+		 // light strip setup
+
+
+		 LightI2C = new I2C(I2C::Port::kOnboard, 0x10);
+		 lightColors[0] = 0;
+		 lightColors[1] = 0;
+		 lightColors[2] = 0;
+		 LightI2C->WriteBulk(lightColors, 3);
+
 
 
 
@@ -920,13 +929,23 @@ public:
 			SmartDashboard::PutString("AUTOMODELOAD", "GOT TO SWITCH");
 			switch(AutoMode){
 				case(0): // Prelim Automatic Right
-						// PUT SELECTOR HERE
-						CurrentAutoMode = &AutoConfig.autoMode1; // put the stuff from that list into the current list
+						if(fieldColorLocations.isNearestSwitchOnLeft() && fieldColorLocations.isScaleOnLeft()) { // LLL
+							CurrentAutoMode = &AutoConfig.autoMode2;
+						} else if(fieldColorLocations.isScaleOnLeft()) { // RLR
+							CurrentAutoMode = &AutoConfig.autoMode4;
+						} else {  // LRL
+							CurrentAutoMode = &AutoConfig.autoMode3;
+						}
 						autonomousVars.foundList = true;
 						break;
 				case(1): // Prelim Automatic Left
-						// PUT SELECTOR HERE
-						CurrentAutoMode = &AutoConfig.autoMode1;
+						if(fieldColorLocations.isNearestSwitchOnLeft() && fieldColorLocations.isScaleOnLeft()) { // LLL
+							CurrentAutoMode = &AutoConfig.autoMode2;
+						} else if(fieldColorLocations.isScaleOnLeft()) { // RLR
+							CurrentAutoMode = &AutoConfig.autoMode4;
+						} else {  // LRL
+							CurrentAutoMode = &AutoConfig.autoMode3;
+						}
 						autonomousVars.foundList = true;
 						break;
 				case(2): // Finals Automatic Right
@@ -935,8 +954,13 @@ public:
 						autonomousVars.foundList = true;
 						break;
 				case(3): // Finals Automatic Left
-						// PUT SELECTOR HERE
-						CurrentAutoMode = &AutoConfig.autoMode1; // put the stuff from that list into the current list
+						if(fieldColorLocations.isNearestSwitchOnLeft() && fieldColorLocations.isScaleOnLeft()) { // LLL
+							CurrentAutoMode = &AutoConfig.autoMode2;
+						} else if(fieldColorLocations.isScaleOnLeft()) { // RLR
+							CurrentAutoMode = &AutoConfig.autoMode5;
+						} else {  // LRL
+							CurrentAutoMode = &AutoConfig.autoMode3;
+						}
 						autonomousVars.foundList = true;
 						break;
 				case(4): // Drive Forward
@@ -1176,7 +1200,7 @@ public:
 						SmartDashboard::PutBoolean("graph_in", true);
 
 						if(autonomousVars.autoTemp->data[2] <= 1) { // if negative position
-							if(((m_rearLeft.GetSelectedSensorPosition(0) + m_rearRight.GetSelectedSensorPosition(0))/2) < (trueSetpoint + 200)) {
+							if(((m_rearLeft.GetSelectedSensorPosition(0) + m_rearRight.GetSelectedSensorPosition(0))/2) < (trueSetpoint + 300)) {
 								SmartDashboard::PutNumber("2 Drive End Position", (m_rearRight.GetSelectedSensorPosition(0) + m_rearLeft.GetSelectedSensorPosition(0))/2);
 								SmartDashboard::PutNumber("2 Drive in End Position", ((m_rearRight.GetSelectedSensorPosition(0) + m_rearLeft.GetSelectedSensorPosition(0))/2)/TicksPerInch);
 
@@ -1187,7 +1211,7 @@ public:
 
 						}
 						if(autonomousVars.autoTemp->data[2] >= 1) { // if positive position
-							if(((m_rearLeft.GetSelectedSensorPosition(0) + m_rearRight.GetSelectedSensorPosition(0))/2) > (trueSetpoint - 200)) {
+							if(((m_rearLeft.GetSelectedSensorPosition(0) + m_rearRight.GetSelectedSensorPosition(0))/2) > (trueSetpoint - 300)) {
 								SmartDashboard::PutNumber("2 Drive End Position", (m_rearRight.GetSelectedSensorPosition(0) + m_rearLeft.GetSelectedSensorPosition(0))/2);
 								SmartDashboard::PutNumber("2 Drive in End Position", ((m_rearRight.GetSelectedSensorPosition(0) + m_rearLeft.GetSelectedSensorPosition(0))/2)/TicksPerInch);
 								autonomousVars.DriveOperationDone = true;
@@ -1379,6 +1403,7 @@ public:
 		DriveTurningPIDController->Disable();
 
 		navxgyro->ZeroYaw();
+
 	}
 
 	/***********************************************************************
@@ -1402,6 +1427,9 @@ public:
 		SmartDashboard::PutNumber("Talon Right Sensor Velocity", m_rearRight.GetSelectedSensorVelocity(0));
 		SmartDashboard::PutNumber("Talon Right Sensor Position", m_rearRight.GetSelectedSensorPosition(0));
 		SmartDashboard::PutNumber("Drive Target X", joystickX);
+
+
+
 
 
 		//SmartDashboard::PutNumber("Hall Effect Value" , HallEffect->Get());
@@ -1579,6 +1607,11 @@ private:
 	list *CurrentAutoMode;
 	//std::unique_ptr<frc::Command> autonomousCommand;
 	//frc::SendableChooser<frc::Command*> chooser;
+
+	// light setup
+
+	I2C *LightI2C;
+	unsigned char lightColors[2];
 
 };
 
