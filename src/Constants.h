@@ -80,6 +80,9 @@
 #define INTAKE_SOL_ONE 4
 #define INTAKE_SOL_TWO 5
 
+// climber
+#define CLIMBER_PORT 10
+
 
 enum Constants {
 	/**

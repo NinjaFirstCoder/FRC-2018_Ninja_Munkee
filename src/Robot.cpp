@@ -361,6 +361,9 @@ public:
 		 IntakeTalonLeft = new Talon(LEFT_INTAKE_PORT);
 		 IntakeTalonRight = new Talon(RIGHT_INTAKE_PORT);
 
+		 // climber setup
+		 ClimberTalon = new Talon(CLIMBER_PORT);
+
 		 // Grabber setup
 		 GrabberTalon = new TalonSRX(GRABBER_CONTROLLER_PORT);
 
@@ -380,10 +383,6 @@ public:
 		 lightColors[1] = 0;
 		 lightColors[2] = 0;
 		 LightI2C->WriteBulk(lightColors, 3);
-
-
-
-
 	}
 	/********************************************************
 	 * Drive function. This runs the drive train
@@ -447,6 +446,20 @@ public:
 			intakeRotateRight = false;
 			intakeRotateLeft = false;
 		}
+		/**********************************************************
+		 * climber buttons
+		 */
+		if(ArmJoystick->GetRawButton(8)){
+			climberUp = true;
+			climberDown = false;
+		} else if(ArmJoystick->GetRawButton(9)) {
+			climberUp = false;
+			climberDown = true;
+		} else {
+			climberUp = false;
+			climberDown = false;
+		}
+		climberSpeed = ArmJoystick->GetZ();
 		/**********************************************************
 		 * buttons for the grabber levels
 		 */
@@ -585,6 +598,19 @@ public:
 
 	}
 
+
+	/*****************************************************
+	 * Function runs the climber
+	 */
+	void runClimber() {
+		if(climberUp) {
+			ClimberTalon->Set(climberSpeed * 1);
+		} else if(climberDown) {
+			ClimberTalon->Set(climberSpeed * -1);
+		} else {
+			ClimberTalon->Set(0);
+		}
+	}
 	/*****************************************************
 	 * Function runs the arm motor
 	 */
@@ -1182,24 +1208,38 @@ public:
 
 				/**********************************************************************************
 				 * run intake operations
-				 * /
+				 */
 				if(autonomousVars.autoTemp->data[9]) { // if its a one open the intake
 					intakeSolenoid.Set(frc::DoubleSolenoid::Value::kReverse);
 				} else {
 					intakeSolenoid.Set(frc::DoubleSolenoid::Value::kForward);
 				}
-				if(autonomousVars.autoTemp->data[11] != autonomousVars.intakeTimeCount) {
-					autonomousVars.intakeTimeCount ++;
-					IntakeTalonLeft->Set(autonomousVars.autoTemp->data[10]);
-					IntakeTalonRight->Set(-autonomousVars.autoTemp->data[10]);
-					// add intake movement here
+				if(autonomousVars.autoTemp->data[11] > 1) {
+					if(autonomousVars.autoTemp->data[11] != autonomousVars.intakeTimeCount) {
+						autonomousVars.intakeTimeCount ++;
+						IntakeTalonLeft->Set(autonomousVars.autoTemp->data[10]);
+						IntakeTalonRight->Set(-autonomousVars.autoTemp->data[10]);
+						// add intake movement here
 
+					} else {
+						IntakeTalonLeft->Set(0);
+						IntakeTalonRight->Set(0);
+						autonomousVars.IntakeOperationDone = true;
+					}
 				} else {
-					IntakeTalonLeft->Set(0);
-					IntakeTalonRight->Set(0);
-					autonomousVars.IntakeOperationDone = true;
-				} */
-				autonomousVars.IntakeOperationDone = true;
+					if(!IntakeSwitch->Get()) {
+						IntakeTalonLeft->Set(autonomousVars.autoTemp->data[10]);
+						IntakeTalonRight->Set(-autonomousVars.autoTemp->data[10]);
+											// add intake movement here
+
+					} else {
+						IntakeTalonLeft->Set(0);
+						IntakeTalonRight->Set(0);
+						autonomousVars.IntakeOperationDone = true;
+					}
+
+				}
+				//autonomousVars.IntakeOperationDone = true;
 
 
 				/**********************************************************************************
@@ -1444,9 +1484,10 @@ public:
 	void TeleopPeriodic() {
 		pollControllers(); //
 		pollSensors();
-		//runIntake();
-	    //runGrabber();
-		//runArm();
+		runClimber();
+		runIntake();
+	    runGrabber();
+		runArm();
 		drive(joystickX,joystickY);
 
 		if(GyroFound) {
@@ -1568,8 +1609,13 @@ private:
 	 */
 	Talon *IntakeTalonLeft;
 	Talon *IntakeTalonRight;
+	Talon *ClimberTalon;
 	TalonSRX *ArmTalon;
 	TalonSRX *GrabberTalon;
+	bool climberUp = false;
+	bool climberDown = false;
+	double climberSpeed = 0;
+
 
 	bool intakeForward = false;
 	bool intakeBackward = false;
