@@ -852,6 +852,10 @@ public:
 	 * 		10 - Right_Switch
 	 * 		11 - Right_Scale
 	 * 		12 - Right_Scale_FINAL
+	 * 		13 - Left_None
+	 * 		14 - RIght_None
+	 * 		15 - Left_None_FINAL
+	 * 		16 - Right_None_FINAL
 	 *
 	 */
 	void AutonomousPeriodic() {
@@ -929,106 +933,132 @@ public:
 			SmartDashboard::PutString("AUTOMODELOAD", "GOT TO SWITCH");
 			switch(AutoMode){
 				case(0): // Prelim Automatic Right
+						isRightSide = -1;
 						if(fieldColorLocations.isNearestSwitchOnLeft() && fieldColorLocations.isScaleOnLeft()) { // LLL
-							CurrentAutoMode = &AutoConfig.autoMode2;
+							CurrentAutoMode = &AutoConfig.autoMode10;
 						} else if(fieldColorLocations.isScaleOnLeft()) { // RLR
-							CurrentAutoMode = &AutoConfig.autoMode4;
-						} else {  // LRL
 							CurrentAutoMode = &AutoConfig.autoMode3;
+						} else if(fieldColorLocations.isNearestSwitchOnLeft()) { // LRL
+							CurrentAutoMode = &AutoConfig.autoMode4;
+						} else { // RRR
+							CurrentAutoMode = &AutoConfig.autoMode2;
 						}
 						autonomousVars.foundList = true;
 						break;
 				case(1): // Prelim Automatic Left
+						isRightSide = 1;
 						if(fieldColorLocations.isNearestSwitchOnLeft() && fieldColorLocations.isScaleOnLeft()) { // LLL
 							CurrentAutoMode = &AutoConfig.autoMode2;
 						} else if(fieldColorLocations.isScaleOnLeft()) { // RLR
 							CurrentAutoMode = &AutoConfig.autoMode4;
-						} else {  // LRL
+						} else if(fieldColorLocations.isNearestSwitchOnLeft()) { // LRL
 							CurrentAutoMode = &AutoConfig.autoMode3;
+						} else { // RRR
+							CurrentAutoMode = &AutoConfig.autoMode10;
 						}
 						autonomousVars.foundList = true;
 						break;
 				case(2): // Finals Automatic Right
-						// PUT SELECTOR HERE
-						CurrentAutoMode = &AutoConfig.autoMode1;
+						isRightSide = -1;
+						if(fieldColorLocations.isScaleOnLeft()) { // Left side scale
+							CurrentAutoMode = &AutoConfig.autoMode12;
+						} else { // right side scale
+							CurrentAutoMode = &AutoConfig.autoMode5;
+						}
 						autonomousVars.foundList = true;
 						break;
 				case(3): // Finals Automatic Left
-						if(fieldColorLocations.isNearestSwitchOnLeft() && fieldColorLocations.isScaleOnLeft()) { // LLL
-							CurrentAutoMode = &AutoConfig.autoMode2;
-						} else if(fieldColorLocations.isScaleOnLeft()) { // RLR
+						isRightSide = 1;
+						if(fieldColorLocations.isScaleOnLeft()) { // Left side scale
 							CurrentAutoMode = &AutoConfig.autoMode5;
-						} else {  // LRL
-							CurrentAutoMode = &AutoConfig.autoMode3;
+						} else { // right side scale
+							CurrentAutoMode = &AutoConfig.autoMode12;
 						}
 						autonomousVars.foundList = true;
 						break;
 				case(4): // Drive Forward
+						isRightSide = 1;
 						CurrentAutoMode = &AutoConfig.autoMode1;
 						autonomousVars.foundList = true;
 						break;
 				case(5): // Left Switch Scale
+						isRightSide = 1;
 						CurrentAutoMode = &AutoConfig.autoMode2;
 						autonomousVars.foundList = true;
 						break;
 				case(6): // Left Switch
+						isRightSide = 1;
 						CurrentAutoMode = &AutoConfig.autoMode3;
 						autonomousVars.foundList = true;
 						break;
 				case(7): // Left Scale
+						isRightSide = 1;
 						CurrentAutoMode = &AutoConfig.autoMode4;
 						autonomousVars.foundList = true;
 						break;
-				case(8): // Left Scale Final
+				case(8): // Left Scale Final this grabs two cubes
+						isRightSide = 1;
 						CurrentAutoMode = &AutoConfig.autoMode5; // put the stuff from that list into the current list
 						autonomousVars.foundList = true;
 						break;
 				case(9): // Right Switch Scale
-						CurrentAutoMode = &AutoConfig.autoMode6;
+						isRightSide = -1;
+						CurrentAutoMode = &AutoConfig.autoMode2;
 						autonomousVars.foundList = true;
 						break;
 				case(10): // Right Switch
-						CurrentAutoMode = &AutoConfig.autoMode7;
+						isRightSide = -1;
+						CurrentAutoMode = &AutoConfig.autoMode3;
 						autonomousVars.foundList = true;
 						break;
 				case(11): // Right Scale
-						CurrentAutoMode = &AutoConfig.autoMode8;
+						isRightSide = -1;
+						CurrentAutoMode = &AutoConfig.autoMode4;
 						autonomousVars.foundList = true;
 						break;
-				case(12): // Right Scale Final
-						CurrentAutoMode = &AutoConfig.autoMode9;
+				case(12): // Right Scale Final this grabs two cubes
+						isRightSide = -1;
+						CurrentAutoMode = &AutoConfig.autoMode5;
 						autonomousVars.foundList = true;
 						break;
-				case(13): // Right Scale Final
+				case(13): // Left None scores on the right side for both
+						isRightSide = 1;
 						CurrentAutoMode = &AutoConfig.autoMode10;
 						autonomousVars.foundList = true;
 						break;
-				case(14): // Right Scale Final
-						CurrentAutoMode = &AutoConfig.autoMode11;
+				case(14): // Right None scores on the left side for both
+						isRightSide = -1;
+						CurrentAutoMode = &AutoConfig.autoMode10;
 						autonomousVars.foundList = true;
 						break;
-				case(15): // Right Scale Final
+				case(15): // Left_None_FINALS FINALS scale right from left
+						isRightSide = 1;
 						CurrentAutoMode = &AutoConfig.autoMode12;
 						autonomousVars.foundList = true;
 						break;
-				case(16): // Right Scale Final
-						CurrentAutoMode = &AutoConfig.autoMode13;
+				case(16): // Right_None_FINALS FINALS scale left from right
+						isRightSide = -1;
+						CurrentAutoMode = &AutoConfig.autoMode12;
 						autonomousVars.foundList = true;
 						break;
 				case(17): // Right Scale Final
+						isRightSide = 1;
 						CurrentAutoMode = &AutoConfig.autoMode14;
 						autonomousVars.foundList = true;
 						break;
 				case(18): // Right Scale Final
+						isRightSide = 1;
 						CurrentAutoMode = &AutoConfig.autoMode15;
 						autonomousVars.foundList = true;
 						break;
 				case(19): // Right Scale Final
+						isRightSide = 1;
 						CurrentAutoMode = &AutoConfig.autoMode16;
 						autonomousVars.foundList = true;
 						break;
 				case(20): // Right Scale Final
-						CurrentAutoMode = &AutoConfig.autoMode17;
+						isRightSide = 1;
+						CurrentAutoMode = &AutoConfig.autoMode17;  // DO NOT CHANGE THIS MODE!!!!!!!
 						autonomousVars.foundList = true;
 						break;
 				default:
@@ -1245,10 +1275,10 @@ public:
 							//DriveTurningPIDController->Reset();
 
 								SmartDashboard::PutNumber("Start Yaw Drive", startYaw);
-								if(autonomousVars.autoTemp->data[4] < 0) {
-									DriveTurningPIDController->SetSetpoint((autonomousVars.autoTemp->data[4] + startYaw + 5));
+								if(isRightSide * autonomousVars.autoTemp->data[4] < 0) {
+									DriveTurningPIDController->SetSetpoint((isRightSide * autonomousVars.autoTemp->data[4] + startYaw + 5));
 								} else {
-									DriveTurningPIDController->SetSetpoint((autonomousVars.autoTemp->data[4] + startYaw - 7.5));
+									DriveTurningPIDController->SetSetpoint((isRightSide * autonomousVars.autoTemp->data[4] + startYaw - 7.5));
 								}
 
 
@@ -1257,7 +1287,7 @@ public:
 								//}
 						} else {
 
-								if(autonomousVars.autoTemp->data[4] < 0) { // if the setpoint is negative
+								if(isRightSide * autonomousVars.autoTemp->data[4] < 0) { // if the setpoint is negative
 									if(DriveTurningPIDOutputController->m_out * autonomousVars.autoTemp->data[5] < 0) {
 										turningIsNegative = 1;
 									} else {
@@ -1274,19 +1304,19 @@ public:
 							 SmartDashboard::PutNumber("Drive angle setpoint", DriveTurningPIDController->GetSetpoint());
 							 SmartDashboard::PutNumber("Drive gyro angle", navxgyro->GetAngle());
 							 SmartDashboard::PutNumber("Drive PID power", turningIsNegative * (DriveTurningPIDOutputController->m_out * autonomousVars.autoTemp->data[5]));
-							 SmartDashboard::PutNumber("Drive PID set power", autonomousVars.autoTemp->data[4]);
+							 SmartDashboard::PutNumber("Drive PID set power", isRightSide * autonomousVars.autoTemp->data[4]);
 
 
 							 m_drive.ArcadeDrive(0,  turningIsNegative * DriveTurningPIDOutputController->m_out * autonomousVars.autoTemp->data[5]);
 
-							 if(autonomousVars.autoTemp->data[4] <= 1) { // if negative position
+							 if(isRightSide * autonomousVars.autoTemp->data[4] <= 1) { // if negative position
 							 		if(navxgyro->GetAngle() < DriveTurningPIDController->GetSetpoint() + 1) {
 							 				autonomousVars.TurningOperationDone = true;
 							 				DriveTurningPIDController->Disable();
 							 				ranOnce = false;
 							 		}
 							 }
-							 if(autonomousVars.autoTemp->data[4] >= 1) { // if positive position
+							 if(isRightSide * autonomousVars.autoTemp->data[4] >= 1) { // if positive position
 							 		if(navxgyro->GetAngle() >  DriveTurningPIDController->GetSetpoint() - 1) {
 							 				autonomousVars.TurningOperationDone = true;
 							 				DriveTurningPIDController->Disable();
@@ -1428,10 +1458,6 @@ public:
 		SmartDashboard::PutNumber("Talon Right Sensor Position", m_rearRight.GetSelectedSensorPosition(0));
 		SmartDashboard::PutNumber("Drive Target X", joystickX);
 
-
-
-
-
 		//SmartDashboard::PutNumber("Hall Effect Value" , HallEffect->Get());
 	}
 
@@ -1487,17 +1513,13 @@ private:
 
 	//DriveGyroPIDOutput *GyroPIDOutput;
 	double GyroPIDOutputPower = 0;
-
 	double TurningAngle = 0;
-
 	double ranOnce = false;
 	double startYaw = 0;
-
 	double trueSetpoint = 0;
-
 	double PIDTurningOutputPower = 0;
-
 	int turningIsNegative = 1;
+	int isRightSide = 1; // this variable is the inversion for angles on the right side.
 
 
 	PIDController *DriveTurningPIDController;

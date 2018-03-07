@@ -204,7 +204,7 @@ Operation_01
 
 -AutoMode_3-
 Operation_01
-	arm_position: 0 // code for left left left from left
+	arm_position: 0 // code for left Right left from left
 	arm_speed: 0
 	drive_position: 149
 	drive_speed: 1
@@ -603,7 +603,7 @@ Operation_01
 
 -AutoMode_5-
 Operation_01
-	arm_position: 0 // finals right left right from left
+	arm_position: 0 // Left scale Finals two cube auto
 	arm_speed: 0
 	drive_position: 268
 	drive_speed: 1
@@ -857,7 +857,7 @@ Operation_01
 
 -AutoMode_10-
 Operation_01
-	arm_position: 0 // code for right left right from left
+	arm_position: 0 // Code for Right scale from the left side FINALS
 	arm_speed: 0
 	drive_position: 230
 	drive_speed: 1
@@ -1326,5 +1326,89 @@ Operation_01
 	time: 0
 -END-
 
+-AutoMode_13-
+Operation_01
+	arm_position: 0 
+	arm_speed: 0
+	drive_position: 0
+	drive_speed: 0
+	turn_angle: 0
+	turn_speed: 0
+	grabber_position: 0
+	grabber_speed: 0 
+	grabber_time: 0
+	intake_position: 0
+	intake_speed: 0
+	intake_time: 0
+	time: 0
+-END-
+
+-AutoMode_14-
+Operation_01
+	arm_position: 0 
+	arm_speed: 0
+	drive_position: 0
+	drive_speed: 0
+	turn_angle: 0
+	turn_speed: 0
+	grabber_position: 0
+	grabber_speed: 0 
+	grabber_time: 0
+	intake_position: 0
+	intake_speed: 0
+	intake_time: 0
+	time: 0
+-END-
+
+-AutoMode_15-
+Operation_01
+	arm_position: 0 
+	arm_speed: 0
+	drive_position: 0
+	drive_speed: 0
+	turn_angle: 0
+	turn_speed: 0
+	grabber_position: 0
+	grabber_speed: 0 
+	grabber_time: 0
+	intake_position: 0
+	intake_speed: 0
+	intake_time: 0
+	time: 0
+-END-
+
+-AutoMode_16-
+Operation_01
+	arm_position: 0 
+	arm_speed: 0
+	drive_position: 0
+	drive_speed: 0
+	turn_angle: 0
+	turn_speed: 0
+	grabber_position: 0
+	grabber_speed: 0 
+	grabber_time: 0
+	intake_position: 0
+	intake_speed: 0
+	intake_time: 0
+	time: 0
+-END-
+
+-AutoMode_17-
+Operation_01
+	arm_position: 0    
+	arm_speed: 0
+	drive_position: 0
+	drive_speed: 0
+	turn_angle: 0
+	turn_speed: 0
+	grabber_position: 0
+	grabber_speed: 0 
+	grabber_time: 0
+	intake_position: 0
+	intake_speed: 0
+	intake_time: 0
+	time: 0
+-END-
 
 
