@@ -1396,7 +1396,7 @@ Operation_01
 
 -AutoMode_17-
 Operation_01
-	arm_position: 0    
+	arm_position: 0 // leave how it is    
 	arm_speed: 0
 	drive_position: 0
 	drive_speed: 0
