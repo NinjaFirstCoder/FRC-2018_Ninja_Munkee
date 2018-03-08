@@ -855,55 +855,111 @@ Operation_01
 
 -AutoMode_5-
 Operation_01
-	arm_position: 0 // Left scale Finals two cube auto
-	arm_speed: 0
+	arm_position: 80000 // Left scale Finals two cube auto
+	arm_speed: 1        // move arm up and grab the box
+	drive_position: 0
+	drive_speed: 0
+	turn_angle: 0
+	turn_speed: 0
+	grabber_position: 1 // open
+	grabber_speed: 0
+	grabber_time: 0
+	intake_position: 1 // open
+	intake_speed: 0 
+	intake_time: 0
+	time: 0
+Operation_01
+	arm_position: 200000 // move it to the midway point
+	arm_speed: 1
+	drive_position: 0
+	drive_speed: 0
+	turn_angle: 0
+	turn_speed: 0
+	grabber_position: 0 // close
+	grabber_speed: 1 
+	grabber_time: 30
+	intake_position: 1 // open
+	intake_speed: 0 // out 
+	intake_time: 0
+	time: 0
+Operation_01
+	arm_position: 550000
+	arm_speed: 1 
 	drive_position: 268
 	drive_speed: 1
 	turn_angle: 0
 	turn_speed: 0
-	grabber_position: 0
+	grabber_position: 0 // hold closed
 	grabber_speed: 0 
 	grabber_time: 0
-	intake_position: 0
+	intake_position: 1 // hold open
 	intake_speed: 0
 	intake_time: 0
 	time: 0
 Operation_01
-	arm_position: 0 
-	arm_speed: 0
+	arm_position: 550000
+	arm_speed: 1
 	drive_position: 0
 	drive_speed: 0
 	turn_angle: 45
 	turn_speed: 0.8
-	grabber_position: 0
+	grabber_position: 0 // hold closed
 	grabber_speed: 0 
 	grabber_time: 0
-	intake_position: 0
+	intake_position: 1 // hold open
 	intake_speed: 0
 	intake_time: 0
 	time: 0
 Operation_01
-	arm_position: 0 
-	arm_speed: 0
+	arm_position: 550000
+	arm_speed: 1
+	drive_position: 0
+	drive_speed: 0
+	turn_angle: 0
+	turn_speed: 0
+	grabber_position: 0 // hold closed
+	grabber_speed: 1 
+	grabber_time: 50 // spit out cube 
+	intake_position: 0 // close intake
+	intake_speed: 0
+	intake_time: 0
+	time: 0
+Operation_01
+	arm_position: 550000
+	arm_speed: 1
+	drive_position: 0
+	drive_speed: 0
+	turn_angle: 0
+	turn_speed: 0
+	grabber_position: 1 // open grabber
+	grabber_speed: 0 
+	grabber_time: 0
+	intake_position: 0 // hold closed
+	intake_speed: 0
+	intake_time: 0
+	time: 0
+Operation_01
+	arm_position: 550000
+	arm_speed: 1
 	drive_position: 0
 	drive_speed: 0
 	turn_angle: 135
 	turn_speed: 0.8
-	grabber_position: 0
+	grabber_position: 1 // hold open
 	grabber_speed: 0 
 	grabber_time: 0
-	intake_position: 0
-	intake_speed: 0
-	intake_time: 0
+	intake_position: 0 // hold closed
+	intake_speed: 1
+	intake_time: 25
 	time: 0
 Operation_01
-	arm_position: 0 
-	arm_speed: 0
+	arm_position: 550000
+	arm_speed: 1
 	drive_position: 40
 	drive_speed: 0.8
 	turn_angle: 0
 	turn_speed: 0
-	grabber_position: 0
+	grabber_position: 1 // hold open
 	grabber_speed: 0 
 	grabber_time: 0
 	intake_position: 0
@@ -911,13 +967,13 @@ Operation_01
 	intake_time: 0
 	time: 0
 Operation_01
-	arm_position: 0 
-	arm_speed: 0
+	arm_position: 550000
+	arm_speed: 1
 	drive_position: 0
 	drive_speed: 0
 	turn_angle: -90
 	turn_speed: 0.8
-	grabber_position: 0
+	grabber_position: 1
 	grabber_speed: 0 
 	grabber_time: 0
 	intake_position: 0
@@ -925,52 +981,80 @@ Operation_01
 	intake_time: 0
 	time: 0
 Operation_01
-	arm_position: 0 
-	arm_speed: 0
+	arm_position: 0 // drop arm
+	arm_speed: 1
 	drive_position: 32
 	drive_speed: 0.8
 	turn_angle: 0
 	turn_speed: 0
-	grabber_position: 0
+	grabber_position: 1
 	grabber_speed: 0 
 	grabber_time: 0
-	intake_position: 0
+	intake_position: 1 // open intake
 	intake_speed: 0
 	intake_time: 0
 	time: 0
 Operation_01
-	arm_position: 0 
-	arm_speed: 0
+	arm_position: 40000 // move to low mid
+	arm_speed: 1
 	drive_position: 0
 	drive_speed: 0
 	turn_angle: 90
 	turn_speed: 0.8
-	grabber_position: 0
+	grabber_position: 1
 	grabber_speed: 0 
 	grabber_time: 0
-	intake_position: 0
+	intake_position: 1 // keep open
 	intake_speed: 0
 	intake_time: 0
 	time: 0
 Operation_01
-	arm_position: 0 
-	arm_speed: 0
+	arm_position: 40000 // low mid
+	arm_speed: 1
 	drive_position: 24
 	drive_speed: 0.8
 	turn_angle: 0
 	turn_speed: 0
-	grabber_position: 0
+	grabber_position: 1
 	grabber_speed: 0 
 	grabber_time: 0
-	intake_position: 0
+	intake_position: 1 // keep opened
 	intake_speed: 0
 	intake_time: 0
 	time: 0
 Operation_01
-	arm_position: 0 
-	arm_speed: 0
+	arm_position: 40000 // low mid
+	arm_speed: 1
+	drive_position: 0
+	drive_speed: 0
+	turn_angle: 0
+	turn_speed: 0
+	grabber_position: 1
+	grabber_speed: 0 
+	grabber_time: 0
+	intake_position: 0 // close intake
+	intake_speed: 1
+	intake_time: -1 // wait until we get a cube
+	time: 0
+Operation_01
+	arm_position: 40000
+	arm_speed: 1
+	drive_position: 0
+	drive_speed: 0
+	turn_angle: 0
+	turn_speed: 0
+	grabber_position: 0 // close grabber
+	grabber_speed: 0 
+	grabber_time: 0
+	intake_position: 0 // hold closed
+	intake_speed: 0
+	intake_time: 0
+	time: 0
+Operation_01
+	arm_position: 550000 
+	arm_speed: 1
 	drive_position: -24
-	drive_speed: 0.8
+	drive_speed: 0.5
 	turn_angle: 0
 	turn_speed: 0
 	grabber_position: 0
@@ -981,8 +1065,8 @@ Operation_01
 	intake_time: 0
 	time: 0
 Operation_01
-	arm_position: 0 
-	arm_speed: 0
+	arm_position: 550000
+	arm_speed: 1
 	drive_position: 0
 	drive_speed: 0
 	turn_angle: 90
@@ -995,8 +1079,8 @@ Operation_01
 	intake_time: 0
 	time: 0
 Operation_01
-	arm_position: 0 
-	arm_speed: 0
+	arm_position: 550000
+	arm_speed: 1
 	drive_position: 16
 	drive_speed: 0.8
 	turn_angle: 0
@@ -1009,8 +1093,8 @@ Operation_01
 	intake_time: 0
 	time: 0
 Operation_01
-	arm_position: 0 
-	arm_speed: 0
+	arm_position: 550000
+	arm_speed: 1
 	drive_position: 0
 	drive_speed: 0
 	turn_angle: 90
@@ -1023,8 +1107,8 @@ Operation_01
 	intake_time: 0
 	time: 0
 Operation_01
-	arm_position: 0 
-	arm_speed: 0
+	arm_position: 550000 
+	arm_speed: 1
 	drive_position: 34
 	drive_speed: 0.8
 	turn_angle: 0
@@ -1032,6 +1116,20 @@ Operation_01
 	grabber_position: 0
 	grabber_speed: 0 
 	grabber_time: 0
+	intake_position: 0
+	intake_speed: 0
+	intake_time: 0
+	time: 0
+Operation_01
+	arm_position: 550000 
+	arm_speed: 1
+	drive_position: 0
+	drive_speed: 0
+	turn_angle: 0
+	turn_speed: 0
+	grabber_position: 0
+	grabber_speed: -1
+	grabber_time: 500  // release cube from intake 
 	intake_position: 0
 	intake_speed: 0
 	intake_time: 0
@@ -1437,64 +1535,92 @@ Operation_01
 
 -AutoMode_12-
 Operation_01
-	arm_position: 0 // FINALS right scale from left side
-	arm_speed: 0
+	arm_position: 80000 // FINALS right scale from left side
+	arm_speed: 1        // move arm up and grab the box
+	drive_position: 0
+	drive_speed: 0
+	turn_angle: 0
+	turn_speed: 0
+	grabber_position: 1 // open
+	grabber_speed: 0
+	grabber_time: 0
+	intake_position: 1 // open
+	intake_speed: 0 
+	intake_time: 0
+	time: 0
+Operation_01
+	arm_position: 200000 // move it to the midway point
+	arm_speed: 1
+	drive_position: 0
+	drive_speed: 0
+	turn_angle: 0
+	turn_speed: 0
+	grabber_position: 0 // close
+	grabber_speed: 1 
+	grabber_time: 30
+	intake_position: 1 // open
+	intake_speed: 0 // out 
+	intake_time: 0
+	time: 0
+Operation_01
+	arm_position: 550000 
+	arm_speed: 1
 	drive_position: 230
 	drive_speed: 1
 	turn_angle: 0
 	turn_speed: 0
-	grabber_position: 0
+	grabber_position: 0 // keep closed
 	grabber_speed: 0 
 	grabber_time: 0
-	intake_position: 0
+	intake_position: 1 // keep open
 	intake_speed: 0
 	intake_time: 0
 	time: 0
 Operation_01
-	arm_position: 0 
-	arm_speed: 0
+	arm_position: 550000
+	arm_speed: 1
 	drive_position: 0
 	drive_speed: 0
 	turn_angle: 90
 	turn_speed: 0.8
-	grabber_position: 0
+	grabber_position: 0 // keep closed 
 	grabber_speed: 0 
 	grabber_time: 0
-	intake_position: 0
+	intake_position: 1 // keep open 
 	intake_speed: 0
 	intake_time: 0
 	time: 0
 Operation_01
-	arm_position: 0 
-	arm_speed: 0
+	arm_position: 550000
+	arm_speed: 1
 	drive_position: 195
 	drive_speed: 1
 	turn_angle: 0
 	turn_speed: 0
-	grabber_position: 0
+	grabber_position: 0 // keep closed
 	grabber_speed: 0 
 	grabber_time: 0
-	intake_position: 0
+	intake_position: 1 // keep open
 	intake_speed: 0
 	intake_time: 0
 	time: 0
 Operation_01
-	arm_position: 0 
-	arm_speed: 0
+	arm_position: 550000
+	arm_speed: 1
 	drive_position: 0
 	drive_speed: 0
 	turn_angle: -90
 	turn_speed: 0.8
-	grabber_position: 0
+	grabber_position: 0 // keep closed
 	grabber_speed: 0 
 	grabber_time: 0
-	intake_position: 0
+	intake_position: 1 // keep open
 	intake_speed: 0
 	intake_time: 0
 	time: 0
 Operation_01
-	arm_position: 0 
-	arm_speed: 0
+	arm_position: 550000 
+	arm_speed: 1
 	drive_position: 36
 	drive_speed: 1
 	turn_angle: 0
@@ -1502,13 +1628,13 @@ Operation_01
 	grabber_position: 0
 	grabber_speed: 0 
 	grabber_time: 0
-	intake_position: 0
+	intake_position: 1 // keep open
 	intake_speed: 0
 	intake_time: 0
 	time: 0
 Operation_01
-	arm_position: 0 
-	arm_speed: 0
+	arm_position: 550000
+	arm_speed: 1
 	drive_position: 0
 	drive_speed: 0
 	turn_angle: -45
@@ -1516,99 +1642,155 @@ Operation_01
 	grabber_position: 0
 	grabber_speed: 0 
 	grabber_time: 0
-	intake_position: 0
+	intake_position: 1 // keep open
 	intake_speed: 0
 	intake_time: 0
 	time: 0
 Operation_01
-	arm_position: 0 
-	arm_speed: 0
+	arm_position: 550000
+	arm_speed: 1
+	drive_position: 0
+	drive_speed: 0
+	turn_angle: 0
+	turn_speed: 0
+	grabber_position: 0
+	grabber_speed: -1 
+	grabber_time: 50
+	intake_position: 1 // keep open
+	intake_speed: 0
+	intake_time: 0
+	time: 0
+Operation_01
+	arm_position: 550000
+	arm_speed: 1
+	drive_position: 0
+	drive_speed: 0
+	turn_angle: 0
+	turn_speed: 0
+	grabber_position: 1 // open grabber
+	grabber_speed: 0
+	grabber_time: 0
+	intake_position: 0 // fully deploy intake 
+	intake_speed: 1
+	intake_time: 25
+	time: 0
+Operation_01
+	arm_position: 550000
+	arm_speed: 1
 	drive_position: 0
 	drive_speed: 0
 	turn_angle: -135
 	turn_speed: 0.8
-	grabber_position: 0
+	grabber_position: 1 // keep grabbber open
 	grabber_speed: 0 
 	grabber_time: 0
-	intake_position: 0
+	intake_position: 0 // keep closed
 	intake_speed: 0
 	intake_time: 0
 	time: 0
 Operation_01
-	arm_position: 0 
-	arm_speed: 0
+	arm_position: 0 // drop arm
+	arm_speed: 1
 	drive_position: 40
 	drive_speed: 0.8
 	turn_angle: 0
 	turn_speed: 0
-	grabber_position: 0
+	grabber_position: 1 // keep open
 	grabber_speed: 0 
 	grabber_time: 0
-	intake_position: 0
+	intake_position: 1 // open arm 
 	intake_speed: 0
 	intake_time: 0
 	time: 0
 Operation_01
-	arm_position: 0 
-	arm_speed: 0
+	arm_position: 40000 // move to low mid
+	arm_speed: 1
 	drive_position: 0
 	drive_speed: 0
 	turn_angle: 90
 	turn_speed: 0.8
-	grabber_position: 0
+	grabber_position: 1 // keep open
 	grabber_speed: 0 
 	grabber_time: 0
-	intake_position: 0
+	intake_position: 1 // keep open
 	intake_speed: 0
 	intake_time: 0
 	time: 0
 Operation_01
-	arm_position: 0 
-	arm_speed: 0
+	arm_position: 40000 // keep at position
+	arm_speed: 1
 	drive_position: 32
 	drive_speed: 0.8
 	turn_angle: 0
 	turn_speed: 0
-	grabber_position: 0
+	grabber_position: 1 // keep open
 	grabber_speed: 0 
 	grabber_time: 0
-	intake_position: 0
+	intake_position: 1 // keep open
 	intake_speed: 0
 	intake_time: 0
 	time: 0
 Operation_01
-	arm_position: 0 
-	arm_speed: 0
+	arm_position: 40000 // keep at position
+	arm_speed: 1
 	drive_position: 0
 	drive_speed: 0
 	turn_angle: -90
 	turn_speed: 0.8
-	grabber_position: 0
+	grabber_position: 1 // keep open
 	grabber_speed: 0 
 	grabber_time: 0
-	intake_position: 0
+	intake_position: 1 // keep open
 	intake_speed: 0
 	intake_time: 0
 	time: 0
 Operation_01
-	arm_position: 0 
-	arm_speed: 0
+	arm_position: 40000 // keep at lowmid
+	arm_speed: 1
 	drive_position: 24
 	drive_speed: 0.8
 	turn_angle: 0
 	turn_speed: 0
-	grabber_position: 0
+	grabber_position: 1 // keep open
 	grabber_speed: 0 
 	grabber_time: 0
-	intake_position: 0
+	intake_position: 1 // keep open 
 	intake_speed: 0
 	intake_time: 0
 	time: 0
 Operation_01
-	arm_position: 0 
-	arm_speed: 0
+	arm_position: 40000 // keep at lowmid
+	arm_speed: 1
+	drive_position: 0
+	drive_speed: 0
+	turn_angle: 0
+	turn_speed: 0
+	grabber_position: 1 // keep open
+	grabber_speed: 0 
+	grabber_time: 0
+	intake_position: 0 // close  
+	intake_speed: 1
+	intake_time: -1 // wait until cube is in
+	time: 0
+Operation_01
+	arm_position: 40000 // keep at lowmid
+	arm_speed: 1
+	drive_position: 0
+	drive_speed: 0
+	turn_angle: 0
+	turn_speed: 0
+	grabber_position: 0 // close grabber
+	grabber_speed: 0 
+	grabber_time: 0
+	intake_position: 0 // keep closed 
+	intake_speed: 0
+	intake_time: 0
+	time: 0
+Operation_01
+	arm_position: 550000
+	arm_speed: 1
 	drive_position: -24
-	drive_speed: 0.8
+	drive_speed: 0.5
 	turn_angle: 0
 	turn_speed: 0
 	grabber_position: 0
@@ -1619,8 +1801,8 @@ Operation_01
 	intake_time: 0
 	time: 0
 Operation_01
-	arm_position: 0 
-	arm_speed: 0
+	arm_position: 550000
+	arm_speed: 1
 	drive_position: 0
 	drive_speed: 0
 	turn_angle: -90
@@ -1633,8 +1815,8 @@ Operation_01
 	intake_time: 0
 	time: 0
 Operation_01
-	arm_position: 0 
-	arm_speed: 0
+	arm_position: 550000
+	arm_speed: 1
 	drive_position: 16
 	drive_speed: 0.8
 	turn_angle: 0
@@ -1647,8 +1829,8 @@ Operation_01
 	intake_time: 0
 	time: 0
 Operation_01
-	arm_position: 0 
-	arm_speed: 0
+	arm_position: 550000
+	arm_speed: 1
 	drive_position: 0
 	drive_speed: 0
 	turn_angle: -90
@@ -1661,8 +1843,8 @@ Operation_01
 	intake_time: 0
 	time: 0
 Operation_01
-	arm_position: 0 
-	arm_speed: 0
+	arm_position: 550000
+	arm_speed: 1
 	drive_position: 34
 	drive_speed: 0.8
 	turn_angle: 0
@@ -1670,6 +1852,20 @@ Operation_01
 	grabber_position: 0
 	grabber_speed: 0 
 	grabber_time: 0
+	intake_position: 0
+	intake_speed: 0
+	intake_time: 0
+	time: 0
+Operation_01
+	arm_position: 550000
+	arm_speed: 1
+	drive_position: 0
+	drive_speed: 0
+	turn_angle: 0
+	turn_speed: 0
+	grabber_position: 0
+	grabber_speed: -1
+	grabber_time: 500 // spit out cube 
 	intake_position: 0
 	intake_speed: 0
 	intake_time: 0
