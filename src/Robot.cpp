@@ -463,10 +463,10 @@ public:
 		/**********************************************************
 		 * buttons for the grabber levels
 		 */
-		if(GamepadButtons->GetRawButton(4)) {
+		if(GamepadButtons->GetRawButton(1)) {
 			grabberForward = 1;
 			grabberBackward = 0;
-		} else if(GamepadButtons->GetRawButton(8)){
+		} else if(GamepadButtons->GetRawButton(2)){
 			grabberForward = 0;
 			grabberBackward = 1;
 		} else {
@@ -474,12 +474,12 @@ public:
 			grabberBackward = 0;
 		}
 
-		if(GamepadButtons->GetRawButton(6)) {
+		if(GamepadButtons->GetRawButton(3)) {
 			grabberOpen = true;
 		} else {
 			grabberOpen = false;
 		}
-
+/*
 		if(MainJoystick->GetRawButton(4)) {
 			grabberPneumaticsForward = true;
 			grabberPneumaticsBackward = false;
@@ -491,21 +491,21 @@ public:
 		}else {
 			grabberPneumaticsForward = false;
 			grabberPneumaticsBackward = false;
-		}
+		}*/
 		/**********************************************************
 		 * buttons for the arm levels
 		 */
-		if(GamepadButtons->GetRawButton(3)){
+		if(GamepadButtons->GetRawButton(8)){
 			ArmButtons.low = true;
 			ArmButtons.mid = false;
 			ArmButtons.high = false;
 			ArmButtons.lowmid = false;
-		} else if(GamepadButtons->GetRawButton(2)){
+		} else if(GamepadButtons->GetRawButton(6)){
 			ArmButtons.low = false;
 			ArmButtons.mid = true;
 			ArmButtons.high = false;
 			ArmButtons.lowmid = false;
-		} else if(GamepadButtons->GetRawButton(1)){
+		} else if(GamepadButtons->GetRawButton(4)){
 			ArmButtons.low = false;
 			ArmButtons.mid = false;
 			ArmButtons.high = true;
@@ -521,7 +521,7 @@ public:
 			ArmButtons.high = false;
 			ArmButtons.lowmid = false;
 		}
-
+/*
 		if(ArmJoystick->GetRawButton(9)) {
 			armZeroDown = false;
 			armZeroUp = true;
@@ -531,7 +531,7 @@ public:
 		} else {
 			armZeroDown = false;
 			armZeroUp = false;
-		}
+		}*/
 	}
 
 	/*****************************************************
@@ -616,7 +616,7 @@ public:
 	 */
 	void runArm() {
 		int tmp;
-		int lowerLimit = -10000;
+		int lowerLimit = -1000000;
 		if(ArmButtons.low ) {
 				arm_currentPos = lowerLimit;
 				grabberSolenoid.Set(frc::DoubleSolenoid::Value::kForward);
@@ -646,7 +646,7 @@ public:
 		} else if(ArmButtons.high){
 				arm_currentPos = ARM_UPPER_LIMIT;
 		} else if(ArmButtons.lowmid) {
-				arm_currentPos = 40000;
+				arm_currentPos = 30000;
 		} else {
 				tmp = -ArmJoystick->GetY();
 				if (tmp > 0.1) {
@@ -891,8 +891,9 @@ public:
 		string furthestSwitch = fieldColorLocations.isFurthestSwitchOnLeft() ? "LEFT" : "RIGHT";
 		SmartDashboard::PutString("COLORS", nearestSwitch + " " + scale + " " + furthestSwitch);
 
+		//drive(0,0);
+
 		/*
-		/ *
 		if(!fieldColorLocations.isNearestSwitchOnLeft()) {
 			/ *
 			 * TODO:
@@ -917,9 +918,9 @@ public:
 			 * 4. Turn to the left 90 degrees.
 			 * 5. Deploy intake and dump box.
 			 * /
-		} * /
+		} */
 
-		/ *
+		/*
 		 * Recommendation: utilize JSON for the configuration file. JSON has several libraries available,
 		 * as it is a standard. An example might be as such.
 		 *
@@ -943,7 +944,7 @@ public:
 		 *     "DEPLOY"
 		 *   ]
 		 * }
-		 * /
+		 */
 
 		if(!autonomousVars.startingConfigDone) {
 
@@ -1107,9 +1108,9 @@ public:
 			//DriveTurningPIDController->SetI((double) SmartDashboard::GetNumber("drive_I", 0));
 			//DriveTurningPIDController->SetD((double) SmartDashboard::GetNumber("drive_D", 0));
 
-				/ *	SmartDashboard::PutNumber("actual_P", DrivePIDController->GetP());
+				/*	SmartDashboard::PutNumber("actual_P", DrivePIDController->GetP());
 					SmartDashboard::PutNumber("actual_I", DrivePIDController->GetI());
-					SmartDashboard::PutNumber("actual_D", DrivePIDController->GetD());* /
+					SmartDashboard::PutNumber("actual_D", DrivePIDController->GetD());*/
 			//DrivePIDController->Reset();
 			//DrivePIDController->Enable();
 		} else {
@@ -1133,7 +1134,7 @@ public:
 					drive(0,0);
 				}
 			} else {
-				/ **********************************************************************************
+				/**********************************************************************************
 				 * Run arm operations
 				 * /
 
@@ -1171,14 +1172,14 @@ public:
 				}
 				SmartDashboard::PutNumber("Arm Motor Target Position", autonomousVars.autoTemp->data[0]);
 				SmartDashboard::PutNumber("Arm Motor actual Position", ArmTalon->GetSelectedSensorPosition(0));
-				* /
+				*/
 				autonomousVars.ArmOperationDone = true;
 
 
 
-				/ **********************************************************************************
+				/**********************************************************************************
 				 * run time operations
-				 * /
+				 */
 				if(autonomousVars.autoTemp->data[12] != autonomousVars.timeCount) {
 					autonomousVars.timeCount++;
 					SmartDashboard::PutNumber("Time Ticks", autonomousVars.timeCount);
@@ -1189,7 +1190,7 @@ public:
 
 
 
-				/ **********************************************************************************
+				/**********************************************************************************
 				 * run grabber operations
 				 * /
 				if(autonomousVars.autoTemp->data[6]) {
@@ -1203,12 +1204,12 @@ public:
 				} else {
 					GrabberTalon->Set(ControlMode::PercentOutput, 0);
 					autonomousVars.GrabberOperationDone = true;
-				} * /
-
+				}
+				*/
 				autonomousVars.GrabberOperationDone = true;
 
 
-				/ **********************************************************************************
+				/**********************************************************************************
 				 * run intake operations
 				 * /
 				if(autonomousVars.autoTemp->data[9]) { // if its a one open the intake
@@ -1240,13 +1241,13 @@ public:
 						autonomousVars.IntakeOperationDone = true;
 					}
 
-				}
-				//autonomousVars.IntakeOperationDone = true;
+				}*/
+				autonomousVars.IntakeOperationDone = true;
 
 
-				/ **********************************************************************************
+				/**********************************************************************************
 				 * run drive train operations
-				 * /
+				 */
 				if(!autonomousVars.DriveOperationDone) {
 					SmartDashboard::PutNumber("Drive Target Position", autonomousVars.autoTemp->data[2]);
 					SmartDashboard::PutNumber("Drive gyro angle", navxgyro->GetAngle());
@@ -1373,10 +1374,10 @@ public:
 
 
 
-				/ **********************************************************************************
+				/**********************************************************************************
 				 * Put all the modes current completion state on the driver station and test to see
 				 * if we can move onto the next operation.
-				 * /
+				 */
 				SmartDashboard::PutNumber("1 TurningOperationDone", autonomousVars.TurningOperationDone);
 				SmartDashboard::PutNumber("1 DriveOperationDone", autonomousVars.DriveOperationDone);
 				SmartDashboard::PutNumber("1 ArmOperationDone", autonomousVars.ArmOperationDone);
@@ -1413,7 +1414,7 @@ public:
 		if(autonomousVars.DriveOperationDone && autonomousVars.TurningOperationDone) {
 			drive(0,0);
 		}
-	}*/
+
 	}
 	/*********************************************************************************
 	 * These functions overwrite the default PIDController input and output functions.
@@ -1434,14 +1435,14 @@ public:
 	 * straight.
 	 *
 	 */
-	/*class DriveGyroPIDOutput : public PIDOutput {
+	class DriveGyroPIDOutput : public PIDOutput {
 		private:
 			double *PIDOutputVar;
 		public:
 			virtual void PIDWrite(float output) {
 				*PIDOutputVar = output; // put the value of the PIDOutput in the proper variable
 			}
-	};*/
+	};
 
 
 	/***********************************************************************

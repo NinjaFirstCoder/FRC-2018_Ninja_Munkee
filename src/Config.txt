@@ -2,7 +2,21 @@
 Operation_01
 	arm_position: 0 // drive forward mode
 	arm_speed: 0
-	drive_position: 259
+	drive_position: 0
+	drive_speed: 0
+	turn_angle: 0
+	turn_speed: 0
+	grabber_position: 0
+	grabber_speed: 0 
+	grabber_time: 0
+	intake_position: 0
+	intake_speed: 0
+	intake_time: 0
+	time: 250
+Operation_01
+	arm_position: 0 // drive forward mode
+	arm_speed: 0
+	drive_position: 150
 	drive_speed: 1
 	turn_angle: 0
 	turn_speed: 0

@@ -38,7 +38,7 @@
 
 #define DRIVE_PIDC_PERIOD 0.02  // default maybe change to 20ms
 
-#define DRIVE_WHEEL_DIA 6.2861 // in inches
+#define DRIVE_WHEEL_DIA 7 // in inches
 
 /**********************************
  * PID constants. These are for the arm PID and should be adjusted with care
@@ -60,7 +60,7 @@
 
 #define ARM_AUTO_ERROR 10000
 
-#define ARM_UPPER_LIMIT 550000
+#define ARM_UPPER_LIMIT 620000
 
 /*********************************
  * Constants for the Grabber
@@ -81,7 +81,7 @@
 #define INTAKE_SOL_TWO 5
 
 // climber
-#define CLIMBER_PORT 10
+#define CLIMBER_PORT 7
 
 
 enum Constants {
