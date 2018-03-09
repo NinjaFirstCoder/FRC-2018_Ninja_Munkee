@@ -419,12 +419,19 @@ public:
 		 * buttons for the intake levels
 		 */
 		if(MainJoystick->GetRawButton(2)) { // run the intake forward
+			intakeLeftSideOnly = 0;
 			intakeForward = 1;
 			intakeBackward = 0;
 		} else if(MainJoystick->GetRawButton(3)){ // run the intake backwards
+			intakeLeftSideOnly = false;
 			intakeForward = 0;
 			intakeBackward = 1;
+		} else if(MainJoystick->GetRawButton(10)) {
+			intakeLeftSideOnly = true;
+			intakeForward = 0;
+			intakeBackward = 0;
 		} else {
+			intakeLeftSideOnly = false;
 			intakeForward = 0;
 			intakeBackward = 0;
 		}
@@ -553,12 +560,9 @@ public:
 		} else if(intakeBackward) {
 			IntakeTalonLeft->Set(INTAKE_SPEED);
 			IntakeTalonRight->Set(-INTAKE_SPEED);
-		} else if (intakeRotateRight) {
-			IntakeTalonLeft->Set(-INTAKE_SPEED);
+		} else if (intakeLeftSideOnly) {
+			IntakeTalonLeft->Set(0);
 			IntakeTalonRight->Set(-INTAKE_SPEED);
-		} else if (intakeRotateLeft) {
-			IntakeTalonLeft->Set(INTAKE_SPEED);
-			IntakeTalonRight->Set(INTAKE_SPEED);
 		} else {
 
 			IntakeTalonRight->Set(0);
@@ -1136,7 +1140,7 @@ public:
 			} else {
 				/**********************************************************************************
 				 * Run arm operations
-				 * /
+				 */
 
 				if(!autonomousVars.ArmOperationDone) {
 					if(autonomousVars.autoTemp->data[0] > 0) { // initial state of doing nothing.
@@ -1172,8 +1176,8 @@ public:
 				}
 				SmartDashboard::PutNumber("Arm Motor Target Position", autonomousVars.autoTemp->data[0]);
 				SmartDashboard::PutNumber("Arm Motor actual Position", ArmTalon->GetSelectedSensorPosition(0));
-				*/
-				autonomousVars.ArmOperationDone = true;
+				//*/
+				//autonomousVars.ArmOperationDone = true;
 
 
 
@@ -1192,7 +1196,7 @@ public:
 
 				/**********************************************************************************
 				 * run grabber operations
-				 * /
+				 */
 				if(autonomousVars.autoTemp->data[6]) {
 					grabberSolenoid.Set(frc::DoubleSolenoid::Value::kForward);
 				} else {
@@ -1205,19 +1209,19 @@ public:
 					GrabberTalon->Set(ControlMode::PercentOutput, 0);
 					autonomousVars.GrabberOperationDone = true;
 				}
-				*/
-				autonomousVars.GrabberOperationDone = true;
+				//*/
+				//autonomousVars.GrabberOperationDone = true;
 
 
 				/**********************************************************************************
 				 * run intake operations
-				 * /
+				 */
 				if(autonomousVars.autoTemp->data[9]) { // if its a one open the intake
 					intakeSolenoid.Set(frc::DoubleSolenoid::Value::kReverse);
 				} else {
 					intakeSolenoid.Set(frc::DoubleSolenoid::Value::kForward);
 				}
-				if(autonomousVars.autoTemp->data[11] > 1) {
+				if(autonomousVars.autoTemp->data[11] >= 0) {
 					if(autonomousVars.autoTemp->data[11] != autonomousVars.intakeTimeCount) {
 						autonomousVars.intakeTimeCount ++;
 						IntakeTalonLeft->Set(autonomousVars.autoTemp->data[10]);
@@ -1241,8 +1245,8 @@ public:
 						autonomousVars.IntakeOperationDone = true;
 					}
 
-				}*/
-				autonomousVars.IntakeOperationDone = true;
+				}//*/
+				//autonomousVars.IntakeOperationDone = true;
 
 
 				/**********************************************************************************
@@ -1624,6 +1628,7 @@ private:
 	bool intakeBackward = false;
 	bool intakeOpen = false;
 	bool intakeClose = false;
+	bool intakeLeftSideOnly = false;
 	double intakeSpeed = 0;
 
 	bool zeroingOperation = false;

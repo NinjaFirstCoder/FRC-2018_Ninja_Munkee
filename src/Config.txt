@@ -2,28 +2,14 @@
 Operation_01
 	arm_position: 0 // drive forward mode
 	arm_speed: 0
-	drive_position: 0
-	drive_speed: 0
-	turn_angle: 0
-	turn_speed: 0
-	grabber_position: 0
-	grabber_speed: 0 
-	grabber_time: 0
-	intake_position: 0
-	intake_speed: 0
-	intake_time: 0
-	time: 250
-Operation_01
-	arm_position: 0 // drive forward mode
-	arm_speed: 0
 	drive_position: 150
 	drive_speed: 1
 	turn_angle: 0
 	turn_speed: 0
-	grabber_position: 0
+	grabber_position: 1 // open
 	grabber_speed: 0 
 	grabber_time: 0
-	intake_position: 0
+	intake_position: 1 // open
 	intake_speed: 0
 	intake_time: 0
 	time: 0
@@ -1939,10 +1925,52 @@ Operation_01
 
 -AutoMode_16-
 Operation_01
-	arm_position: 0 
-	arm_speed: 0
+	arm_position: 80000 // code for left left left from left
+	arm_speed: 1        // move arm up and grab the box
 	drive_position: 0
 	drive_speed: 0
+	turn_angle: 0
+	turn_speed: 0
+	grabber_position: 1 // open
+	grabber_speed: 0
+	grabber_time: 0
+	intake_position: 1 // open
+	intake_speed: 0 
+	intake_time: 0
+	time: 0
+Operation_01
+	arm_position: 400000 // move it to the midway point
+	arm_speed: 1
+	drive_position: 0
+	drive_speed: 0
+	turn_angle: 0
+	turn_speed: 0
+	grabber_position: 0 // close
+	grabber_speed: 1 
+	grabber_time: 30
+	intake_position: 1 // open
+	intake_speed: 0 // out 
+	intake_time: 0
+	time: 0
+Operation_01
+	arm_position: 400000 // move it to the midway point
+	arm_speed: 1
+	drive_position: 0
+	drive_speed: 0
+	turn_angle: 0
+	turn_speed: 0
+	grabber_position: 0 // close
+	grabber_speed:  
+	grabber_time: 
+	intake_position: 0 // close
+	intake_speed: 1 // out 
+	intake_time: 25
+	time: 0
+Operation_01
+	arm_position: 0 // drive forward mode
+	arm_speed: 0
+	drive_position: 150
+	drive_speed: 1
 	turn_angle: 0
 	turn_speed: 0
 	grabber_position: 0
@@ -1956,7 +1984,7 @@ Operation_01
 
 -AutoMode_17-
 Operation_01
-	arm_position: 0 // leave how it is    
+	arm_position: 0 // do nothing
 	arm_speed: 0
 	drive_position: 0
 	drive_speed: 0
