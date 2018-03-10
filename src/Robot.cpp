@@ -418,11 +418,11 @@ public:
 		/**********************************************************
 		 * buttons for the intake levels
 		 */
-		if(MainJoystick->GetRawButton(2)) { // run the intake forward
+		if(MainJoystick->GetRawButton(7)) { // run the intake forward
 			intakeLeftSideOnly = 0;
 			intakeForward = 1;
 			intakeBackward = 0;
-		} else if(MainJoystick->GetRawButton(3)){ // run the intake backwards
+		} else if(MainJoystick->GetRawButton(6)){ // run the intake backwards
 			intakeLeftSideOnly = false;
 			intakeForward = 0;
 			intakeBackward = 1;
@@ -576,7 +576,7 @@ public:
 
 		}
 		if(IntakeSwitch->Get() && ArmTalon->GetSelectedSensorPosition(0) < 200) {
-			grabberSolenoid.Set(frc::DoubleSolenoid::Value::kReverse);
+		//	grabberSolenoid.Set(frc::DoubleSolenoid::Value::kReverse);
 		}
 
 	}
@@ -623,7 +623,7 @@ public:
 		int lowerLimit = -1000000;
 		if(ArmButtons.low ) {
 				arm_currentPos = lowerLimit;
-				grabberSolenoid.Set(frc::DoubleSolenoid::Value::kForward);
+				//grabberSolenoid.Set(frc::DoubleSolenoid::Value::kForward);
 		} else {
 				tmp = -ArmJoystick->GetY();
 				if (tmp < -0.1) {
@@ -731,7 +731,7 @@ public:
 		ArmTalon->Set(ControlMode::Position, arm_currentPos);
 		SmartDashboard::PutNumber("Arm Position", ArmTalon->GetSelectedSensorPosition(0));
 		SmartDashboard::PutNumber("Arm Target Position", arm_currentPos);
-		SmartDashboard::PutNumber("Arm Target trag Position", ArmTalon->GetActiveTrajectoryPosition());
+		//SmartDashboard::PutNumber("Arm Target trag Position", ArmTalon->GetActiveTrajectoryPosition());
 
 /*		if(ArmJoystick->GetRawButton(8)) {
 			dashData1 = SmartDashboard::GetString("DB/String 0", "myDefaultData");
@@ -1224,8 +1224,10 @@ public:
 				 */
 				if(autonomousVars.autoTemp->data[9]) { // if its a one open the intake
 					intakeSolenoid.Set(frc::DoubleSolenoid::Value::kReverse);
+					SmartDashboard::PutString("Intake Position", "reverse");
 				} else {
 					intakeSolenoid.Set(frc::DoubleSolenoid::Value::kForward);
+					SmartDashboard::PutString("Intake Position", "forward");
 				}
 				if(autonomousVars.autoTemp->data[11] >= 0) {
 					if(autonomousVars.autoTemp->data[11] != autonomousVars.intakeTimeCount) {
@@ -1240,9 +1242,21 @@ public:
 						autonomousVars.IntakeOperationDone = true;
 					}
 				} else {
+					/*
 					if(!IntakeSwitch->Get()) {
 						IntakeTalonLeft->Set(autonomousVars.autoTemp->data[10]);
 						IntakeTalonRight->Set(-autonomousVars.autoTemp->data[10]);
+											// add intake movement here
+
+					} else {
+						IntakeTalonLeft->Set(0);
+						IntakeTalonRight->Set(0);
+						autonomousVars.IntakeOperationDone = true;
+					}*/
+					if(-autonomousVars.autoTemp->data[11] != autonomousVars.intakeTimeCount) {
+						autonomousVars.intakeTimeCount ++;
+						IntakeTalonLeft->Set(0);
+						IntakeTalonRight->Set(-INTAKE_SPEED);
 											// add intake movement here
 
 					} else {
