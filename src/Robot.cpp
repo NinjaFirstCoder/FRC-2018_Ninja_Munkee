@@ -731,6 +731,7 @@ public:
 		ArmTalon->Set(ControlMode::Position, arm_currentPos);
 		SmartDashboard::PutNumber("Arm Position", ArmTalon->GetSelectedSensorPosition(0));
 		SmartDashboard::PutNumber("Arm Target Position", arm_currentPos);
+		SmartDashboard::PutNumber("Arm Target trag Position", ArmTalon->GetActiveTrajectoryPosition());
 
 /*		if(ArmJoystick->GetRawButton(8)) {
 			dashData1 = SmartDashboard::GetString("DB/String 0", "myDefaultData");
@@ -981,13 +982,17 @@ public:
 				case(1): // Prelim Automatic Left
 						isRightSide = 1;
 						if(fieldColorLocations.isNearestSwitchOnLeft() && fieldColorLocations.isScaleOnLeft()) { // LLL
-							CurrentAutoMode = &AutoConfig.autoMode2;
+							CurrentAutoMode = &AutoConfig.autoMode14;
+							SmartDashboard::PutNumber("AUTO MODE SELECTED BY FIELD" , 14);
 						} else if(fieldColorLocations.isScaleOnLeft()) { // RLR
-							CurrentAutoMode = &AutoConfig.autoMode4;
+							CurrentAutoMode = &AutoConfig.autoMode15;
+							SmartDashboard::PutNumber("AUTO MODE SELECTED BY FIELD" , 15);
 						} else if(fieldColorLocations.isNearestSwitchOnLeft()) { // LRL
-							CurrentAutoMode = &AutoConfig.autoMode3;
+							CurrentAutoMode = &AutoConfig.autoMode14;
+							SmartDashboard::PutNumber("AUTO MODE SELECTED BY FIELD" , 14);
 						} else { // RRR
-							CurrentAutoMode = &AutoConfig.autoMode10;
+							CurrentAutoMode = &AutoConfig.autoMode16;
+							SmartDashboard::PutNumber("AUTO MODE SELECTED BY FIELD" , 16);
 						}
 						autonomousVars.foundList = true;
 						break;
@@ -1143,6 +1148,7 @@ public:
 				 */
 
 				if(!autonomousVars.ArmOperationDone) {
+					autoRanOnce = true;
 					if(autonomousVars.autoTemp->data[0] > 0) { // initial state of doing nothing.
 						if(autonomousVars.autoTemp->data[0] == 0) {
 							// run tell you find the hall effect
@@ -1465,9 +1471,12 @@ public:
 		 * TODO:
 		 * add a thing that doesn't change the zero if auto ran first
 		 */
-		ArmTalon->SetSelectedSensorPosition(0, kPIDLoopIdx, kTimeoutMs);
-		ArmTalon->Set(ControlMode::Position, 0);
+		if(!autoRanOnce) {
+			ArmTalon->SetSelectedSensorPosition(0, kPIDLoopIdx, kTimeoutMs);
+			arm_currentPos = 0;
+		}
 		arm_currentPos = 0;
+		ArmTalon->Set(ControlMode::Position, 0);
 		intnumb++;
 		SmartDashboard::PutNumber("intnumb", intnumb);
 		zeroingOperation = false;
@@ -1506,6 +1515,7 @@ public:
 		SmartDashboard::PutNumber("Talon Right Sensor Position", m_rearRight.GetSelectedSensorPosition(0));
 		SmartDashboard::PutNumber("Drive Target X", joystickX);
 
+		autoRanOnce = false;
 		//SmartDashboard::PutNumber("Hall Effect Value" , HallEffect->Get());
 	}
 
@@ -1643,6 +1653,8 @@ private:
 
 	bool grabberPneumaticsForward = false;
 	bool grabberPneumaticsBackward = false;
+
+	bool autoRanOnce = false;
 
 	bool armZeroDown = false;
 	bool armZeroUp = false;
