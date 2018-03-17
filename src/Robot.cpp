@@ -1531,6 +1531,17 @@ public:
 
 		autoRanOnce = false;
 		//SmartDashboard::PutNumber("Hall Effect Value" , HallEffect->Get());
+
+		// put robot in PID tuning mode if user switch is pressed
+		if(RobotController::GetUserButton()) { // if high
+			if(lastUserButtonState == 0) { // if low - do toggle stuff here
+				TuningEnabled = TuningEnabled ? false : true; // invert
+				SmartDashboard::PutBoolean("TuneEnabled", TuningEnabled);
+
+
+			}
+		}
+		lastUserButtonState = RobotController::GetUserButton();
 	}
 
 	/***********************************************************************
@@ -1714,6 +1725,10 @@ private:
 
 	I2C *LightI2C;
 	unsigned char lightColors[2];
+
+	bool TuningEnabled = false;
+	int lastUserButtonState = 0;
+	int currentButtonState = 0;
 
 };
 
