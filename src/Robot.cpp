@@ -48,7 +48,7 @@
 #include <algorithm>
 #include <cstdlib>
 using namespace std;
-#define OPERATION_ELEMENTS 13
+#define OPERATION_ELEMENTS 15
 
 /***************************************************
  * This code redefines the PIDOutput to a new class
@@ -198,7 +198,7 @@ public:
 			 									/*for (string::iterator it = line.begin(); it != line.end(); ++it) { // remove all non digits
 			 									        if (isdigit(*it)) newString.push_back(*it);
 			 									}*/
-			 									for(int z = 0; z < (signed) line.length(); z++) {
+			 									for(int z = 0; z < (signed) line.length(); z++) { // filter out all non integers
 			 										if(line[z] == '0' || line[z] == '1' || line[z] == '2' || line[z] == '3' || line[z] == '4' || line[z] == '5' || line[z] == '6' || line[z] == '7' || line[z] == '8' || line[z] == '9' || line[z] == '.' || line[z] == '-' ) {
 			 											newString.push_back(line[z]);
 			 										}
@@ -270,11 +270,11 @@ public:
 			 				}
 			 			}
 			 			myfile.close();
-			 			frc::SmartDashboard::PutNumber("Mode_2_states_loaded", y);
-				 		frc::SmartDashboard::PutString("Pulled_Auto_Modes_From_Config", "Yes");
+			 			frc::SmartDashboard::PutNumber("AUTOLOAD - Mode_2_states_loaded", y);
+				 		frc::SmartDashboard::PutString("AUTOLOAD - Pulled_Auto_Modes_From_Config", "Yes");
 			 	 }
 			 	 else { // PRINT ERROR MESSAGE OR SEARCH FOR FILE HERE
-			 		frc::SmartDashboard::PutString("Pulled_Auto_Modes_From_Config", "FAILED");
+			 		frc::SmartDashboard::PutString("AUTOLOAD - Pulled_Auto_Modes_From_Config", "FAILED");
 			 		FileNotFound= true;
 			 	 }
 		 }
@@ -318,24 +318,24 @@ public:
 		 /****************************************
 		  * Drive train motor encoder setup
 		  */
+		 // main drive train and encoder setup
 		 m_rearLeft.ConfigSelectedFeedbackSensor(FeedbackDevice::QuadEncoder, 0, 0);
 		 m_rearLeft.SetSensorPhase(true);
 		 m_left.SetInverted(false);
-
 		 m_rearRight.ConfigSelectedFeedbackSensor(FeedbackDevice::QuadEncoder, 0, 0);
 		 m_rearRight.SetSensorPhase(false);
 
+		 // setup the drive train PID controller for auto
 		 DrivePIDController = new PIDController(DRIVE_PIDC_Kp, DRIVE_PIDC_Ki, DRIVE_PIDC_Kd, this, this, DRIVE_PIDC_PERIOD);
 
+		 // setup the turning operation PID controller for auto
 		 DriveTurningPIDOutputController = new TDPIDOutput;
 		 DriveTurningPIDController = new PIDController(DRIVE_PIDT_Kp, DRIVE_PIDT_Ki, DRIVE_PIDT_Kd, navxgyro, DriveTurningPIDOutputController);
 		 DriveTurningPIDController->SetInputRange(-1000000.0f,  1000000.0f);
 		 DriveTurningPIDController->SetOutputRange(-1.0, 1.0);
-		 //DriveTurningPIDController->SetAbsoluteTolerance(kToleranceDegrees);
 		 DriveTurningPIDController->SetContinuous(true);
-		 //GyroPIDOutput = new DriveGyroPIDOutput;
 
-		 TicksPerInch = (1/(DRIVE_WHEEL_DIA * 3.1415)) * 4096;
+		 TicksPerInch = (1/(DRIVE_WHEEL_DIA * 3.1415)) * 4096; // calculate the amount of ticks for an inch
 
 
 		 /***************************************
@@ -349,9 +349,10 @@ public:
 		 ArmTalon->Config_kP(kPIDLoopIdx, CONST_kP, kTimeoutMs);
 		 ArmTalon->Config_kI(kPIDLoopIdx, CONST_kI, kTimeoutMs);
 		 ArmTalon->Config_kD(kPIDLoopIdx, CONST_kF, kTimeoutMs);
-		 //ArmTalon->ConfigPeakOutputForward((double) ARM_POWER, kTimeoutMs);
-		 //ArmTalon->ConfigPeakOutputReverse((double)-ARM_POWER, kTimeoutMs);
 
+		 /***************************************
+		  * digital switch setup
+		  */
 		 HallEffect = new DigitalInput(9);
 		 IntakeSwitch = new DigitalInput(8);
 
@@ -367,17 +368,10 @@ public:
 		 // Grabber setup
 		 GrabberTalon = new TalonSRX(GRABBER_CONTROLLER_PORT);
 
-
-		 // auto config loader
+		 // load the auto codes
 		 AutoConfig.loadConfig();
-		// chooser.AddDefault("Automatic", new AutoManual());
-		 //chooser.AddObject("Manual 1", new AutoSelection());
 
-//		 frc::SmartDashboard::PutData("Auto Modes", &chooser);
-
-		 // light strip setup
-
-
+		 // RGB light strip setup
 		 LightI2C = new I2C(I2C::Port::kOnboard, 0x10);
 		 lightColors[0] = 0;
 		 lightColors[1] = 0;
@@ -398,15 +392,14 @@ public:
 	 * Function grabs values from joysticks and gamepads
 	 */
 	void pollControllers(){
+
+		/**********************************************************
+		 * buttons for the drive train
+		 */
 		joystickX = -MainJoystick->GetX();
 		joystickY = MainJoystick->GetY();
-		intakeSpeed = (MainJoystick->GetZ()-1)/2;
 
-		/* Add joystick switches here
-		 *
-		 */
-
-		// buttons for the drive train levels
+		// not used atm
 		if(MainJoystick->GetRawButton(1)){
 			driveLevel = driveNormal;
 		} else if(MainJoystick->GetRawButton(2)){
@@ -453,6 +446,10 @@ public:
 			intakeRotateRight = false;
 			intakeRotateLeft = false;
 		}
+
+		// isn't currently used
+		intakeSpeed = (MainJoystick->GetZ()-1)/2;
+
 		/**********************************************************
 		 * climber buttons
 		 */
@@ -466,7 +463,7 @@ public:
 			climberUp = false;
 			climberDown = false;
 		}
-		climberSpeed = ArmJoystick->GetZ();
+
 		/**********************************************************
 		 * buttons for the grabber levels
 		 */
@@ -486,19 +483,8 @@ public:
 		} else {
 			grabberOpen = false;
 		}
-/*
-		if(MainJoystick->GetRawButton(4)) {
-			grabberPneumaticsForward = true;
-			grabberPneumaticsBackward = false;
 
-		} else if(MainJoystick->GetRawButton(5)){
-			grabberPneumaticsForward = false;
-			grabberPneumaticsBackward = true;
 
-		}else {
-			grabberPneumaticsForward = false;
-			grabberPneumaticsBackward = false;
-		}*/
 		/**********************************************************
 		 * buttons for the arm levels
 		 */
@@ -528,17 +514,6 @@ public:
 			ArmButtons.high = false;
 			ArmButtons.lowmid = false;
 		}
-/*
-		if(ArmJoystick->GetRawButton(9)) {
-			armZeroDown = false;
-			armZeroUp = true;
-		} else if(ArmJoystick->GetRawButton(8)) {
-			armZeroDown = true;
-			armZeroUp = false;
-		} else {
-			armZeroDown = false;
-			armZeroUp = false;
-		}*/
 	}
 
 	/*****************************************************
@@ -575,14 +550,15 @@ public:
 			intakeSolenoid.Set(frc::DoubleSolenoid::Value::kReverse);
 
 		}
+		/* UNCOMMENT THIS BLOCK TO USE THE AUTO GRAB FUNCTION ON THE INTAKE
 		if(IntakeSwitch->Get() && ArmTalon->GetSelectedSensorPosition(0) < 200) {
-		//	grabberSolenoid.Set(frc::DoubleSolenoid::Value::kReverse);
-		}
+			grabberSolenoid.Set(frc::DoubleSolenoid::Value::kReverse);
+		}*/
 
 	}
 
 	/****************************************************
-	 * Function runs the grabber. NOTE: the grabber is the thing on the end of the arm
+	 * Function runs the grabber.
 	 */
 	void runGrabber() {
 		if(grabberForward) {
@@ -608,9 +584,9 @@ public:
 	 */
 	void runClimber() {
 		if(climberUp) {
-			ClimberTalon->Set(climberSpeed * 1);
+			ClimberTalon->Set(1);
 		} else if(climberDown) {
-			ClimberTalon->Set(climberSpeed * -1);
+			ClimberTalon->Set(-1);
 		} else {
 			ClimberTalon->Set(0);
 		}
@@ -620,118 +596,52 @@ public:
 	 */
 	void runArm() {
 		int tmp;
-		int lowerLimit = -1000000;
-		if(ArmButtons.low ) {
-				arm_currentPos = lowerLimit;
+		int lowerLimit = -1000000; // if the arm never finds the hall effect this might keep it from destroying itself
+
+		if(ArmButtons.low ) { // if the low button is pressed
+				arm_currentPos = lowerLimit; // set the arm to go all the way down until it finds the hall effect
 				//grabberSolenoid.Set(frc::DoubleSolenoid::Value::kForward);
-		} else {
+		} else { // if low button isn't pressed check the joystick
 				tmp = -ArmJoystick->GetY();
 				if (tmp < -0.1) {
-						arm_currentPos += ((tmp + 0.1) * (-1 / (-1 + 0.1))) * 5800;
-				} else {
-						arm_currentPos += 0;
-				}
-				//arm_currentPos += -ArmJoystick->GetY() * 5800;
-				//ArmTalon->Set(ControlMode::PercentOutput, ArmJoystick->GetY());
-		}
-
-		if(!HallEffect->Get()) {
-			ArmTalon->SetSelectedSensorPosition(0, kPIDLoopIdx, kTimeoutMs);
-			arm_currentPos = 0;
-
-			//arm_currentPos =  ArmTalon->GetSelectedSensorPosition(0);
-		} else if(arm_currentPos < lowerLimit) {
-			arm_currentPos = lowerLimit;
-		}
-
-
-		if(ArmButtons.mid) {
-				arm_currentPos = (ARM_UPPER_LIMIT/2);
-		} else if(ArmButtons.high){
-				arm_currentPos = ARM_UPPER_LIMIT;
-		} else if(ArmButtons.lowmid) {
-				arm_currentPos = 30000;
-		} else {
-				tmp = -ArmJoystick->GetY();
-				if (tmp > 0.1) {
-						arm_currentPos += ((tmp - 0.1) * (1 / (1 - 0.1))) * 5800 ;
-				} else {
-						arm_currentPos += 0;
-				}
-				//arm_currentPos += -ArmJoystick->GetY() * 5800;
-				//ArmTalon->Set(ControlMode::PercentOutput, ArmJoystick->GetY());
-		}
-
-		if(arm_currentPos > ARM_UPPER_LIMIT) {
-			arm_currentPos = ARM_UPPER_LIMIT;
-		}
-		/*
-		int tmp;
-		if(!zeroingOperation) {
-			if(!HallEffect->Get()) {
-				ArmTalon->SetSelectedSensorPosition(-100, kPIDLoopIdx, kTimeoutMs);
-			}
-	/ *
-			if(armZeroDown && arm_currentPos == 0 ) {
-				ArmTalon->SetSelectedSensorPosition(+100, kPIDLoopIdx, kTimeoutMs);
-			} else if(armZeroUp && arm_currentPos == 0) {
-				ArmTalon->SetSelectedSensorPosition(-100, kPIDLoopIdx, kTimeoutMs);
-			}* /
-			if(ArmButtons.low ) {
-				arm_currentPos = 0;
-				grabberSolenoid.Set(frc::DoubleSolenoid::Value::kForward);
-			} else if(ArmButtons.mid) {
-				arm_currentPos = (550000/2);
-			} else if(ArmButtons.high){
-				arm_currentPos = 550000;
-			} else {
-				tmp = -ArmJoystick->GetY();
-				if (tmp > 0.1) {
-					arm_currentPos += ((tmp - 0.1) * (1 / (1 - 0.1))) * 5800 ;
-				} else if (tmp < -0.1) {
-					arm_currentPos += ((tmp + 0.1) * (-1 / (-1 + 0.1))) * 5800;
+					arm_currentPos += ((tmp + 0.1) * (-1 / (-1 + 0.1))) * 5800; // deadzone is 10%
 				} else {
 					arm_currentPos += 0;
 				}
-				//arm_currentPos += -ArmJoystick->GetY() * 5800;
-				//ArmTalon->Set(ControlMode::PercentOutput, ArmJoystick->GetY());
-			}
-			if(arm_currentPos < 1 ) {
-				arm_currentPos = 0;
-			} if(arm_currentPos > 550000) {
-				arm_currentPos = 550000;
-			}
 		}
 
-		if(armZeroDown ) {
-			arm_currentPos -= 500;
-			zeroEdgeDetect = true;
-			zeroingOperation = true;
-		} else if(armZeroUp) {
-			arm_currentPos += 500;
-			zeroEdgeDetect = true;
-			zeroingOperation = true;
-		}
-
-		if(!armZeroDown && !armZeroUp && zeroEdgeDetect) {
-			ArmTalon->SetSelectedSensorPosition(0, kPIDLoopIdx, kTimeoutMs);
+		if(!HallEffect->Get()) { // if the hall effect sensor is found
+			ArmTalon->SetSelectedSensorPosition(0, kPIDLoopIdx, kTimeoutMs); // set the arm to zero
 			arm_currentPos = 0;
-			zeroingOperation = false;
-			zeroEdgeDetect = false;
-		}*/
-	/*	int tmp = ArmJoystick->GetY();
-		int turn;
-		if (tmp > 0.1) {
-			turn = ((tmp - 0.1) * (1 / (1 - 0.1)));
-		} else if (tmp < -0.1) {
-			turn = ((tmp + 0.1) * (-1 / (-1 + 0.1)));
-		} else {
-			turn = 0;
-		}*/
+		} else if(arm_currentPos < lowerLimit) { // else make sure it isn't at the lower limit
+			arm_currentPos = lowerLimit;
+		}
+
+		if(ArmButtons.mid) { // check if the mid position is set
+			arm_currentPos = (ARM_UPPER_LIMIT/2);
+		} else if(ArmButtons.high){ // check if the high position is set
+			arm_currentPos = ARM_UPPER_LIMIT;
+		} else if(ArmButtons.lowmid) {
+			arm_currentPos = 30000; // check if the low mid position is set
+		} else { // get the joystick values
+			tmp = -ArmJoystick->GetY();
+			if (tmp > 0.1) {
+				arm_currentPos += ((tmp - 0.1) * (1 / (1 - 0.1))) * 5800; // dead zone is at 10%
+			} else {
+				arm_currentPos += 0;
+			}
+		}
+
+		// make sure the arm never hits the upper limit
+		if(arm_currentPos > ARM_UPPER_LIMIT) {
+			arm_currentPos = ARM_UPPER_LIMIT;
+		}
+
+		// set the arm to the desired position
 		ArmTalon->Set(ControlMode::Position, arm_currentPos);
 		SmartDashboard::PutNumber("Arm Position", ArmTalon->GetSelectedSensorPosition(0));
 		SmartDashboard::PutNumber("Arm Target Position", arm_currentPos);
-		//SmartDashboard::PutNumber("Arm Target trag Position", ArmTalon->GetActiveTrajectoryPosition());
+		SmartDashboard::PutNumber("arm_position", ARM_UPPER_LIMIT/ArmTalon->GetSelectedSensorPosition(0));
 
 /*		if(ArmJoystick->GetRawButton(8)) {
 			dashData1 = SmartDashboard::GetString("DB/String 0", "myDefaultData");
@@ -751,12 +661,7 @@ public:
 			SmartDashboard::PutNumber("2", atof(dashData2.c_str()));
 			SmartDashboard::PutNumber("3", atof(dashData3.c_str()));
 			SmartDashboard::PutNumber("4", atof(dashData4.c_str()));
-
-
 		}*/
-
-//		ArmTalon->Set(ControlMode::Position, 1000);
-
 	}
 	/*
 	 * This autonomous (along with the chooser code above) shows how to
@@ -772,21 +677,7 @@ public:
 	 * well.
 	 */
 	void AutonomousInit() override {
-		//autonomousCommand.reset(chooser.GetSelected());
-		//if(autonomousCommand.get() != nullptr) {
-		//	autonomousCommand->Start();
-		//}
-	/*	m_autoSelected = m_chooser.GetSelected();
-		 m_autoSelected = SmartDashboard::GetString("Auto Selector",
-				 kAutoNameDefault);
-		std::cout << "Auto selected: " << m_autoSelected << std::endl;
-
-		if (m_autoSelected == kAutoNameCustom) {
-			// Custom Auto goes here
-		} else {
-			// Default Auto goes here
-		}*/
-			/*
+			/************************************************************************************
 			 * This resets all the variables for autonomous so that it can be run more than once
 			 */
 			autonomousVars.CompletingOperation = true;
@@ -802,18 +693,17 @@ public:
 			autonomousVars.startingConfigDone = false;
 			autonomousVars.TurningOperationDone = false;
 
-			//ArmTalon->SetSelectedSensorPosition(0, kPIDLoopIdx, kTimeoutMs);
+			// reset the drive train encoders
 			m_rearLeft.SetSelectedSensorPosition(0, kPIDLoopIdx, kTimeoutMs);
 			m_rearRight.SetSelectedSensorPosition(0, kPIDLoopIdx, kTimeoutMs);
-			//navxgyro->ZeroYaw();
+			m_left.SetInverted(false); // make sure the drive train is setup right
 
-			m_left.SetInverted(false);
-
+			// set the arm position to zero
 			ArmTalon->SetSelectedSensorPosition(0, kPIDLoopIdx, kTimeoutMs);
 			ArmTalon->Set(ControlMode::Position, 0);
 
 			SmartDashboard::PutNumber("arm waiting", 0);
-			SmartDashboard::PutBoolean("graph_reset", true);
+			SmartDashboard::PutBoolean("graph_reset", true); // reset the graph
 			/**
 			 * Here, get the data from the DriverStation regarding the switches
 			 * and scale on the field. Three characters will be sent over and
@@ -855,14 +745,9 @@ public:
 					fieldColorLocations.setFurthestSwitchRight();
 				}
 			}
-
-			// enable the drive PID controller
-			SmartDashboard::PutBoolean("graph_reset", true);
-			//DrivePIDController->Enable();
-
+			// this is for fixing a thing between tele and auto
 			ranOnce = false;
-
-			// setup for the gyro PID controler
+			SmartDashboard::PutString("ModeRan", "auto Init");
 
 	}
 
@@ -890,82 +775,51 @@ public:
 	 *
 	 */
 	void AutonomousPeriodic() {
-
+		// get game data info
 		string nearestSwitch = fieldColorLocations.isNearestSwitchOnLeft() ? "LEFT" : "RIGHT";
 		string scale = fieldColorLocations.isScaleOnLeft() ? "LEFT" : "RIGHT";
 		string furthestSwitch = fieldColorLocations.isFurthestSwitchOnLeft() ? "LEFT" : "RIGHT";
-		SmartDashboard::PutString("COLORS", nearestSwitch + " " + scale + " " + furthestSwitch);
+		SmartDashboard::PutString("AutoP - Field colors found", nearestSwitch + " " + scale + " " + furthestSwitch);
 
-		//drive(0,0);
+		if(!autonomousVars.startingConfigDone) { // code here is ran once at the start of auto
 
-		/*
-		if(!fieldColorLocations.isNearestSwitchOnLeft()) {
-			/ *
-			 * TODO:
-			 * 1. Drive next to switch.
-			 * 2. Turn toward switch.
-			 * 3. Deploy intake dump box.
-			 * 4. Turn toward scale.
-			 * 5. Drive over the line.
-			 * /
-		} else if(!fieldColorLocations.isScaleOnLeft()) {
-			/ *
-			 * TODO:
-			 * 1. Drive to scale.
-			 * 2. Deploy intake and dump box.
-			 * /
-		} else {
-			/*
-			 * TODO:
-			 * 1. Drive past switch.
-			 * 2. Turn to the left 90 degrees.
-			 * 3. Drive to switch on left side.
-			 * 4. Turn to the left 90 degrees.
-			 * 5. Deploy intake and dump box.
-			 * /
-		} */
 
-		/*
-		 * Recommendation: utilize JSON for the configuration file. JSON has several libraries available,
-		 * as it is a standard. An example might be as such.
-		 *
-		 * {
-		 *   "nearSwitch": [
-		 *     "FORWARD 100",
-		 *     "LEFT 90",
-		 *     "DEPLOY",
-		 *     "RIGHT 90",
-		 *     "DRIVE 50"
-		 *   ],
-		 *   "scale": [
-		 *     "FORWARD 200",
-		 *     "DEPLOY"
-		 *   ],
-		 *   "farSwitch": [
-		 *     "FORWARD 120",
-		 *     "LEFT 90",
-		 *     "DRIVE 200",
-		 *     "LEFT 90",
-		 *     "DEPLOY"
-		 *   ]
-		 * }
-		 */
-
-		if(!autonomousVars.startingConfigDone) {
 
 			drive(0,0);
 			autonomousVars.startingConfigDone = true;
 		} else if(!autonomousVars.foundList) {
-			//SmartDashboard::PutString("CURRENTAUTOSTATE", "started");
-			int AutoMode = SmartDashboard::GetNumber("Autonomous Mode", 404); // may need to be changed from 0
-			SmartDashboard::PutNumber("FOUND", AutoMode);
+
+			if(SmartDashboard::GetBoolean("DriveTune", false)) { // reset the PID controller values if in tuning mode
+				DrivePIDController->SetP((double) SmartDashboard::GetNumber("drive_P", 0));
+				DrivePIDController->SetI((double) SmartDashboard::GetNumber("drive_I", 0));
+				DrivePIDController->SetD((double) SmartDashboard::GetNumber("drive_D", 0));
+				SmartDashboard::PutNumber("AutoP - Actual Drive P", DrivePIDController->GetP());
+				SmartDashboard::PutNumber("AutoP - Actual Drive I", DrivePIDController->GetI());
+				SmartDashboard::PutNumber("AutoP - Actual Drive D", DrivePIDController->GetD());
+				DrivePIDController->Reset();
+				DrivePIDController->Enable();
+				SmartDashboard::PutString("AutoP - Drive Tuning Operation ran", "Custom tune");
+			} else {
+				DrivePIDController->SetP(DRIVE_PIDC_Kp);
+				DrivePIDController->SetI(DRIVE_PIDC_Ki);
+				DrivePIDController->SetD(DRIVE_PIDC_Kd);
+				SmartDashboard::PutNumber("AutoP - Actual Drive P", DrivePIDController->GetP());
+				SmartDashboard::PutNumber("AutoP - Actual Drive I", DrivePIDController->GetI());
+				SmartDashboard::PutNumber("AutoP - Actual Drive D", DrivePIDController->GetD());
+				DrivePIDController->Reset();
+				DrivePIDController->Enable();
+				SmartDashboard::PutString("AutoP - Drive Tuning Operation ran", "Preset tune");
+			}
+
+
+			int AutoMode = SmartDashboard::GetNumber("Autonomous Mode", 404); // 404 is for if the driver station isn't found
+			SmartDashboard::PutNumber("AutoP - Auto mode selected by driver", AutoMode);
 
 			if(AutoConfig.FileNotFound) { // if the auto config wasn't loaded
-				drive(0,0); // update drive so it doesn't error
-				return;
+				drive(0,0);               // update drive so it doesn't error
+				return;                   // return and do nothing
 			}
-			SmartDashboard::PutString("AUTOMODELOAD", "GOT TO SWITCH");
-			switch(AutoMode){
+			switch(AutoMode){ // select the right code to run based on the selector on the driver station
 				case(0): // Prelim Automatic Right
 						isRightSide = -1;
 						if(fieldColorLocations.isNearestSwitchOnLeft() && fieldColorLocations.isScaleOnLeft()) { // LLL
@@ -983,16 +837,16 @@ public:
 						isRightSide = 1;
 						if(fieldColorLocations.isNearestSwitchOnLeft() && fieldColorLocations.isScaleOnLeft()) { // LLL
 							CurrentAutoMode = &AutoConfig.autoMode14;
-							SmartDashboard::PutNumber("AUTO MODE SELECTED BY FIELD" , 14);
+							SmartDashboard::PutNumber("AutoP - Auto Mode selected by automation" , 14);
 						} else if(fieldColorLocations.isScaleOnLeft()) { // RLR
 							CurrentAutoMode = &AutoConfig.autoMode15;
-							SmartDashboard::PutNumber("AUTO MODE SELECTED BY FIELD" , 15);
+							SmartDashboard::PutNumber("AutoP - Auto Mode selected by automation" , 15);
 						} else if(fieldColorLocations.isNearestSwitchOnLeft()) { // LRL
 							CurrentAutoMode = &AutoConfig.autoMode14;
-							SmartDashboard::PutNumber("AUTO MODE SELECTED BY FIELD" , 14);
+							SmartDashboard::PutNumber("AutoP - Auto Mode selected by automation" , 14);
 						} else { // RRR
 							CurrentAutoMode = &AutoConfig.autoMode16;
-							SmartDashboard::PutNumber("AUTO MODE SELECTED BY FIELD" , 16);
+							SmartDashboard::PutNumber("AutoP - Auto Mode selected by automation" , 16);
 						}
 						autonomousVars.foundList = true;
 						break;
@@ -1100,55 +954,46 @@ public:
 						autonomousVars.foundList = true;
 						break;
 				default:
+					drive(0,0); // if the driver station isn't found do nothing
+					return;
 					break;
 
 			}
-			autonomousVars.autoTemp = CurrentAutoMode->head;
-			// zero out sensors
-			//ArmTalon->SetSelectedSensorPosition(0, kPIDLoopIdx, kTimeoutMs);
-			m_rearLeft.SetSelectedSensorPosition(0, kPIDLoopIdx, kTimeoutMs);
+
+			autonomousVars.autoTemp = CurrentAutoMode->head; // load the right pointer address for the code
+
+			m_rearLeft.SetSelectedSensorPosition(0, kPIDLoopIdx, kTimeoutMs); // zero out the drive train
 			m_rearRight.SetSelectedSensorPosition(0, kPIDLoopIdx, kTimeoutMs);
-
-			//navxgyro->ZeroYaw();
-			drive(0,0);
+			drive(0,0); // make sure we don't get a timeout error
 
 
-			//DriveTurningPIDController->SetP((double) SmartDashboard::GetNumber("drive_P", 0));
-			//DriveTurningPIDController->SetI((double) SmartDashboard::GetNumber("drive_I", 0));
-			//DriveTurningPIDController->SetD((double) SmartDashboard::GetNumber("drive_D", 0));
-
-				/*	SmartDashboard::PutNumber("actual_P", DrivePIDController->GetP());
-					SmartDashboard::PutNumber("actual_I", DrivePIDController->GetI());
-					SmartDashboard::PutNumber("actual_D", DrivePIDController->GetD());*/
-			//DrivePIDController->Reset();
-			//DrivePIDController->Enable();
-		} else {
-			if(!autonomousVars.CompletingOperation) { // if not currently in a operation
+		} else { // if done loading config stuff
+			if(!autonomousVars.CompletingOperation) { // if not currently in a operation move into another
 				// grab next operation
 				if(autonomousVars.autoTemp != NULL) {
 					// grab next operation
 					autonomousVars.autoTemp = autonomousVars.autoTemp->next; // grab next operation
 					if(autonomousVars.autoTemp!=NULL) {
 						autonomousVars.CompletingOperation = true;
-						SmartDashboard::PutString("CURRENTAUTOSTATE", "grabbing next value");
+						SmartDashboard::PutString("AutoP - Current Auto State", "grabbing next value");
 						//navxgyro->ZeroYaw();
 					} else {
 						autonomousVars.CompletingOperation = false;
-						SmartDashboard::PutString("CURRENTAUTOSTATE", "FOUND NULL");
+						SmartDashboard::PutString("AutoP - Current Auto State", "Found end of program");
 					}
 				}
 				else {
-					SmartDashboard::PutString("CURRENTAUTOSTATE", "FOUND NULL");
+					SmartDashboard::PutString("AutoP - Current Auto State", "Found end of program");
 					autonomousVars.CompletingOperation = false;
 					drive(0,0);
 				}
-			} else {
+			} else { // run current operation
 				/**********************************************************************************
 				 * Run arm operations
-				 */
+				 * /
 
 				if(!autonomousVars.ArmOperationDone) {
-					autoRanOnce = true;
+					autoRanOnce = true; // make sure tele doesn't reset the arm to zero if its not at zero
 					if(autonomousVars.autoTemp->data[0] > 0) { // initial state of doing nothing.
 						if(autonomousVars.autoTemp->data[0] == 0) {
 							// run tell you find the hall effect
@@ -1180,10 +1025,10 @@ public:
 						SmartDashboard::PutNumber("arm waiting", 1);
 					}
 				}
-				SmartDashboard::PutNumber("Arm Motor Target Position", autonomousVars.autoTemp->data[0]);
-				SmartDashboard::PutNumber("Arm Motor actual Position", ArmTalon->GetSelectedSensorPosition(0));
-				//*/
-				//autonomousVars.ArmOperationDone = true;
+				SmartDashboard::PutNumber("AutoP - Arm Motor Target Position", autonomousVars.autoTemp->data[0]);
+				SmartDashboard::PutNumber("AutoP - Arm Motor actual Position", ArmTalon->GetSelectedSensorPosition(0));
+				*/
+				autonomousVars.ArmOperationDone = true;
 
 
 
@@ -1192,8 +1037,8 @@ public:
 				 */
 				if(autonomousVars.autoTemp->data[12] != autonomousVars.timeCount) {
 					autonomousVars.timeCount++;
-					SmartDashboard::PutNumber("Time Ticks", autonomousVars.timeCount);
-					SmartDashboard::PutNumber("Target Time", autonomousVars.autoTemp->data[12]);
+					SmartDashboard::PutNumber("AutoP - Time Ticks", autonomousVars.timeCount);
+					SmartDashboard::PutNumber("AutoP - Target Time", autonomousVars.autoTemp->data[12]);
 				} else {
 					autonomousVars.TimeOperationDone = true;
 				}
@@ -1202,7 +1047,7 @@ public:
 
 				/**********************************************************************************
 				 * run grabber operations
-				 */
+				 * /
 				if(autonomousVars.autoTemp->data[6]) {
 					grabberSolenoid.Set(frc::DoubleSolenoid::Value::kForward);
 				} else {
@@ -1215,70 +1060,71 @@ public:
 					GrabberTalon->Set(ControlMode::PercentOutput, 0);
 					autonomousVars.GrabberOperationDone = true;
 				}
-				//*/
-				//autonomousVars.GrabberOperationDone = true;
+				*/
+				autonomousVars.GrabberOperationDone = true;
 
 
 				/**********************************************************************************
 				 * run intake operations
-				 */
+				 * /
 				if(autonomousVars.autoTemp->data[9]) { // if its a one open the intake
 					intakeSolenoid.Set(frc::DoubleSolenoid::Value::kReverse);
-					SmartDashboard::PutString("Intake Position", "reverse");
+					SmartDashboard::PutString("AutoP - Intake Position", "reverse");
 				} else {
 					intakeSolenoid.Set(frc::DoubleSolenoid::Value::kForward);
-					SmartDashboard::PutString("Intake Position", "forward");
+					SmartDashboard::PutString("AutoP - Intake Position", "forward");
 				}
-				if(autonomousVars.autoTemp->data[11] >= 0) {
-					if(autonomousVars.autoTemp->data[11] != autonomousVars.intakeTimeCount) {
-						autonomousVars.intakeTimeCount ++;
-						IntakeTalonLeft->Set(autonomousVars.autoTemp->data[10]);
-						IntakeTalonRight->Set(-autonomousVars.autoTemp->data[10]);
-						// add intake movement here
 
-					} else {
-						IntakeTalonLeft->Set(0);
-						IntakeTalonRight->Set(0);
-						autonomousVars.IntakeOperationDone = true;
-					}
-				} else {
-					/*
-					if(!IntakeSwitch->Get()) {
-						IntakeTalonLeft->Set(autonomousVars.autoTemp->data[10]);
-						IntakeTalonRight->Set(-autonomousVars.autoTemp->data[10]);
-											// add intake movement here
 
+				if(autonomousVars.autoTemp->data[13] == 1) { // if waiting on the switch
+					if(!IntakeSwitch->Get()) {               // wait until intake switch is pressed
+							IntakeTalonLeft->Set(autonomousVars.autoTemp->data[10]);
+							IntakeTalonRight->Set(-autonomousVars.autoTemp->data[10]);
+							// add intake movement here
 					} else {
-						IntakeTalonLeft->Set(0);
-						IntakeTalonRight->Set(0);
-						autonomousVars.IntakeOperationDone = true;
-					}*/
-					if(-autonomousVars.autoTemp->data[11] != autonomousVars.intakeTimeCount) {
-						autonomousVars.intakeTimeCount ++;
-						IntakeTalonLeft->Set(0);
-						IntakeTalonRight->Set(-INTAKE_SPEED);
-											// add intake movement here
-
-					} else {
-						IntakeTalonLeft->Set(0);
-						IntakeTalonRight->Set(0);
-						autonomousVars.IntakeOperationDone = true;
+							IntakeTalonLeft->Set(0);
+							IntakeTalonRight->Set(0);
+							autonomousVars.IntakeOperationDone = true;
 					}
 
-				}//*/
-				//autonomousVars.IntakeOperationDone = true;
+				} else { // if not waiting on the switch
+					if(autonomousVars.autoTemp->data[10] != 0) { // if the run both intake sides has data
+						if(autonomousVars.autoTemp->data[11] != autonomousVars.intakeTimeCount) {
+							autonomousVars.intakeTimeCount ++;
+							IntakeTalonLeft->Set(autonomousVars.autoTemp->data[10]);
+							IntakeTalonRight->Set(-autonomousVars.autoTemp->data[10]);
+						} else {
+							IntakeTalonLeft->Set(0);
+							IntakeTalonRight->Set(0);
+							autonomousVars.IntakeOperationDone = true;
+						}
+					} else if(autonomousVars.autoTemp->data[14] != 0) { // if the run a single side of the intake has data
+						if(-autonomousVars.autoTemp->data[11] != autonomousVars.intakeTimeCount) {
+							autonomousVars.intakeTimeCount ++;
+							IntakeTalonLeft->Set(0);
+							IntakeTalonRight->Set(-autonomousVars.autoTemp->data[14]);
+						} else {
+							IntakeTalonLeft->Set(0);
+							IntakeTalonRight->Set(0);
+							autonomousVars.IntakeOperationDone = true;
+						}
+					} else {                                       // if nothing should happen
+						IntakeTalonLeft->Set(0);                   // set intake speed to zero
+						IntakeTalonRight->Set(0);                  //
+						autonomousVars.IntakeOperationDone = true; // mark the operation as done
+					}
+				}*/
+				autonomousVars.IntakeOperationDone = true;
 
 
 				/**********************************************************************************
 				 * run drive train operations
 				 */
 				if(!autonomousVars.DriveOperationDone) {
-					SmartDashboard::PutNumber("Drive Target Position", autonomousVars.autoTemp->data[2]);
-					SmartDashboard::PutNumber("Drive gyro angle", navxgyro->GetAngle());
+					SmartDashboard::PutNumber("AutoP - 2 Drive Target Position", autonomousVars.autoTemp->data[2]);
+					SmartDashboard::PutNumber("AutoP - 2 Drive Gyro angle", navxgyro->GetAngle());
 					if(!ranOnce) {
-						//navxgyro->ZeroYaw();
 							startYaw = navxgyro->GetAngle();
-						//if(startYaw < 0.5 && startYaw > -0.5) {
 							ranOnce = true;
 
 							m_rearLeft.SetSelectedSensorPosition(0, kPIDLoopIdx, kTimeoutMs);
@@ -1286,20 +1132,15 @@ public:
 							trueSetpoint  = (TicksPerInch * (autonomousVars.autoTemp->data[2]));
 							DrivePIDController->SetSetpoint(trueSetpoint);
 							DrivePIDController->Enable();
-							SmartDashboard::PutNumber("Start Yaw Drive", startYaw);
-						//}
+							SmartDashboard::PutNumber("AutoP - 2 Start Yaw Drive", startYaw);
 					} else {
 						TurningAngle = -(navxgyro->GetAngle() - startYaw) * DRIVE_STRAIGHT_P;
 
 
-						SmartDashboard::PutNumber("graph_actual", 0);
-						SmartDashboard::PutNumber("graph_target", TurningAngle);
-						SmartDashboard::PutBoolean("graph_in", true);
-
 						if(autonomousVars.autoTemp->data[2] <= 1) { // if negative position
-							if(((m_rearLeft.GetSelectedSensorPosition(0) + m_rearRight.GetSelectedSensorPosition(0))/2) < (trueSetpoint + 300)) {
-								SmartDashboard::PutNumber("2 Drive End Position", (m_rearRight.GetSelectedSensorPosition(0) + m_rearLeft.GetSelectedSensorPosition(0))/2);
-								SmartDashboard::PutNumber("2 Drive in End Position", ((m_rearRight.GetSelectedSensorPosition(0) + m_rearLeft.GetSelectedSensorPosition(0))/2)/TicksPerInch);
+							if(((m_rearLeft.GetSelectedSensorPosition(0) + m_rearRight.GetSelectedSensorPosition(0))/2) < (trueSetpoint + 10)) { // was 300
+								SmartDashboard::PutNumber("AutoP - 2 Drive End Position", (m_rearRight.GetSelectedSensorPosition(0) + m_rearLeft.GetSelectedSensorPosition(0))/2);
+								SmartDashboard::PutNumber("AutoP - 2 Drive in End Position", ((m_rearRight.GetSelectedSensorPosition(0) + m_rearLeft.GetSelectedSensorPosition(0))/2)/TicksPerInch);
 
 								autonomousVars.DriveOperationDone = true;
 								DrivePIDController->Disable();
@@ -1308,9 +1149,9 @@ public:
 
 						}
 						if(autonomousVars.autoTemp->data[2] >= 1) { // if positive position
-							if(((m_rearLeft.GetSelectedSensorPosition(0) + m_rearRight.GetSelectedSensorPosition(0))/2) > (trueSetpoint - 300)) {
-								SmartDashboard::PutNumber("2 Drive End Position", (m_rearRight.GetSelectedSensorPosition(0) + m_rearLeft.GetSelectedSensorPosition(0))/2);
-								SmartDashboard::PutNumber("2 Drive in End Position", ((m_rearRight.GetSelectedSensorPosition(0) + m_rearLeft.GetSelectedSensorPosition(0))/2)/TicksPerInch);
+							if(((m_rearLeft.GetSelectedSensorPosition(0) + m_rearRight.GetSelectedSensorPosition(0))/2) > (trueSetpoint - 10)) { // was 300
+								SmartDashboard::PutNumber("AutoP - 2 Drive End Position", (m_rearRight.GetSelectedSensorPosition(0) + m_rearLeft.GetSelectedSensorPosition(0))/2);
+								SmartDashboard::PutNumber("AutoP - 2 Drive in End Position", ((m_rearRight.GetSelectedSensorPosition(0) + m_rearLeft.GetSelectedSensorPosition(0))/2)/TicksPerInch);
 								autonomousVars.DriveOperationDone = true;
 								DrivePIDController->Disable();
 								ranOnce = false;
@@ -1319,15 +1160,14 @@ public:
 						}
 					}
 				}
-				SmartDashboard::PutNumber("2 Drive left Position", m_rearLeft.GetSelectedSensorPosition(0));
-				SmartDashboard::PutNumber("2 Drive Right Position", m_rearRight.GetSelectedSensorPosition(0));
-				SmartDashboard::PutNumber("2 Drive Avg Position", (m_rearRight.GetSelectedSensorPosition(0) + m_rearLeft.GetSelectedSensorPosition(0))/2);
-				SmartDashboard::PutNumber("2 Drive in Avg Position",  ((m_rearRight.GetSelectedSensorPosition(0) + m_rearLeft.GetSelectedSensorPosition(0))/2)/TicksPerInch);
-				SmartDashboard::PutNumber("2 Drive truesetpoint", trueSetpoint);
-				SmartDashboard::PutNumber("2 Drive in truesetpoint", trueSetpoint/TicksPerInch);
+				SmartDashboard::PutNumber("AutoP - 2 Drive left Position", m_rearLeft.GetSelectedSensorPosition(0));
+				SmartDashboard::PutNumber("AutoP - 2 Drive Right Position", m_rearRight.GetSelectedSensorPosition(0));
+				SmartDashboard::PutNumber("AutoP - 2 Drive Avg Position", (m_rearRight.GetSelectedSensorPosition(0) + m_rearLeft.GetSelectedSensorPosition(0))/2);
+				SmartDashboard::PutNumber("AutoP - 2 Drive in Avg Position",  ((m_rearRight.GetSelectedSensorPosition(0) + m_rearLeft.GetSelectedSensorPosition(0))/2)/TicksPerInch);
+				SmartDashboard::PutNumber("AutoP - 2 Drive truesetpoint", trueSetpoint);
+				SmartDashboard::PutNumber("AutoP - 2 Drive in truesetpoint", trueSetpoint/TicksPerInch);
 
 
-				//autonomousVars.TurningOperationDone = true;
 				// turning operation
 				if(autonomousVars.DriveOperationDone) {
 					if(autonomousVars.autoTemp->data[4] == 0){
@@ -1335,13 +1175,9 @@ public:
 					}
 					if(!autonomousVars.TurningOperationDone) {
 						if(!ranOnce) {
-								//navxgyro->ZeroYaw();
 								startYaw = navxgyro->GetAngle();
-								///if(startYaw < 0.5 && startYaw > -0.5) {
-									//ranOnce = true;
-							//DriveTurningPIDController->Reset();
 
-								SmartDashboard::PutNumber("Start Yaw Drive", startYaw);
+								SmartDashboard::PutNumber("AutoP - 2 Start Yaw Drive", startYaw);
 								if(isRightSide * autonomousVars.autoTemp->data[4] < 0) {
 									DriveTurningPIDController->SetSetpoint((isRightSide * autonomousVars.autoTemp->data[4] + startYaw + 5));
 								} else {
@@ -1351,7 +1187,6 @@ public:
 
 								DriveTurningPIDController->Enable();
 								ranOnce = true;
-								//}
 						} else {
 
 								if(isRightSide * autonomousVars.autoTemp->data[4] < 0) { // if the setpoint is negative
@@ -1368,10 +1203,10 @@ public:
 									}
 
 								}
-							 SmartDashboard::PutNumber("Drive angle setpoint", DriveTurningPIDController->GetSetpoint());
-							 SmartDashboard::PutNumber("Drive gyro angle", navxgyro->GetAngle());
-							 SmartDashboard::PutNumber("Drive PID power", turningIsNegative * (DriveTurningPIDOutputController->m_out * autonomousVars.autoTemp->data[5]));
-							 SmartDashboard::PutNumber("Drive PID set power", isRightSide * autonomousVars.autoTemp->data[4]);
+							 SmartDashboard::PutNumber("AutoP - 2 Drive angle setpoint", DriveTurningPIDController->GetSetpoint());
+							 SmartDashboard::PutNumber("AutoP - 2 Drive gyro angle", navxgyro->GetAngle());
+							 SmartDashboard::PutNumber("AutoP - 2 Drive PID power", turningIsNegative * (DriveTurningPIDOutputController->m_out * autonomousVars.autoTemp->data[5]));
+							 SmartDashboard::PutNumber("AutoP - 2 Drive PID set power", isRightSide * autonomousVars.autoTemp->data[4]);
 
 
 							 m_drive.ArcadeDrive(0,  turningIsNegative * DriveTurningPIDOutputController->m_out * autonomousVars.autoTemp->data[5]);
@@ -1402,17 +1237,15 @@ public:
 				 * Put all the modes current completion state on the driver station and test to see
 				 * if we can move onto the next operation.
 				 */
-				SmartDashboard::PutNumber("1 TurningOperationDone", autonomousVars.TurningOperationDone);
-				SmartDashboard::PutNumber("1 DriveOperationDone", autonomousVars.DriveOperationDone);
-				SmartDashboard::PutNumber("1 ArmOperationDone", autonomousVars.ArmOperationDone);
-				SmartDashboard::PutNumber("1 TimeOperationDone", autonomousVars.TimeOperationDone);
-				SmartDashboard::PutNumber("1 IntakeOperationDone", autonomousVars.IntakeOperationDone );
-				SmartDashboard::PutNumber("1 GrabberOperationDone", autonomousVars.GrabberOperationDone);
+				SmartDashboard::PutNumber("AutoP - 1 TurningOperationDone", autonomousVars.TurningOperationDone);
+				SmartDashboard::PutNumber("AutoP - 1 DriveOperationDone", autonomousVars.DriveOperationDone);
+				SmartDashboard::PutNumber("AutoP - 1 ArmOperationDone", autonomousVars.ArmOperationDone);
+				SmartDashboard::PutNumber("AutoP - 1 TimeOperationDone", autonomousVars.TimeOperationDone);
+				SmartDashboard::PutNumber("AutoP - 1 IntakeOperationDone", autonomousVars.IntakeOperationDone );
+				SmartDashboard::PutNumber("AutoP - 1 GrabberOperationDone", autonomousVars.GrabberOperationDone);
 
 
 				if(autonomousVars.TurningOperationDone && autonomousVars.DriveOperationDone && autonomousVars.ArmOperationDone && autonomousVars.TimeOperationDone && autonomousVars.IntakeOperationDone && autonomousVars.GrabberOperationDone) {
-					SmartDashboard::PutString("CURRENTAUTOSTATE", "Finished arm");
-
 					autonomousVars.CompletingOperation = false; //reset operations and variables so they don't carry over to the next state
 					autonomousVars.ArmOperationDone = false;
 					autonomousVars.TimeOperationDone = false;
@@ -1424,20 +1257,21 @@ public:
 					autonomousVars.grabberTimeCount = 0;
 					autonomousVars.intakeTimeCount = 0;
 
-
-
 					m_rearLeft.SetSelectedSensorPosition(0, kPIDLoopIdx, kTimeoutMs); // this makes the drive train position relative
 					m_rearRight.SetSelectedSensorPosition(0, kPIDLoopIdx, kTimeoutMs);
-					//navxgyro->ZeroYaw();
-					TurningAngle = 0;
 
+					TurningAngle = 0;
 					ranOnce = false;
 				}
 			}
 		}
-		if(autonomousVars.DriveOperationDone && autonomousVars.TurningOperationDone) {
+		if(autonomousVars.DriveOperationDone && autonomousVars.TurningOperationDone) { // prevent timeout errors
 			drive(0,0);
 		}
+		// graph stuff
+		SmartDashboard::PutNumber("graph_actual", (m_rearLeft.GetSelectedSensorPosition(0) + m_rearRight.GetSelectedSensorPosition(0))/2);
+		SmartDashboard::PutNumber("graph_target", trueSetpoint);
+		SmartDashboard::PutBoolean("graph_in", true);
 
 	}
 	/*********************************************************************************
@@ -1457,7 +1291,6 @@ public:
 	/*********************************************************************************
 	 * This is custom PIDController output code. It is used for driving the auto
 	 * straight.
-	 *
 	 */
 	class DriveGyroPIDOutput : public PIDOutput {
 		private:
@@ -1476,21 +1309,14 @@ public:
 	 *
 	 */
 	void TeleopInit() {
-		// RESET TALON SPEED HERE
-		//ArmTalon->ConfigPeakOutputForward((double) ARM_POWER, kTimeoutMs);
-		//ArmTalon->ConfigPeakOutputReverse((double)-ARM_POWER, kTimeoutMs);
-
 		m_left.SetInverted(true);
-		/*
-		 * TODO:
-		 * add a thing that doesn't change the zero if auto ran first
-		 */
-		if(!autoRanOnce) {
+
+		if(!autoRanOnce) { // if auto modified the arm value don't change it
 			ArmTalon->SetSelectedSensorPosition(0, kPIDLoopIdx, kTimeoutMs);
 			arm_currentPos = 0;
 		}
 		arm_currentPos = 0;
-		ArmTalon->Set(ControlMode::Position, 0);
+		ArmTalon->Set(ControlMode::Position, 0); // drop the arm to zero MAY CHANGE
 		intnumb++;
 		SmartDashboard::PutNumber("intnumb", intnumb);
 		zeroingOperation = false;
@@ -1499,10 +1325,10 @@ public:
 		m_rearRight.SetSelectedSensorPosition(0, kPIDLoopIdx, kTimeoutMs);
 		m_rearLeft.SetSelectedSensorPosition(0, kPIDLoopIdx, kTimeoutMs);
 
-		DrivePIDController->Disable(); // turn off the drive PID controller
+		DrivePIDController->Disable(); // turn off the drive PID controllers from auto
 		DriveTurningPIDController->Disable();
 
-		navxgyro->ZeroYaw();
+		navxgyro->ZeroYaw(); // zero yaw
 
 	}
 
@@ -1542,6 +1368,7 @@ public:
 			}
 		}
 		lastUserButtonState = RobotController::GetUserButton();
+		SmartDashboard::PutString("ModeRan", "tele");
 	}
 
 	/***********************************************************************
