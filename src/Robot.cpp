@@ -1107,7 +1107,7 @@ public:
 
 
 				if(autonomousVars.autoTemp->data[13] == 1) { // if waiting on the switch
-					if(!IntakeSwitch->Get()) {               // wait until intake switch is pressed
+					if(IntakeSwitch->Get()) {               // wait until intake switch is pressed
 							IntakeTalonLeft->Set(autonomousVars.autoTemp->data[10]);
 							IntakeTalonRight->Set(-autonomousVars.autoTemp->data[10]);
 							// add intake movement here
@@ -1150,6 +1150,9 @@ public:
 				/**********************************************************************************
 				 * run drive train operations
 				 */
+				if(autonomousVars.autoTemp->data[2] == 0) {
+					autonomousVars.DriveOperationDone = true;
+				}
 				if(!autonomousVars.DriveOperationDone) {
 					SmartDashboard::PutNumber("AutoP - 2 Drive Target Position", autonomousVars.autoTemp->data[2]);
 					SmartDashboard::PutNumber("AutoP - 2 Drive Gyro angle", navxgyro->GetAngle());
@@ -1411,6 +1414,8 @@ public:
 		SmartDashboard::PutNumber("Talon Right Sensor Velocity", m_rearRight.GetSelectedSensorVelocity(0));
 		SmartDashboard::PutNumber("Talon Right Sensor Position", m_rearRight.GetSelectedSensorPosition(0));
 		SmartDashboard::PutNumber("Drive Target X", joystickX);
+
+		SmartDashboard::PutBoolean("Intake Switch Sensor Value" , IntakeSwitch->Get());
 
 		autoRanOnce = false;
 		//SmartDashboard::PutNumber("Hall Effect Value" , HallEffect->Get());
