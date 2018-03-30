@@ -422,11 +422,11 @@ public:
 		/**********************************************************
 		 * buttons for the intake levels
 		 */
-		if(MainJoystick->GetRawButton(3)) { // run the intake forward
+		if(MainJoystick->GetRawButton(1)) { // run the intake forward
 			intakeLeftSideOnly = 0;
 			intakeForward = 1;
 			intakeBackward = 0;
-		} else if(MainJoystick->GetRawButton(1)){ // run the intake backwards
+		} else if(MainJoystick->GetRawButton(3)){ // run the intake backwards
 			intakeLeftSideOnly = false;
 			intakeForward = 0;
 			intakeBackward = 1;
@@ -439,10 +439,10 @@ public:
 			intakeForward = 0;
 			intakeBackward = 0;
 		}
-		if(MainJoystick->GetRawButton(7)) {
+		if(MainJoystick->GetRawButton(6)) {
 			intakeOpen = true;
 			intakeClose = false;
-		}else if(MainJoystick->GetRawButton(6)){
+		}else if(MainJoystick->GetRawButton(7)){
 			intakeOpen = false;
 			intakeClose = true;
 		}
@@ -809,7 +809,7 @@ public:
 			/***********************************************
 			 * this grabs all the values of the PID stuff from the driver station if its in tuning mode
 			 */
-			if(false) { // reset the PID controller values if in tuning mode
+			if(SmartDashboard::GetBoolean("DriveTune", false)) { // reset the PID controller values if in tuning mode
 				DrivePIDController->SetP((double) SmartDashboard::GetNumber("drive_P", 0));
 				DrivePIDController->SetI((double) SmartDashboard::GetNumber("drive_I", 0));
 				DrivePIDController->SetD((double) SmartDashboard::GetNumber("drive_D", 0));
@@ -875,11 +875,9 @@ public:
 						if(fieldColorLocations.isNearestSwitchOnLeft()) {
 							isRightSide = 1;
 							CurrentAutoMode = &AutoConfig.autoMode3;
-							SmartDashboard::PutString("AutoP - Auto Mode selected", "3");
 						} else {
 							isRightSide = -1;
 							CurrentAutoMode = &AutoConfig.autoMode3;
-							SmartDashboard::PutString("AutoP - Auto Mode selected", "-3");
 						}
 						autonomousVars.foundList = true;
 						break;
@@ -887,10 +885,8 @@ public:
 						isRightSide = 1;
 						if(fieldColorLocations.isScaleOnLeft()) { // Left side scale
 							CurrentAutoMode = &AutoConfig.autoMode5;
-							SmartDashboard::PutString("AutoP - Auto Mode selected", "5");
 						} else { // right side scale
 							CurrentAutoMode = &AutoConfig.autoMode6;
-							SmartDashboard::PutString("AutoP - Auto Mode selected", "6");
 						}
 						autonomousVars.foundList = true;
 						break;
@@ -898,7 +894,6 @@ public:
 						isRightSide = -1;
 						if(fieldColorLocations.isScaleOnLeft()) { // Left side scale
 							CurrentAutoMode = &AutoConfig.autoMode6;
-							SmartDashboard::PutString("AutoP - Auto Mode selected", "6");
 						} else { // right side scale
 							CurrentAutoMode = &AutoConfig.autoMode5;
 							SmartDashboard::PutString("AutoP - Auto Mode selected", "5");
@@ -908,7 +903,6 @@ public:
 				case(3): // nothing
 						isRightSide = 1;
 						CurrentAutoMode = &AutoConfig.autoMode2;
-						SmartDashboard::PutString("AutoP - Auto Mode selected", "2");
 						autonomousVars.foundList = true;
 						break;
 				case(4): // Drive Forward
@@ -932,7 +926,6 @@ public:
 				case(7): // middle right switch
 						isRightSide = -1;
 						CurrentAutoMode = &AutoConfig.autoMode3;
-						SmartDashboard::PutString("AutoP - Auto Mode selected", "3");
 						autonomousVars.foundList = true;
 						break;
 				case(8): // left scale
@@ -944,25 +937,21 @@ public:
 				case(9): // left opposite scale
 						isRightSide = 1;
 						CurrentAutoMode = &AutoConfig.autoMode6;
-						SmartDashboard::PutString("AutoP - Auto Mode selected", "6");
 						autonomousVars.foundList = true;
 						break;
 				case(10): // right scale
 						isRightSide = -1;
 						CurrentAutoMode = &AutoConfig.autoMode5;
-						SmartDashboard::PutString("AutoP - Auto Mode selected", "5");
 						autonomousVars.foundList = true;
 						break;
 				case(11): // right opposite scale
 						isRightSide = -1;
 						CurrentAutoMode = &AutoConfig.autoMode6;
-						SmartDashboard::PutString("AutoP - Auto Mode selected", "6");
 						autonomousVars.foundList = true;
 						break;
 				case(12): // nothing
 						isRightSide = 1;
 						CurrentAutoMode = &AutoConfig.autoMode9;
-						SmartDashboard::PutString("AutoP - Auto Mode selected", "9");
 						autonomousVars.foundList = true;
 						break;
 				case(13): // nothing
@@ -974,7 +963,6 @@ public:
 				case(14): // nothing
 						isRightSide = 1;
 						CurrentAutoMode = &AutoConfig.autoMode11;
-						SmartDashboard::PutString("AutoP - Auto Mode selected", "11");
 						autonomousVars.foundList = true;
 						break;
 				case(15): // nothing
@@ -986,7 +974,6 @@ public:
 				case(16): // nothing
 						isRightSide = 1;
 						CurrentAutoMode = &AutoConfig.autoMode13;
-						SmartDashboard::PutString("AutoP - Auto Mode selected", "13");
 						autonomousVars.foundList = true;
 						break;
 				case(17): // nothing
@@ -1227,7 +1214,6 @@ public:
 								autonomousVars.DriveOperationDone = true;
 								DrivePIDController->Disable();
 								ranOnce = false;
-								//drive(-autonomousVars.autoTemp->data[3], 0 );
 
 								SmartDashboard::PutNumber("graph_actual", (m_rearLeft.GetSelectedSensorPosition(0) + m_rearRight.GetSelectedSensorPosition(0))/2);
 								SmartDashboard::PutNumber("graph_target", trueSetpoint);
