@@ -22,15 +22,15 @@
 
 #define DRIVE_AUTO_ERROR 100
 
-#define DRIVE_PIDC_Kp 0.0035    // for driving
+#define DRIVE_PIDC_Kp 0.019    // for driving
 #define DRIVE_PIDC_Ki 0
-#define DRIVE_PIDC_Kd 0.002
+#define DRIVE_PIDC_Kd 0.08
 #define DRIVE_PIDC_Kf 0
 
 #define DRIVE_STRAIGHT_P 0.095 // for driving straight
 
 
-#define DRIVE_PIDT_Kp 0.095   // for turning
+#define DRIVE_PIDT_Kp 0.07   // for turning
 #define DRIVE_PIDT_Ki 0
 #define DRIVE_PIDT_Kd 0
 #define DRIVE_PIDT_Kf 0
@@ -60,7 +60,7 @@
 
 #define ARM_AUTO_ERROR 10000
 
-#define ARM_UPPER_LIMIT 620000
+#define ARM_UPPER_LIMIT 600000
 
 /*********************************
  * Constants for the Grabber

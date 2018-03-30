@@ -95,7 +95,7 @@ Operation_01
 	turn_speed: 0
 	grabber_position: 0 // close
 	grabber_speed: 1 // continue running grabber in
-	grabber_time: 50
+	grabber_time: 5
 	intake_position: 0 // close
 	intake_speed: 0
 	intake_time: 0
@@ -113,8 +113,8 @@ Operation_01
 	grabber_speed: 0
 	grabber_time: 0
 	intake_position: 0 // close
-	intake_speed: 1 // run single intake side out
-	intake_time: 75
+	intake_speed: 0 // run single intake side out
+	intake_time: 40
 	time: 0
 	intake_swait: 0 
 	intake_one: 1
@@ -130,7 +130,7 @@ Operation_01
 	grabber_time: 0
 	intake_position: 0 // close
 	intake_speed: 1 // run both sides out
-	intake_time: 75
+	intake_time: 40
 	time: 0
 	intake_swait: 0 
 	intake_one: 0
@@ -262,7 +262,7 @@ Operation_01
 	turn_speed: 0
 	grabber_position: 0 // close
 	grabber_speed: 1 // continue running grabber in
-	grabber_time: 50
+	grabber_time: 5
 	intake_position: 0 // close
 	intake_speed: 0
 	intake_time: 0
@@ -280,8 +280,8 @@ Operation_01
 	grabber_speed: 0
 	grabber_time: 0
 	intake_position: 0 // close
-	intake_speed: 1 // run single intake side out
-	intake_time: 75
+	intake_speed: 0 // run single intake side out
+	intake_time: 40
 	time: 0
 	intake_swait: 0 
 	intake_one: 1
@@ -297,7 +297,7 @@ Operation_01
 	grabber_time: 0
 	intake_position: 0 // close
 	intake_speed: 1 // run both sides out
-	intake_time: 75
+	intake_time: 40
 	time: 0
 	intake_swait: 0 
 	intake_one: 0
@@ -339,7 +339,7 @@ Operation_01
 	drive_position: 0
 	drive_speed: 0
 	turn_angle: 45
-	turn_speed: 0.8
+	turn_speed: 1
 	grabber_position: 0 // hold closed
 	grabber_speed: 0 
 	grabber_time: 0
@@ -618,7 +618,7 @@ Operation_01
 	turn_speed: 0
 	grabber_position: 0 // close
 	grabber_speed: 1 // continue running grabber in
-	grabber_time: 50
+	grabber_time: 5
 	intake_position: 0 // close
 	intake_speed: 0
 	intake_time: 0
@@ -636,8 +636,8 @@ Operation_01
 	grabber_speed: 0
 	grabber_time: 0
 	intake_position: 0 // close
-	intake_speed: 1 // run single intake side out
-	intake_time: 75
+	intake_speed: 0 // run single intake side out
+	intake_time: 40
 	time: 0
 	intake_swait: 0 
 	intake_one: 1
@@ -653,7 +653,7 @@ Operation_01
 	grabber_time: 0
 	intake_position: 0 // close
 	intake_speed: 1 // run both sides out
-	intake_time: 75
+	intake_time: 40
 	time: 0
 	intake_swait: 0 
 	intake_one: 0
@@ -1101,7 +1101,7 @@ Operation_01
 	arm_position: 0 // drive forward mode 100
 	arm_speed: 0
 	drive_position: 100
-	drive_speed: 1
+	drive_speed: 0.8
 	turn_angle: 0
 	turn_speed: 0
 	grabber_position: 1 // open
@@ -1120,7 +1120,7 @@ Operation_01
 	arm_position: 0 // drive forward mode 50
 	arm_speed: 0
 	drive_position: 50
-	drive_speed: 1
+	drive_speed: 0.8
 	turn_angle: 0
 	turn_speed: 0
 	grabber_position: 1 // open
