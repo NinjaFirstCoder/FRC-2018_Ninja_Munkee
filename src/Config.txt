@@ -39,48 +39,144 @@ Operation_01
 
 -AutoMode_3-
 Operation_01
-	arm_position: 0 // left switch from the middle position 
-	arm_speed: 0
+	arm_position: 70000 // left switch from the middle position 
+	arm_speed: 1
+	drive_position: 
+	drive_speed: 0
+	turn_angle: 0
+	turn_speed: 0
+	grabber_position: 1 // open
+	grabber_speed: 0 
+	grabber_time: 0
+	intake_position: 0 // close
+	intake_speed: 0
+	intake_time: 0
+	time: 0
+	intake_swait: 0 
+	intake_one: 0
+Operation_01
+	arm_position: 70000 // arm is raised so close grabber on box
+	arm_speed: 1
+	drive_position: 
+	drive_speed: 0
+	turn_angle: 0
+	turn_speed: 0
+	grabber_position: 0 // close
+	grabber_speed: 0
+	grabber_time: 0
+	intake_position: 0 // close
+	intake_speed: 0
+	intake_time: 0
+	time: 0
+	intake_swait: 0 
+	intake_one: 0
+Operation_01
+	arm_position: 400000 // raise arm to mid position
+	arm_speed: 1
+	drive_position: 0
+	drive_speed: 0
+	turn_angle: 0
+	turn_speed: 0
+	grabber_position: 0 // close
+	grabber_speed: 1 // run grabber in as arm raises
+	grabber_time: 50
+	intake_position: 0 // close
+	intake_speed: 0
+	intake_time: 0
+	time: 0
+	intake_swait: 0 
+	intake_one: 0
+Operation_01
+	arm_position: 400000 // do nothing
+	arm_speed: 1
+	drive_position: 0
+	drive_speed: 0
+	turn_angle: 0
+	turn_speed: 0
+	grabber_position: 0 // close
+	grabber_speed: 1 // continue running grabber in
+	grabber_time: 5
+	intake_position: 0 // close
+	intake_speed: 0
+	intake_time: 0
+	time: 0
+	intake_swait: 0 
+	intake_one: 0
+Operation_01
+	arm_position: 400000 // do nothing
+	arm_speed: 1
+	drive_position: 0
+	drive_speed: 0
+	turn_angle: 0
+	turn_speed: 0
+	grabber_position: 0 // close
+	grabber_speed: 0
+	grabber_time: 0
+	intake_position: 0 // close
+	intake_speed: 0 // run single intake side out
+	intake_time: 40
+	time: 0
+	intake_swait: 0 
+	intake_one: 1
+Operation_01
+	arm_position: 400000 // do nothing
+	arm_speed: 1
+	drive_position: 0
+	drive_speed: 0
+	turn_angle: 0
+	turn_speed: 0
+	grabber_position: 0 // close
+	grabber_speed: 0
+	grabber_time: 0
+	intake_position: 0 // close
+	intake_speed: 1 // run both sides out
+	intake_time: 40
+	time: 0
+	intake_swait: 0 
+	intake_one: 0
+Operation_01
+	arm_position: 400000 
+	arm_speed: 1
 	drive_position: 12
 	drive_speed: 1
 	turn_angle: 45
 	turn_speed: 0.8
-	grabber_position: 0
+	grabber_position: 0 // close
 	grabber_speed: 0 
 	grabber_time: 0
-	intake_position: 0
+	intake_position: 0 // close
 	intake_speed: 0
 	intake_time: 0
 	time: 0
 	intake_swait: 0 
 	intake_one: 0
 Operation_01
-	arm_position: 0 
-	arm_speed: 0
+	arm_position: 400000
+	arm_speed: 1
 	drive_position: 36
 	drive_speed: 1
 	turn_angle: -45
 	turn_speed: 0.8
-	grabber_position: 0
+	grabber_position: 0 // close
 	grabber_speed: 0 
 	grabber_time: 0
-	intake_position: 0
+	intake_position: 0 // close
 	intake_speed: 0
 	intake_time: 0
 	time: 0
 	intake_swait: 0 
 	intake_one: 0
 Operation_01
-	arm_position: 0 
-	arm_speed: 0
+	arm_position: 400000
+	arm_speed: 1
 	drive_position: 36
 	drive_speed: 0.5
 	turn_angle: 0
 	turn_speed: 0
-	grabber_position: 0
-	grabber_speed: 0 
-	grabber_time: 0
-	intake_position: 0
+	grabber_position: 0 // close
+	grabber_speed: -1 // eject cube  
+	grabber_time: 500
+	intake_position: 0 // close
 	intake_speed: 0
 	intake_time: 0
 	time: 0
@@ -110,42 +206,154 @@ Operation_01
 
 -AutoMode_5-
 Operation_01
-	arm_position: 80000 // Left scale Finals two cube auto from left side
-	arm_speed: 1        // move arm up and grab the box
-	drive_position: 0
+	arm_position: 70000 // Left scale Finals two cube auto from left side 
+	arm_speed: 1
+	drive_position: 
 	drive_speed: 0
 	turn_angle: 0
 	turn_speed: 0
 	grabber_position: 1 // open
-	grabber_speed: 0
+	grabber_speed: 0 
 	grabber_time: 0
-	intake_position: 1 // open
-	intake_speed: 0 
+	intake_position: 0 // close
+	intake_speed: 0
 	intake_time: 0
 	time: 0
 	intake_swait: 0 
 	intake_one: 0
 Operation_01
-	arm_position: 200000 // move it to the midway point
+	arm_position: 70000 // arm is raised so close grabber on box
+	arm_speed: 1
+	drive_position: 
+	drive_speed: 0
+	turn_angle: 0
+	turn_speed: 0
+	grabber_position: 0 // close
+	grabber_speed: 0
+	grabber_time: 0
+	intake_position: 0 // close
+	intake_speed: 0
+	intake_time: 0
+	time: 0
+	intake_swait: 0 
+	intake_one: 0
+Operation_01
+	arm_position: 400000 // raise arm to mid position
 	arm_speed: 1
 	drive_position: 0
 	drive_speed: 0
 	turn_angle: 0
 	turn_speed: 0
 	grabber_position: 0 // close
-	grabber_speed: 1 
-	grabber_time: 30
-	intake_position: 1 // open
-	intake_speed: 0 // out 
+	grabber_speed: 1 // run grabber in as arm raises
+	grabber_time: 50
+	intake_position: 0 // close
+	intake_speed: 0
 	intake_time: 0
 	time: 0
 	intake_swait: 0 
 	intake_one: 0
 Operation_01
-	arm_position: 550000
+	arm_position: 400000 // do nothing
+	arm_speed: 1
+	drive_position: 0
+	drive_speed: 0
+	turn_angle: 0
+	turn_speed: 0
+	grabber_position: 0 // close
+	grabber_speed: 1 // continue running grabber in
+	grabber_time: 5
+	intake_position: 0 // close
+	intake_speed: 0
+	intake_time: 0
+	time: 0
+	intake_swait: 0 
+	intake_one: 0
+Operation_01
+	arm_position: 400000 // do nothing
+	arm_speed: 1
+	drive_position: 0
+	drive_speed: 0
+	turn_angle: 0
+	turn_speed: 0
+	grabber_position: 0 // close
+	grabber_speed: 0
+	grabber_time: 0
+	intake_position: 0 // close
+	intake_speed: 0 // run single intake side out
+	intake_time: 40
+	time: 0
+	intake_swait: 0 
+	intake_one: 1
+Operation_01
+	arm_position: 400000 // do nothing
+	arm_speed: 1
+	drive_position: 0
+	drive_speed: 0
+	turn_angle: 0
+	turn_speed: 0
+	grabber_position: 0 // close
+	grabber_speed: 0
+	grabber_time: 0
+	intake_position: 0 // close
+	intake_speed: 1 // run both sides out
+	intake_time: 40
+	time: 0
+	intake_swait: 0 
+	intake_one: 0
+Operation_01
+	arm_position: 400000 // keep arm at mid
 	arm_speed: 1 
-	drive_position: 268
-	drive_speed: 1
+	drive_position: 230
+	drive_speed: 0.6
+	turn_angle: 0
+	turn_speed: 0
+	grabber_position: 0 // hold closed
+	grabber_speed: 0 
+	grabber_time: 0
+	intake_position: 0 // close
+	intake_speed: 0
+	intake_time: 0
+	time: 0
+	intake_swait: 0 
+	intake_one: 0
+Operation_01
+	arm_position: 600000 // raise to full height
+	arm_speed: 1 
+	drive_position: 38
+	drive_speed: 0.5
+	turn_angle: 0
+	turn_speed: 0
+	grabber_position: 0 // hold closed
+	grabber_speed: 0 
+	grabber_time: 0
+	intake_position: 0 // close
+	intake_speed: 0
+	intake_time: 0
+	time: 0
+	intake_swait: 0 
+	intake_one: 0
+Operation_01
+	arm_position: 600000
+	arm_speed: 1
+	drive_position: 0
+	drive_speed: 0
+	turn_angle: 45
+	turn_speed: 1
+	grabber_position: 0 // hold closed
+	grabber_speed: 0 
+	grabber_time: 0
+	intake_position: 0 // close
+	intake_speed: 0
+	intake_time: 0
+	time: 0
+	intake_swait: 0 
+	intake_one: 0
+Operation_01
+	arm_position: 600000
+	arm_speed: 1
+	drive_position: 24
+	drive_speed: 0.5
 	turn_angle: 0
 	turn_speed: 0
 	grabber_position: 0 // hold closed
@@ -354,41 +562,105 @@ Operation_01
 
 -AutoMode_6-
 Operation_01
-	arm_position: 80000 // FINALS right scale from left side 2 cube auto
-	arm_speed: 1        // move arm up and grab the box
-	drive_position: 0
+	arm_position: 70000 // FINALS right scale from left side 2 cube auto
+	arm_speed: 1
+	drive_position: 
 	drive_speed: 0
 	turn_angle: 0
 	turn_speed: 0
 	grabber_position: 1 // open
-	grabber_speed: 0
+	grabber_speed: 0 
 	grabber_time: 0
-	intake_position: 1 // open
-	intake_speed: 0 
+	intake_position: 0 // close
+	intake_speed: 0
 	intake_time: 0
 	time: 0
 	intake_swait: 0 
 	intake_one: 0
 Operation_01
-	arm_position: 200000 // move it to the midway point
+	arm_position: 70000 // arm is raised so close grabber on box
+	arm_speed: 1
+	drive_position: 
+	drive_speed: 0
+	turn_angle: 0
+	turn_speed: 0
+	grabber_position: 0 // close
+	grabber_speed: 0
+	grabber_time: 0
+	intake_position: 0 // close
+	intake_speed: 0
+	intake_time: 0
+	time: 0
+	intake_swait: 0 
+	intake_one: 0
+Operation_01
+	arm_position: 400000 // raise arm to mid position
 	arm_speed: 1
 	drive_position: 0
 	drive_speed: 0
 	turn_angle: 0
 	turn_speed: 0
 	grabber_position: 0 // close
-	grabber_speed: 1 
-	grabber_time: 30
-	intake_position: 1 // open
-	intake_speed: 0 // out 
+	grabber_speed: 1 // run grabber in as arm raises
+	grabber_time: 50
+	intake_position: 0 // close
+	intake_speed: 0
 	intake_time: 0
 	time: 0
 	intake_swait: 0 
 	intake_one: 0
 Operation_01
-	arm_position: 550000 
+	arm_position: 400000 // do nothing
 	arm_speed: 1
-	drive_position: 230
+	drive_position: 0
+	drive_speed: 0
+	turn_angle: 0
+	turn_speed: 0
+	grabber_position: 0 // close
+	grabber_speed: 1 // continue running grabber in
+	grabber_time: 5
+	intake_position: 0 // close
+	intake_speed: 0
+	intake_time: 0
+	time: 0
+	intake_swait: 0 
+	intake_one: 0
+Operation_01
+	arm_position: 400000 // do nothing
+	arm_speed: 1
+	drive_position: 0
+	drive_speed: 0
+	turn_angle: 0
+	turn_speed: 0
+	grabber_position: 0 // close
+	grabber_speed: 0
+	grabber_time: 0
+	intake_position: 0 // close
+	intake_speed: 0 // run single intake side out
+	intake_time: 40
+	time: 0
+	intake_swait: 0 
+	intake_one: 1
+Operation_01
+	arm_position: 400000 // do nothing
+	arm_speed: 1
+	drive_position: 0
+	drive_speed: 0
+	turn_angle: 0
+	turn_speed: 0
+	grabber_position: 0 // close
+	grabber_speed: 0
+	grabber_time: 0
+	intake_position: 0 // close
+	intake_speed: 1 // run both sides out
+	intake_time: 40
+	time: 0
+	intake_swait: 0 
+	intake_one: 0
+Operation_01
+	arm_position: 400000 
+	arm_speed: 1
+	drive_position: 220
 	drive_speed: 1
 	turn_angle: 0
 	turn_speed: 0
@@ -826,16 +1098,16 @@ Operation_01
 
 -AutoMode_14-
 Operation_01
-	arm_position: 0 // do nothing mode
+	arm_position: 0 // drive forward mode 100
 	arm_speed: 0
-	drive_position: 0
-	drive_speed: 0
+	drive_position: 100
+	drive_speed: 0.8
 	turn_angle: 0
 	turn_speed: 0
 	grabber_position: 1 // open
 	grabber_speed: 0 
 	grabber_time: 0
-	intake_position: 1 // open
+	intake_position: 0 // close
 	intake_speed: 0
 	intake_time: 0
 	time: 0
@@ -845,16 +1117,16 @@ Operation_01
 
 -AutoMode_15-
 Operation_01
-	arm_position: 0 // do nothing mode
+	arm_position: 0 // drive forward mode 50
 	arm_speed: 0
-	drive_position: 0
-	drive_speed: 0
+	drive_position: 50
+	drive_speed: 0.8
 	turn_angle: 0
 	turn_speed: 0
 	grabber_position: 1 // open
 	grabber_speed: 0 
 	grabber_time: 0
-	intake_position: 1 // open
+	intake_position: 0 // close
 	intake_speed: 0
 	intake_time: 0
 	time: 0
@@ -864,16 +1136,32 @@ Operation_01
 
 -AutoMode_16-
 Operation_01
-	arm_position: 0 // do nothing mode
+	arm_position: 0 // intake test mode
 	arm_speed: 0
-	drive_position: 0
-	drive_speed: 0
+	drive_position: 100
+	drive_speed: 0.8
 	turn_angle: 0
 	turn_speed: 0
 	grabber_position: 1 // open
 	grabber_speed: 0 
 	grabber_time: 0
-	intake_position: 1 // open
+	intake_position: 1 // close
+	intake_speed: 1
+	intake_time: 0
+	time: 0
+	intake_swait: 1
+	intake_one: 0
+Operation_01
+	arm_position: 0 // intake test mode
+	arm_speed: 0
+	drive_position: -50
+	drive_speed: 0.8
+	turn_angle: 0
+	turn_speed: 0
+	grabber_position: 1 // open
+	grabber_speed: 0 
+	grabber_time: 0
+	intake_position: 1 // close
 	intake_speed: 0
 	intake_time: 0
 	time: 0
@@ -979,5 +1267,4 @@ Operation_01
 	intake_swait: 0 
 	intake_one: 0
 -END-
-
 

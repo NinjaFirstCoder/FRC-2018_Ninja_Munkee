@@ -707,6 +707,9 @@ public:
 			autonomousVars.startingConfigDone = false;
 			autonomousVars.TurningOperationDone = false;
 
+			autonomousDataNotFound = false;
+			autoDataFindRanOnce = false;
+
 			// reset the drive train encoders
 			m_rearLeft.SetSelectedSensorPosition(0, kPIDLoopIdx, kTimeoutMs);
 			m_rearRight.SetSelectedSensorPosition(0, kPIDLoopIdx, kTimeoutMs);
@@ -722,6 +725,7 @@ public:
 			// this is for fixing a thing between tele and auto
 			ranOnce = false;
 			SmartDashboard::PutString("ModeRan", "auto Init");
+
 
 	}
 
@@ -751,60 +755,60 @@ public:
 	void AutonomousPeriodic() {
 		// get game data info
 
-		if(!autonomousVars.startingConfigDone) { // code here is ran once at the start of auto
-			/**
-			* Here, get the data from the DriverStation regarding the switches
-			* and scale on the field. Three characters will be sent over and
-			* stored into gameData. The first denotes the switch closest to the
-			* robot, the second denotes the scale, and the third denotes the switch
-			* furthest from the robot. The three characters each will be 'L' or 'R'
-			* and denote the side of the field that the alliance color is on, relative
-			* to the robot's alliance.
-			*/
-			string gameData = DriverStation::GetInstance().GetGameSpecificMessage();
-			if(gameData.length() >= 3) {
-				switch(gameData[0]) {
-					case 'L':
-					case 'l':
-						fieldColorLocations.setNearestSwitchLeft();
-						break;
-					case 'R':
-					case 'r':
-						fieldColorLocations.setNearestSwitchRight();
-				}
-
-				switch(gameData[1]) {
-					case 'L':
-					case 'l':
-						fieldColorLocations.setScaleLeft();
-						break;
-					case 'R':
-					case 'r':
-						fieldColorLocations.setScaleRight();
-				}
-
-		    	switch(gameData[2]) {
-					case 'L':
-					case 'l':
-						fieldColorLocations.setFurthestSwitchLeft();
-						break;
-					case 'R':
-					case 'r':
-						fieldColorLocations.setFurthestSwitchRight();
-					}
-				}
-
-				string nearestSwitch = fieldColorLocations.isNearestSwitchOnLeft() ? "LEFT" : "RIGHT";
-				string scale = fieldColorLocations.isScaleOnLeft() ? "LEFT" : "RIGHT";
-				string furthestSwitch = fieldColorLocations.isFurthestSwitchOnLeft() ? "LEFT" : "RIGHT";
-				SmartDashboard::PutString("AutoP - Field colors found", nearestSwitch + " " + scale + " " + furthestSwitch);
-
-
+		/*if(!autonomousVars.startingConfigDone) { // code here is ran once at the start of auto
 
 
 				drive(0,0);
 				autonomousVars.startingConfigDone = true;
-		} else if(!autonomousVars.foundList) {
+		} else */
+		if(!autoDataFindRanOnce) {
+			autoDataFindRanOnce = true;
+		string gameData = DriverStation::GetInstance().GetGameSpecificMessage();
+		SmartDashboard::PutString("DB/String 0" , gameData);
+					if(gameData.length() >= 3) {
+						SmartDashboard::PutBoolean("DB/LED 0" , true);
+						autonomousDataNotFound = false;
+						switch(gameData[0]) {
+							case 'L':
+							case 'l':
+								fieldColorLocations.setNearestSwitchLeft();
+								break;
+							case 'R':
+							case 'r':
+								fieldColorLocations.setNearestSwitchRight();
+						}
+
+						switch(gameData[1]) {
+							case 'L':
+							case 'l':
+								fieldColorLocations.setScaleLeft();
+								break;
+							case 'R':
+							case 'r':
+								fieldColorLocations.setScaleRight();
+						}
+
+				    	switch(gameData[2]) {
+							case 'L':
+							case 'l':
+								fieldColorLocations.setFurthestSwitchLeft();
+								break;
+							case 'R':
+							case 'r':
+								fieldColorLocations.setFurthestSwitchRight();
+							}
+						} else {
+							autonomousDataNotFound = true;
+							//drive(0,0);               // update drive so it doesn't error
+							//return;                   // return and do nothing
+						}
+
+						string nearestSwitch = fieldColorLocations.isNearestSwitchOnLeft() ? "LEFT" : "RIGHT";
+						string scale = fieldColorLocations.isScaleOnLeft() ? "LEFT" : "RIGHT";
+						string furthestSwitch = fieldColorLocations.isFurthestSwitchOnLeft() ? "LEFT" : "RIGHT";
+						SmartDashboard::PutString("AutoP - Field colors found", nearestSwitch + " " + scale + " " + furthestSwitch);
+		}
+		if(!autonomousVars.foundList) {
 
 			/***********************************************
 			 * this grabs all the values of the PID stuff from the driver station if its in tuning mode
@@ -870,142 +874,150 @@ public:
 				drive(0,0);               // update drive so it doesn't error
 				return;                   // return and do nothing
 			}
-			switch(AutoMode){ // select the right code to run based on the selector on the driver station
-				case(0): // switch from middle position automatic
-						if(fieldColorLocations.isNearestSwitchOnLeft()) {
+
+			if(!autonomousDataNotFound) {
+				switch(AutoMode){ // select the right code to run based on the selector on the driver station
+					case(0): // switch from middle position automatic
+							if(fieldColorLocations.isNearestSwitchOnLeft()) {
+								isRightSide = 1;
+								CurrentAutoMode = &AutoConfig.autoMode3;
+							} else {
+								isRightSide = -1;
+								CurrentAutoMode = &AutoConfig.autoMode3;
+							}
+							autonomousVars.foundList = true;
+							break;
+					case(1): // scale from left automatic
+							isRightSide = 1;
+							if(fieldColorLocations.isScaleOnLeft()) { // Left side scale
+								CurrentAutoMode = &AutoConfig.autoMode5;
+							} else { // right side scale
+								CurrentAutoMode = &AutoConfig.autoMode6;
+							}
+							autonomousVars.foundList = true;
+							break;
+					case(2): // scale from right automatic
+							isRightSide = -1;
+							if(fieldColorLocations.isScaleOnLeft()) { // Left side scale
+								CurrentAutoMode = &AutoConfig.autoMode6;
+							} else { // right side scale
+								CurrentAutoMode = &AutoConfig.autoMode5;
+								SmartDashboard::PutString("AutoP - Auto Mode selected", "5");
+							}
+							autonomousVars.foundList = true;
+							break;
+					case(3): // nothing
+							isRightSide = 1;
+							CurrentAutoMode = &AutoConfig.autoMode2;
+							autonomousVars.foundList = true;
+							break;
+					case(4): // Drive Forward
+							isRightSide = 1;
+							CurrentAutoMode = &AutoConfig.autoMode1;
+							SmartDashboard::PutString("AutoP - Auto Mode selected", "1");
+							autonomousVars.foundList = true;
+							break;
+					case(5): // do nothing
+							isRightSide = 1;
+							CurrentAutoMode = &AutoConfig.autoMode2;
+							SmartDashboard::PutString("AutoP - Auto Mode selected", "2");
+							autonomousVars.foundList = true;
+							break;
+					case(6): // middle left switch
 							isRightSide = 1;
 							CurrentAutoMode = &AutoConfig.autoMode3;
-						} else {
+							SmartDashboard::PutString("AutoP - Auto Mode selected", "3");
+							autonomousVars.foundList = true;
+							break;
+					case(7): // middle right switch
 							isRightSide = -1;
 							CurrentAutoMode = &AutoConfig.autoMode3;
-						}
-						autonomousVars.foundList = true;
-						break;
-				case(1): // scale from left automatic
-						isRightSide = 1;
-						if(fieldColorLocations.isScaleOnLeft()) { // Left side scale
-							CurrentAutoMode = &AutoConfig.autoMode5;
-						} else { // right side scale
-							CurrentAutoMode = &AutoConfig.autoMode6;
-						}
-						autonomousVars.foundList = true;
-						break;
-				case(2): // scale from right automatic
-						isRightSide = -1;
-						if(fieldColorLocations.isScaleOnLeft()) { // Left side scale
-							CurrentAutoMode = &AutoConfig.autoMode6;
-						} else { // right side scale
-							CurrentAutoMode = &AutoConfig.autoMode5;
+							autonomousVars.foundList = true;
+							break;
+					case(8): // left scale
+							isRightSide = 1;
+							CurrentAutoMode = &AutoConfig.autoMode5; // put the stuff from that list into the current list
 							SmartDashboard::PutString("AutoP - Auto Mode selected", "5");
-						}
-						autonomousVars.foundList = true;
+							autonomousVars.foundList = true;
+							break;
+					case(9): // left opposite scale
+							isRightSide = 1;
+							CurrentAutoMode = &AutoConfig.autoMode6;
+							autonomousVars.foundList = true;
+							break;
+					case(10): // right scale
+							isRightSide = -1;
+							CurrentAutoMode = &AutoConfig.autoMode5;
+							autonomousVars.foundList = true;
+							break;
+					case(11): // right opposite scale
+							isRightSide = -1;
+							CurrentAutoMode = &AutoConfig.autoMode6;
+							autonomousVars.foundList = true;
+							break;
+					case(12): // nothing
+							isRightSide = 1;
+							CurrentAutoMode = &AutoConfig.autoMode9;
+							autonomousVars.foundList = true;
+							break;
+					case(13): // nothing
+							isRightSide = 1;
+							CurrentAutoMode = &AutoConfig.autoMode10;
+							SmartDashboard::PutString("AutoP - Auto Mode selected", "10");
+							autonomousVars.foundList = true;
+							break;
+					case(14): // nothing
+							isRightSide = 1;
+							CurrentAutoMode = &AutoConfig.autoMode11;
+							autonomousVars.foundList = true;
+							break;
+					case(15): // nothing
+							isRightSide = 1;
+							CurrentAutoMode = &AutoConfig.autoMode12;
+							SmartDashboard::PutString("AutoP - Auto Mode selected", "12");
+							autonomousVars.foundList = true;
+							break;
+					case(16): // nothing
+							isRightSide = 1;
+							CurrentAutoMode = &AutoConfig.autoMode13;
+							autonomousVars.foundList = true;
+							break;
+					case(17): // nothing
+							isRightSide = 1;
+							CurrentAutoMode = &AutoConfig.autoMode14;
+							SmartDashboard::PutString("AutoP - Auto Mode selected", "14");
+							autonomousVars.foundList = true;
+							break;
+					case(18): // nothing
+							isRightSide = 1;
+							CurrentAutoMode = &AutoConfig.autoMode15;
+							SmartDashboard::PutString("AutoP - Auto Mode selected", "15");
+							autonomousVars.foundList = true;
+							break;
+					case(19): // nothing
+							isRightSide = 1;
+							CurrentAutoMode = &AutoConfig.autoMode16;
+							SmartDashboard::PutString("AutoP - Auto Mode selected", "16");
+							autonomousVars.foundList = true;
+							break;
+					case(20): // nothing
+							isRightSide = 1;
+							CurrentAutoMode = &AutoConfig.autoMode17;  // DO NOT CHANGE THIS MODE!!!!!!!
+							SmartDashboard::PutString("AutoP - Auto Mode selected", "17");
+							autonomousVars.foundList = true;
+							break;
+					default:
+						drive(0,0); // if the driver station isn't found do nothing
+						return;
 						break;
-				case(3): // nothing
-						isRightSide = 1;
-						CurrentAutoMode = &AutoConfig.autoMode2;
-						autonomousVars.foundList = true;
-						break;
-				case(4): // Drive Forward
-						isRightSide = 1;
-						CurrentAutoMode = &AutoConfig.autoMode1;
-						SmartDashboard::PutString("AutoP - Auto Mode selected", "1");
-						autonomousVars.foundList = true;
-						break;
-				case(5): // do nothing
-						isRightSide = 1;
-						CurrentAutoMode = &AutoConfig.autoMode2;
-						SmartDashboard::PutString("AutoP - Auto Mode selected", "2");
-						autonomousVars.foundList = true;
-						break;
-				case(6): // middle left switch
-						isRightSide = 1;
-						CurrentAutoMode = &AutoConfig.autoMode3;
-						SmartDashboard::PutString("AutoP - Auto Mode selected", "3");
-						autonomousVars.foundList = true;
-						break;
-				case(7): // middle right switch
-						isRightSide = -1;
-						CurrentAutoMode = &AutoConfig.autoMode3;
-						autonomousVars.foundList = true;
-						break;
-				case(8): // left scale
-						isRightSide = 1;
-						CurrentAutoMode = &AutoConfig.autoMode5; // put the stuff from that list into the current list
-						SmartDashboard::PutString("AutoP - Auto Mode selected", "5");
-						autonomousVars.foundList = true;
-						break;
-				case(9): // left opposite scale
-						isRightSide = 1;
-						CurrentAutoMode = &AutoConfig.autoMode6;
-						autonomousVars.foundList = true;
-						break;
-				case(10): // right scale
-						isRightSide = -1;
-						CurrentAutoMode = &AutoConfig.autoMode5;
-						autonomousVars.foundList = true;
-						break;
-				case(11): // right opposite scale
-						isRightSide = -1;
-						CurrentAutoMode = &AutoConfig.autoMode6;
-						autonomousVars.foundList = true;
-						break;
-				case(12): // nothing
-						isRightSide = 1;
-						CurrentAutoMode = &AutoConfig.autoMode9;
-						autonomousVars.foundList = true;
-						break;
-				case(13): // nothing
-						isRightSide = 1;
-						CurrentAutoMode = &AutoConfig.autoMode10;
-						SmartDashboard::PutString("AutoP - Auto Mode selected", "10");
-						autonomousVars.foundList = true;
-						break;
-				case(14): // nothing
-						isRightSide = 1;
-						CurrentAutoMode = &AutoConfig.autoMode11;
-						autonomousVars.foundList = true;
-						break;
-				case(15): // nothing
-						isRightSide = 1;
-						CurrentAutoMode = &AutoConfig.autoMode12;
-						SmartDashboard::PutString("AutoP - Auto Mode selected", "12");
-						autonomousVars.foundList = true;
-						break;
-				case(16): // nothing
-						isRightSide = 1;
-						CurrentAutoMode = &AutoConfig.autoMode13;
-						autonomousVars.foundList = true;
-						break;
-				case(17): // nothing
-						isRightSide = 1;
-						CurrentAutoMode = &AutoConfig.autoMode14;
-						SmartDashboard::PutString("AutoP - Auto Mode selected", "14");
-						autonomousVars.foundList = true;
-						break;
-				case(18): // nothing
-						isRightSide = 1;
-						CurrentAutoMode = &AutoConfig.autoMode15;
-						SmartDashboard::PutString("AutoP - Auto Mode selected", "15");
-						autonomousVars.foundList = true;
-						break;
-				case(19): // nothing
-						isRightSide = 1;
-						CurrentAutoMode = &AutoConfig.autoMode16;
-						SmartDashboard::PutString("AutoP - Auto Mode selected", "16");
-						autonomousVars.foundList = true;
-						break;
-				case(20): // nothing
-						isRightSide = 1;
-						CurrentAutoMode = &AutoConfig.autoMode17;  // DO NOT CHANGE THIS MODE!!!!!!!
-						SmartDashboard::PutString("AutoP - Auto Mode selected", "17");
-						autonomousVars.foundList = true;
-						break;
-				default:
-					drive(0,0); // if the driver station isn't found do nothing
-					return;
-					break;
 
-			}
+				}
+		} else {
+			isRightSide = 1;
+			CurrentAutoMode = &AutoConfig.autoMode1;
+			SmartDashboard::PutString("AutoP - Auto Mode selected", "DATA NOT FOUND 1");
+			autonomousVars.foundList = true;
+		}
 
 			autonomousVars.autoTemp = CurrentAutoMode->head; // load the right pointer address for the code
 
@@ -1445,6 +1457,8 @@ public:
 
 
 		SmartDashboard::PutString("ModeRan", "tele");
+
+		//SmartDashboard::PutBoolean("DB/String 1" , "test");
 	}
 
 	/***********************************************************************
@@ -1637,6 +1651,10 @@ private:
 	bool TuningEnabled = false;
 	int lastUserButtonState = 0;
 	int currentButtonState = 0;
+
+
+	bool autonomousDataNotFound = false;
+	bool autoDataFindRanOnce = false;
 
 };
 

@@ -10,9 +10,9 @@
 
 class FieldColorLocations {
 private:
-	bool nearestSwitch;
-	bool furthestSwitch;
-	bool scale;
+	bool nearestSwitch = false;
+	bool furthestSwitch = false;
+	bool scale = false;
 
 public:
 	FieldColorLocations();
