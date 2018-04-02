@@ -729,6 +729,50 @@ public:
 
 	}
 
+	void DisabledPeriodic() {
+		string gameData = DriverStation::GetInstance().GetGameSpecificMessage();
+				//printf("Gamedata Received: %s\n", gameData);
+				SmartDashboard::PutString("DB/String 0" , gameData);
+							if(gameData.length() >= 3) {
+								SmartDashboard::PutBoolean("DB/LED 0" , true);
+								autonomousDataNotFound = false;
+								switch(gameData[0]) {
+									case 'L':
+									case 'l':
+										fieldColorLocations.setNearestSwitchLeft();
+										break;
+									case 'R':
+									case 'r':
+										fieldColorLocations.setNearestSwitchRight();
+								}
+
+								switch(gameData[1]) {
+									case 'L':
+									case 'l':
+										fieldColorLocations.setScaleLeft();
+										break;
+									case 'R':
+									case 'r':
+										fieldColorLocations.setScaleRight();
+								}
+
+						    	switch(gameData[2]) {
+									case 'L':
+									case 'l':
+										fieldColorLocations.setFurthestSwitchLeft();
+										break;
+									case 'R':
+									case 'r':
+										fieldColorLocations.setFurthestSwitchRight();
+									}
+								} else {
+									autonomousDataNotFound = true;
+									//drive(0,0);               // update drive so it doesn't error
+									//return;                   // return and do nothing
+								}
+
+	}
+
 	/*********************************************************************************
 	 * This is the main autonomous function. It selects the proper auto mode to run
 	 * from the config file stored on the robotRIO. The method for mode selection
@@ -753,6 +797,7 @@ public:
 	 *
 	 */
 	void AutonomousPeriodic() {
+		//printf("Started Auto Periodic");
 		// get game data info
 
 		/*if(!autonomousVars.startingConfigDone) { // code here is ran once at the start of auto
@@ -764,6 +809,7 @@ public:
 		if(!autoDataFindRanOnce) {
 			autoDataFindRanOnce = true;
 		string gameData = DriverStation::GetInstance().GetGameSpecificMessage();
+		//printf("Gamedata Received: %s\n", gameData);
 		SmartDashboard::PutString("DB/String 0" , gameData);
 					if(gameData.length() >= 3) {
 						SmartDashboard::PutBoolean("DB/LED 0" , true);
@@ -809,10 +855,11 @@ public:
 						SmartDashboard::PutString("AutoP - Field colors found", nearestSwitch + " " + scale + " " + furthestSwitch);
 		}
 		if(!autonomousVars.foundList) {
+			//printf("Entered Found List mode");
 
 			/***********************************************
 			 * this grabs all the values of the PID stuff from the driver station if its in tuning mode
-			 */
+			 * /
 			if(SmartDashboard::GetBoolean("DriveTune", false)) { // reset the PID controller values if in tuning mode
 				DrivePIDController->SetP((double) SmartDashboard::GetNumber("drive_P", 0));
 				DrivePIDController->SetI((double) SmartDashboard::GetNumber("drive_I", 0));
@@ -861,7 +908,9 @@ public:
 				ActualDriveStraightP = SmartDashboard::GetNumber("straight_P", DRIVE_STRAIGHT_P);
 			} else {
 				ActualDriveStraightP = DRIVE_STRAIGHT_P;
-			}
+			}*/
+
+			ActualDriveStraightP = DRIVE_STRAIGHT_P;
 
 			/******************************************
 			 * this code decides what modes to run
@@ -876,7 +925,7 @@ public:
 			}
 
 			if(!autonomousDataNotFound) {
-				switch(AutoMode){ // select the right code to run based on the selector on the driver station
+				switch(4){ // select the right code to run based on the selector on the driver station
 					case(0): // switch from middle position automatic
 							if(fieldColorLocations.isNearestSwitchOnLeft()) {
 								isRightSide = 1;
@@ -1007,8 +1056,10 @@ public:
 							autonomousVars.foundList = true;
 							break;
 					default:
-						drive(0,0); // if the driver station isn't found do nothing
-						return;
+						isRightSide = 1;
+						CurrentAutoMode = &AutoConfig.autoMode1;
+						SmartDashboard::PutString("AutoP - Auto Mode selected", "1");
+						autonomousVars.foundList = true;
 						break;
 
 				}
@@ -1047,6 +1098,7 @@ public:
 					drive(0,0);
 				}
 			} else { // run current operation
+
 				/**********************************************************************************
 				 * Run arm operations
 				 */
@@ -1340,6 +1392,8 @@ public:
 					TurningAngle = 0;
 					ranOnce = false;
 					drive(0,0);
+
+					printf("entered running mode");
 				}
 			}
 		}

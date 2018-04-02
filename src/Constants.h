@@ -60,7 +60,7 @@
 
 #define ARM_AUTO_ERROR 10000
 
-#define ARM_UPPER_LIMIT 600000
+#define ARM_UPPER_LIMIT 570000
 
 /*********************************
  * Constants for the Grabber

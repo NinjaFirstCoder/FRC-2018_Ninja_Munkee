@@ -2,7 +2,7 @@
 Operation_01
 	arm_position: 0 // drive forward mode
 	arm_speed: 0
-	drive_position: 48
+	drive_position: 120
 	drive_speed: 1
 	turn_angle: 0
 	turn_speed: 0
